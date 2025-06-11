@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '@/hooks/useAuth';
 
 const queryClient = new QueryClient();
 
@@ -21,48 +22,50 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="youthnet-theme">
       <QueryClientProvider client={queryClient}>
-        <Toaster />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/education" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Education />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/skill-development" element={
-              <ProtectedRoute>
-                <Layout>
-                  <SkillDevelopment />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/job-centre" element={
-              <ProtectedRoute>
-                <Layout>
-                  <JobCentre />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/career-centre" element={
-              <ProtectedRoute>
-                <Layout>
-                  <CareerCentre />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/index" element={<Index />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <Toaster />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/education" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Education />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/skill-development" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <SkillDevelopment />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/job-centre" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <JobCentre />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/career-centre" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <CareerCentre />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/index" element={<Index />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );
