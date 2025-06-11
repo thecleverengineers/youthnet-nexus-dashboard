@@ -9,7 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Clock, 
-  CheckIn, 
+  LogIn, 
   LogOut, 
   Calendar as CalendarIcon,
   TrendingUp,
@@ -72,7 +72,7 @@ export const AttendanceManagement = () => {
     const today = format(new Date(), 'yyyy-MM-dd');
 
     const { data } = await supabase
-      .from('employee_attendance')
+      .from('attendance_records')
       .select('*')
       .eq('employee_id', employee.id)
       .eq('date', today)
@@ -80,7 +80,7 @@ export const AttendanceManagement = () => {
 
     if (data) {
       setTodayAttendance(data);
-      setIsCheckedIn(data.check_in_time && !data.check_out_time);
+      setIsCheckedIn(data.check_in && !data.check_out);
     }
   };
 
@@ -88,7 +88,7 @@ export const AttendanceManagement = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('employee_attendance')
+        .from('attendance_records')
         .select(`
           *,
           employees (
@@ -113,7 +113,7 @@ export const AttendanceManagement = () => {
     
     try {
       const { data } = await supabase
-        .from('employee_attendance')
+        .from('attendance_records')
         .select('*')
         .eq('date', today);
 
@@ -122,9 +122,8 @@ export const AttendanceManagement = () => {
           if (record.status === 'present') acc.present++;
           if (record.status === 'absent') acc.absent++;
           if (record.status === 'late') acc.late++;
-          if (record.check_in_time && new Date(record.check_in_time).getHours() <= 9) acc.onTime++;
-          if (record.total_hours) acc.totalHours += parseFloat(record.total_hours);
-          if (record.overtime_hours) acc.overtime += parseFloat(record.overtime_hours);
+          if (record.check_in && new Date(record.check_in).getHours() <= 9) acc.onTime++;
+          // Note: total_hours calculation would need to be implemented based on check_in/check_out
           return acc;
         }, { present: 0, absent: 0, late: 0, onTime: 0, totalHours: 0, overtime: 0 });
 
@@ -151,11 +150,11 @@ export const AttendanceManagement = () => {
       const isLate = now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 15);
       
       const { error } = await supabase
-        .from('employee_attendance')
+        .from('attendance_records')
         .upsert({
           employee_id: employee.id,
           date: today,
-          check_in_time: checkInTime,
+          check_in: checkInTime,
           status: isLate ? 'late' : 'present'
         }, {
           onConflict: 'employee_id,date'
@@ -180,9 +179,9 @@ export const AttendanceManagement = () => {
     
     try {
       const { error } = await supabase
-        .from('employee_attendance')
+        .from('attendance_records')
         .update({
-          check_out_time: now.toISOString()
+          check_out: now.toISOString()
         })
         .eq('id', todayAttendance.id);
 
@@ -256,7 +255,7 @@ export const AttendanceManagement = () => {
                     onClick={handleCheckIn}
                     className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                   >
-                    <CheckIn className="h-4 w-4 mr-2" />
+                    <LogIn className="h-4 w-4 mr-2" />
                     Check In
                   </Button>
                 ) : (
@@ -278,8 +277,8 @@ export const AttendanceManagement = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Check In</p>
                     <p className="font-medium text-green-400">
-                      {todayAttendance.check_in_time ? 
-                        format(new Date(todayAttendance.check_in_time), 'HH:mm') : 
+                      {todayAttendance.check_in ? 
+                        format(new Date(todayAttendance.check_in), 'HH:mm') : 
                         'Not checked in'
                       }
                     </p>
@@ -287,25 +286,19 @@ export const AttendanceManagement = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Check Out</p>
                     <p className="font-medium text-red-400">
-                      {todayAttendance.check_out_time ? 
-                        format(new Date(todayAttendance.check_out_time), 'HH:mm') : 
+                      {todayAttendance.check_out ? 
+                        format(new Date(todayAttendance.check_out), 'HH:mm') : 
                         'Not checked out'
                       }
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Hours</p>
-                    <p className="font-medium text-blue-400">
-                      {todayAttendance.total_hours ? 
-                        `${todayAttendance.total_hours}h` : 
-                        'In progress'
-                      }
-                    </p>
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    <Badge className={getStatusColor(todayAttendance.status)}>
+                      {todayAttendance.status.replace('_', ' ')}
+                    </Badge>
                   </div>
                 </div>
-                <Badge className={getStatusColor(todayAttendance.status)}>
-                  {todayAttendance.status.replace('_', ' ')}
-                </Badge>
               </div>
             )}
           </CardContent>
@@ -342,10 +335,10 @@ export const AttendanceManagement = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Hours</p>
-                <p className="text-3xl font-bold text-cyan-400">{stats.totalHours.toFixed(1)}h</p>
+                <p className="text-sm text-muted-foreground">Late Arrivals</p>
+                <p className="text-3xl font-bold text-yellow-400">{stats.late}</p>
               </div>
-              <Timer className="h-8 w-8 text-cyan-400" />
+              <AlertTriangle className="h-8 w-8 text-yellow-400" />
             </div>
           </CardContent>
         </Card>
@@ -354,10 +347,10 @@ export const AttendanceManagement = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Overtime</p>
-                <p className="text-3xl font-bold text-orange-400">{stats.overtime.toFixed(1)}h</p>
+                <p className="text-sm text-muted-foreground">Absent Today</p>
+                <p className="text-3xl font-bold text-red-400">{stats.absent}</p>
               </div>
-              <Zap className="h-8 w-8 text-orange-400" />
+              <User className="h-8 w-8 text-red-400" />
             </div>
           </CardContent>
         </Card>
@@ -398,11 +391,11 @@ export const AttendanceManagement = () => {
                   <div className="flex items-center gap-4">
                     <div className="text-right text-sm">
                       <p className="text-muted-foreground">
-                        {record.check_in_time ? format(new Date(record.check_in_time), 'HH:mm') : '--'} - 
-                        {record.check_out_time ? format(new Date(record.check_out_time), 'HH:mm') : '--'}
+                        {record.check_in ? format(new Date(record.check_in), 'HH:mm') : '--'} - 
+                        {record.check_out ? format(new Date(record.check_out), 'HH:mm') : '--'}
                       </p>
                       <p className="text-white">
-                        {record.total_hours ? `${record.total_hours}h` : '--'}
+                        {record.notes || 'No notes'}
                       </p>
                     </div>
                     <Badge className={getStatusColor(record.status)}>
