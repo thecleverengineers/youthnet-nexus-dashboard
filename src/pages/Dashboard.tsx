@@ -10,32 +10,13 @@ import {
   TrendingUp,
   Calendar,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  LogOut
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-
-const stats = [
-  { title: 'Total Students', value: '2,847', change: '+12% from last month', changeType: 'positive' as const, icon: Users },
-  { title: 'Active Trainers', value: '156', change: '+3 new this week', changeType: 'positive' as const, icon: GraduationCap },
-  { title: 'Job Placements', value: '423', change: '+8% this quarter', changeType: 'positive' as const, icon: Briefcase },
-  { title: 'Incubation Projects', value: '34', change: '5 new startups', changeType: 'positive' as const, icon: Building2 },
-];
-
-const departmentData = [
-  { name: 'Education', students: 1200, completion: 85 },
-  { name: 'Skill Dev', students: 800, completion: 92 },
-  { name: 'Job Centre', students: 600, completion: 78 },
-  { name: 'Career Dev', students: 400, completion: 88 },
-  { name: 'Incubation', students: 150, completion: 95 },
-];
-
-const placementData = [
-  { name: 'IT/Software', value: 35, color: '#8884d8' },
-  { name: 'Banking', value: 25, color: '#82ca9d' },
-  { name: 'Retail', value: 20, color: '#ffc658' },
-  { name: 'Manufacturing', value: 15, color: '#ff7c7c' },
-  { name: 'Others', value: 5, color: '#8dd1e1' },
-];
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 
 const upcomingEvents = [
   { title: 'Digital Marketing Batch Graduation', date: '2024-01-15', type: 'graduation' },
@@ -45,14 +26,57 @@ const upcomingEvents = [
 ];
 
 export const Dashboard = () => {
+  const { 
+    studentsCount, 
+    trainersCount, 
+    jobPlacements, 
+    incubationProjects, 
+    departmentData, 
+    placementData, 
+    loading 
+  } = useDashboardData();
+  
+  const { signOut, profile } = useAuth();
+
+  const stats = [
+    { title: 'Total Students', value: studentsCount.toString(), change: '+12% from last month', changeType: 'positive' as const, icon: Users },
+    { title: 'Active Trainers', value: trainersCount.toString(), change: '+3 new this week', changeType: 'positive' as const, icon: GraduationCap },
+    { title: 'Job Placements', value: jobPlacements.toString(), change: '+8% this quarter', changeType: 'positive' as const, icon: Briefcase },
+    { title: 'Incubation Projects', value: incubationProjects.toString(), change: '5 new startups', changeType: 'positive' as const, icon: Building2 },
+  ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6 fade-in">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 bg-accent/50 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome to YouthNet Management Information System
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {profile?.full_name || 'User'}! ({profile?.role})
+          </p>
+        </div>
+        <Button variant="outline" onClick={signOut} className="flex items-center gap-2">
+          <LogOut className="h-4 w-4" />
+          Sign Out
+        </Button>
       </div>
 
       {/* Stats Cards */}
