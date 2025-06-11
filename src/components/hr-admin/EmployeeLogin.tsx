@@ -35,10 +35,10 @@ export const EmployeeLogin = () => {
 
     setIsLoading(true);
     try {
-      // Simulate authentication process
+      // Query employees table directly since profiles relationship doesn't exist
       const { data: employee, error } = await supabase
         .from('employees')
-        .select('*, profiles(*)')
+        .select('*')
         .eq('employee_id', employeeId)
         .eq('employment_status', 'active')
         .single();
@@ -48,24 +48,18 @@ export const EmployeeLogin = () => {
         return;
       }
 
-      // Create session record
-      await supabase.from('employee_sessions').insert({
-        employee_id: employee.id,
-        session_token: crypto.randomUUID(),
-        ip_address: '192.168.1.100', // Mock IP
-        user_agent: navigator.userAgent,
-        device_type: /Mobile/.test(navigator.userAgent) ? 'mobile' : 'desktop',
-        location: 'YouthNet HQ'
-      });
-
-      toast.success(`Welcome back, ${employee.profiles?.full_name}!`);
-      // Store session in localStorage for demo
-      localStorage.setItem('employee_session', JSON.stringify({
+      // Mock session creation since employee_sessions table doesn't exist
+      const sessionData = {
         id: employee.id,
-        name: employee.profiles?.full_name,
+        name: `Employee ${employee.employee_id}`, // Mock name since no profiles
         employeeId: employee.employee_id,
         department: employee.department
-      }));
+      };
+
+      toast.success(`Welcome back, ${sessionData.name}!`);
+      
+      // Store session in localStorage for demo
+      localStorage.setItem('employee_session', JSON.stringify(sessionData));
       
       // Redirect to employee dashboard
       window.location.reload();
