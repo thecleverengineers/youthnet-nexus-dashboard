@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
@@ -8,13 +9,13 @@ const queryClient = new QueryClient();
 
 import { Layout } from '@/components/layout/Layout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import Dashboard from '@/pages/Dashboard';
-import { Index } from '@/pages/Index';
+import { Dashboard } from '@/pages/Dashboard';
+import Index from '@/pages/Index';
 import { Education } from '@/pages/Education';
 import { SkillDevelopment } from '@/pages/SkillDevelopment';
 import { JobCentre } from '@/pages/JobCentre';
 import { CareerCentre } from '@/pages/CareerCentre';
-import { NotFound } from '@/pages/NotFound';
+import NotFound from '@/pages/NotFound';
 
 function App() {
   return (

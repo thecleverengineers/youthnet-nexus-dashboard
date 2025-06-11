@@ -5,4 +5,5 @@ const Index = () => {
   return <Dashboard />;
 };
 
+export { Index };
 export default Index;
