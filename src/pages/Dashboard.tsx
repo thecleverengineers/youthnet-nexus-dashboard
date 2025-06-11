@@ -252,7 +252,7 @@ export const Dashboard = () => {
             <CardTitle className="flex items-center gap-3 text-gradient">
               <CheckCircle className="h-6 w-6 text-emerald-400" />
               Quick Actions
-            </Title>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
