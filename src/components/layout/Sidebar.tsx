@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -29,7 +28,7 @@ const navigation = [
   { name: 'Incubation', href: '/incubation', icon: Lightbulb },
   { name: 'Made in Nagaland', href: '/made-in-nagaland', icon: ShoppingBag },
   { name: 'Livelihood Incubator', href: '/livelihood-incubator', icon: Building2 },
-  { name: 'HR & Admin', href: '/hr', icon: Users },
+  { name: 'HR & Admin', href: '/hr-admin', icon: Users },
   { name: 'Inventory', href: '/inventory', icon: Package },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
