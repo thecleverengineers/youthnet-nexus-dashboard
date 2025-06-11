@@ -9,6 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_insights: {
+        Row: {
+          confidence_score: number
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          expires_at: string | null
+          id: string
+          insight_type: string
+          prediction_data: Json
+          recommendations: Json | null
+          validity_period: number | null
+        }
+        Insert: {
+          confidence_score: number
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          expires_at?: string | null
+          id?: string
+          insight_type: string
+          prediction_data: Json
+          recommendations?: Json | null
+          validity_period?: number | null
+        }
+        Update: {
+          confidence_score?: number
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          expires_at?: string | null
+          id?: string
+          insight_type?: string
+          prediction_data?: Json
+          recommendations?: Json | null
+          validity_period?: number | null
+        }
+        Relationships: []
+      }
+      analytics_dashboards: {
+        Row: {
+          config: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          last_refreshed: string | null
+          name: string
+          refresh_interval: number | null
+          updated_at: string
+        }
+        Insert: {
+          config: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          last_refreshed?: string | null
+          name: string
+          refresh_interval?: number | null
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          last_refreshed?: string | null
+          name?: string
+          refresh_interval?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_dashboards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_records: {
         Row: {
           check_in: string | null
@@ -261,6 +347,87 @@ export type Database = {
           {
             foreignKeyName: "employee_benefits_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_tasks: {
+        Row: {
+          actual_hours: number | null
+          ai_complexity_score: number | null
+          assigned_by: string | null
+          assigned_to: string
+          attachments: Json | null
+          auto_assigned: boolean | null
+          completed_at: string | null
+          completion_percentage: number | null
+          created_at: string
+          dependencies: string[] | null
+          description: string | null
+          due_date: string | null
+          estimated_hours: number | null
+          id: string
+          priority: string
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actual_hours?: number | null
+          ai_complexity_score?: number | null
+          assigned_by?: string | null
+          assigned_to: string
+          attachments?: Json | null
+          auto_assigned?: boolean | null
+          completed_at?: string | null
+          completion_percentage?: number | null
+          created_at?: string
+          dependencies?: string[] | null
+          description?: string | null
+          due_date?: string | null
+          estimated_hours?: number | null
+          id?: string
+          priority?: string
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actual_hours?: number | null
+          ai_complexity_score?: number | null
+          assigned_by?: string | null
+          assigned_to?: string
+          attachments?: Json | null
+          auto_assigned?: boolean | null
+          completed_at?: string | null
+          completion_percentage?: number | null
+          created_at?: string
+          dependencies?: string[] | null
+          description?: string | null
+          due_date?: string | null
+          estimated_hours?: number | null
+          id?: string
+          priority?: string
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_tasks_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
@@ -783,9 +950,13 @@ export type Database = {
       }
       payroll: {
         Row: {
+          ai_calculated: boolean | null
+          ai_risk_score: number | null
+          attendance_penalty: number | null
           base_salary: number
           bonuses: number | null
           created_at: string | null
+          cycle_id: string | null
           deductions: number | null
           employee_id: string | null
           gross_pay: number
@@ -797,13 +968,18 @@ export type Database = {
           pay_period_start: string
           payment_date: string | null
           payment_status: string | null
+          performance_bonus: number | null
           tax_deductions: number | null
           updated_at: string | null
         }
         Insert: {
+          ai_calculated?: boolean | null
+          ai_risk_score?: number | null
+          attendance_penalty?: number | null
           base_salary: number
           bonuses?: number | null
           created_at?: string | null
+          cycle_id?: string | null
           deductions?: number | null
           employee_id?: string | null
           gross_pay: number
@@ -815,13 +991,18 @@ export type Database = {
           pay_period_start: string
           payment_date?: string | null
           payment_status?: string | null
+          performance_bonus?: number | null
           tax_deductions?: number | null
           updated_at?: string | null
         }
         Update: {
+          ai_calculated?: boolean | null
+          ai_risk_score?: number | null
+          attendance_penalty?: number | null
           base_salary?: number
           bonuses?: number | null
           created_at?: string | null
+          cycle_id?: string | null
           deductions?: number | null
           employee_id?: string | null
           gross_pay?: number
@@ -833,10 +1014,18 @@ export type Database = {
           pay_period_start?: string
           payment_date?: string | null
           payment_status?: string | null
+          performance_bonus?: number | null
           tax_deductions?: number | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "payroll_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payroll_employee_id_fkey"
             columns: ["employee_id"]
@@ -846,9 +1035,127 @@ export type Database = {
           },
         ]
       }
+      payroll_cycles: {
+        Row: {
+          ai_anomaly_detected: boolean | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          cycle_name: string
+          end_date: string
+          id: string
+          pay_date: string
+          start_date: string
+          status: string
+          total_deductions: number | null
+          total_gross_pay: number | null
+          total_net_pay: number | null
+          updated_at: string
+        }
+        Insert: {
+          ai_anomaly_detected?: boolean | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          cycle_name: string
+          end_date: string
+          id?: string
+          pay_date: string
+          start_date: string
+          status?: string
+          total_deductions?: number | null
+          total_gross_pay?: number | null
+          total_net_pay?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ai_anomaly_detected?: boolean | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          cycle_name?: string
+          end_date?: string
+          id?: string
+          pay_date?: string
+          start_date?: string
+          status?: string
+          total_deductions?: number | null
+          total_gross_pay?: number | null
+          total_net_pay?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_cycles_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_metrics: {
+        Row: {
+          auto_calculated: boolean | null
+          created_at: string
+          data_source: string | null
+          employee_id: string
+          id: string
+          metric_name: string
+          metric_value: number
+          period_end: string
+          period_start: string
+          target_value: number | null
+          unit: string | null
+        }
+        Insert: {
+          auto_calculated?: boolean | null
+          created_at?: string
+          data_source?: string | null
+          employee_id: string
+          id?: string
+          metric_name: string
+          metric_value: number
+          period_end: string
+          period_start: string
+          target_value?: number | null
+          unit?: string | null
+        }
+        Update: {
+          auto_calculated?: boolean | null
+          created_at?: string
+          data_source?: string | null
+          employee_id?: string
+          id?: string
+          metric_name?: string
+          metric_value?: number
+          period_end?: string
+          period_start?: string
+          target_value?: number | null
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_metrics_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       performance_reviews: {
         Row: {
+          ai_generated_insights: string | null
           areas_for_improvement: string | null
+          career_recommendations: Json | null
           created_at: string | null
           development_plan: string | null
           employee_id: string | null
@@ -856,15 +1163,20 @@ export type Database = {
           id: string
           next_review_date: string | null
           overall_rating: Database["public"]["Enums"]["performance_rating"]
+          peer_feedback: Json | null
           review_period_end: string
           review_period_start: string
           reviewer_id: string | null
+          self_assessment: Json | null
+          skill_assessment: Json | null
           status: string | null
           strengths: string | null
           updated_at: string | null
         }
         Insert: {
+          ai_generated_insights?: string | null
           areas_for_improvement?: string | null
+          career_recommendations?: Json | null
           created_at?: string | null
           development_plan?: string | null
           employee_id?: string | null
@@ -872,15 +1184,20 @@ export type Database = {
           id?: string
           next_review_date?: string | null
           overall_rating: Database["public"]["Enums"]["performance_rating"]
+          peer_feedback?: Json | null
           review_period_end: string
           review_period_start: string
           reviewer_id?: string | null
+          self_assessment?: Json | null
+          skill_assessment?: Json | null
           status?: string | null
           strengths?: string | null
           updated_at?: string | null
         }
         Update: {
+          ai_generated_insights?: string | null
           areas_for_improvement?: string | null
+          career_recommendations?: Json | null
           created_at?: string | null
           development_plan?: string | null
           employee_id?: string | null
@@ -888,9 +1205,12 @@ export type Database = {
           id?: string
           next_review_date?: string | null
           overall_rating?: Database["public"]["Enums"]["performance_rating"]
+          peer_feedback?: Json | null
           review_period_end?: string
           review_period_start?: string
           reviewer_id?: string | null
+          self_assessment?: Json | null
+          skill_assessment?: Json | null
           status?: string | null
           strengths?: string | null
           updated_at?: string | null
@@ -1190,6 +1510,99 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_comments: {
+        Row: {
+          attachments: Json | null
+          comment: string
+          created_at: string
+          employee_id: string
+          id: string
+          task_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          comment: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          task_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          comment?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "employee_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_time_logs: {
+        Row: {
+          activity_type: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          employee_id: string
+          end_time: string | null
+          id: string
+          start_time: string
+          task_id: string
+        }
+        Insert: {
+          activity_type?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          employee_id: string
+          end_time?: string | null
+          id?: string
+          start_time: string
+          task_id: string
+        }
+        Update: {
+          activity_type?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          employee_id?: string
+          end_time?: string | null
+          id?: string
+          start_time?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_time_logs_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_time_logs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "employee_tasks"
             referencedColumns: ["id"]
           },
         ]

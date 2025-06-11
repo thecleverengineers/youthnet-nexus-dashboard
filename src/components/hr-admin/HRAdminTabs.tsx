@@ -8,6 +8,7 @@ import { EmployeeLogin } from './EmployeeLogin';
 import { EmployeeDashboard } from './EmployeeDashboard';
 import { PayrollManagement } from './PayrollManagement';
 import { PerformanceReviews } from './PerformanceReviews';
+import { AdvancedReportsAnalytics } from './AdvancedReportsAnalytics';
 
 export const HRAdminTabs = () => {
   const [isEmployeeLoggedIn, setIsEmployeeLoggedIn] = useState(false);
@@ -62,7 +63,7 @@ export const HRAdminTabs = () => {
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="employees">Employees</TabsTrigger>
             <TabsTrigger value="attendance">Attendance</TabsTrigger>
-            <TabsTrigger value="tasks">Task Management</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
             <TabsTrigger value="payroll">Payroll</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
@@ -89,10 +90,7 @@ export const HRAdminTabs = () => {
           </TabsContent>
 
           <TabsContent value="reports">
-            <div className="text-center py-12">
-              <h3 className="text-lg font-semibold text-white mb-2">Advanced Reports</h3>
-              <p className="text-muted-foreground">Comprehensive analytics and reporting dashboard coming soon...</p>
-            </div>
+            <AdvancedReportsAnalytics />
           </TabsContent>
         </Tabs>
       )}

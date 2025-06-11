@@ -61,39 +61,52 @@ export const EmployeeDashboard = () => {
 
       setAttendance(attendanceData);
 
-      // Mock tasks data since employee_tasks table doesn't exist yet
-      const mockTasks = [
-        {
-          id: '1',
-          title: 'Complete Monthly Report',
-          description: 'Prepare and submit monthly performance report',
-          status: 'in_progress',
-          due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          title: 'Team Meeting Preparation',
-          description: 'Prepare agenda for weekly team meeting',
-          status: 'completed',
-          due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString()
-        },
-        {
-          id: '3',
-          title: 'Client Presentation',
-          description: 'Create presentation for client meeting',
-          status: 'pending',
-          due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString()
-        }
-      ];
+      // Fetch real employee tasks from new table
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('employee_tasks')
+        .select('*')
+        .eq('assigned_to', empData.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-      setTasks(mockTasks);
+      if (tasksError) {
+        console.log('Tasks table not accessible, using mock data');
+        // Mock tasks data as fallback
+        const mockTasks = [
+          {
+            id: '1',
+            title: 'Complete Monthly Report',
+            description: 'Prepare and submit monthly performance report',
+            status: 'in_progress',
+            due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
+          },
+          {
+            id: '2',
+            title: 'Team Meeting Preparation',
+            description: 'Prepare agenda for weekly team meeting',
+            status: 'completed',
+            due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
+          },
+          {
+            id: '3',
+            title: 'Client Presentation',
+            description: 'Create presentation for client meeting',
+            status: 'pending',
+            due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
+          }
+        ];
+        setTasks(mockTasks);
+      } else {
+        setTasks(tasksData || []);
+      }
 
-      // Calculate stats from mock data
-      const completed = mockTasks.filter(t => t.status === 'completed').length;
-      const total = mockTasks.length;
+      // Calculate stats from tasks data
+      const tasksToUse = tasksData || [];
+      const completed = tasksToUse.filter(t => t.status === 'completed').length;
+      const total = tasksToUse.length;
       
       setStats({
         tasksCompleted: completed,
