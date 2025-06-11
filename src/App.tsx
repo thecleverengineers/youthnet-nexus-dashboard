@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Layout } from "@/components/layout/Layout";
 import { Dashboard } from "@/pages/Dashboard";
+import { Education } from "@/pages/Education";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,10 +30,7 @@ const App = () => (
                 } />
                 <Route path="/education" element={
                   <Layout>
-                    <div className="p-8 text-center">
-                      <h1 className="text-2xl font-bold mb-4">Education Department</h1>
-                      <p className="text-muted-foreground">Coming soon...</p>
-                    </div>
+                    <Education />
                   </Layout>
                 } />
                 <Route path="/skill-development" element={
