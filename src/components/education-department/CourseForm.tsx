@@ -17,13 +17,11 @@ interface CourseFormProps {
 
 export const CourseForm = ({ course, onClose, onSuccess }: CourseFormProps) => {
   const [formData, setFormData] = useState({
-    title: course?.title || '',
+    name: course?.name || '',
     description: course?.description || '',
     duration_weeks: course?.duration_weeks || 1,
-    level: course?.level || 'beginner',
-    max_students: course?.max_students || 20,
-    price: course?.price || 0,
-    instructor_id: course?.instructor_id || '',
+    max_participants: course?.max_participants || 20,
+    trainer_id: course?.trainer_id || '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -68,11 +66,11 @@ export const CourseForm = ({ course, onClose, onSuccess }: CourseFormProps) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title">Course Title</Label>
+            <Label htmlFor="name">Course Name</Label>
             <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
             />
           </div>
@@ -101,42 +99,13 @@ export const CourseForm = ({ course, onClose, onSuccess }: CourseFormProps) => {
             </div>
 
             <div>
-              <Label htmlFor="level">Level</Label>
-              <Select value={formData.level} onValueChange={(value) => setFormData({ ...formData, level: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="maxStudents">Max Students</Label>
+              <Label htmlFor="maxParticipants">Max Participants</Label>
               <Input
-                id="maxStudents"
+                id="maxParticipants"
                 type="number"
-                value={formData.max_students}
-                onChange={(e) => setFormData({ ...formData, max_students: parseInt(e.target.value) })}
+                value={formData.max_participants}
+                onChange={(e) => setFormData({ ...formData, max_participants: parseInt(e.target.value) })}
                 min="1"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                min="0"
-                step="0.01"
                 required
               />
             </div>
