@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Dashboard } from "@/pages/Dashboard";
 import { Education } from "@/pages/Education";
 import NotFound from "./pages/NotFound";
+import { SkillDevelopment } from "@/pages/SkillDevelopment";
 
 const queryClient = new QueryClient();
 
@@ -35,10 +35,7 @@ const App = () => (
                 } />
                 <Route path="/skill-development" element={
                   <Layout>
-                    <div className="p-8 text-center">
-                      <h1 className="text-2xl font-bold mb-4">Skill Development Centre</h1>
-                      <p className="text-muted-foreground">Coming soon...</p>
-                    </div>
+                    <SkillDevelopment />
                   </Layout>
                 } />
                 <Route path="/job-centre" element={
