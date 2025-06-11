@@ -1,88 +1,63 @@
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { X } from 'lucide-react';
+
+const courseSchema = z.object({
+  course_name: z.string().min(1, 'Course name is required'),
+  course_code: z.string().min(1, 'Course code is required'),
+  description: z.string().optional(),
+  duration_months: z.number().min(1, 'Duration must be at least 1 month'),
+  credits: z.number().min(1, 'Credits must be at least 1'),
+  department: z.string().min(1, 'Department is required'),
+  max_students: z.number().min(1, 'Maximum students must be at least 1'),
+});
+
+type CourseFormData = z.infer<typeof courseSchema>;
 
 interface CourseFormProps {
-  course?: any;
-  onClose: () => void;
-  onSuccess: () => void;
+  onSubmit: (data: CourseFormData) => void;
+  onCancel: () => void;
+  initialData?: Partial<CourseFormData>;
 }
 
-export const CourseForm = ({ course, onClose, onSuccess }: CourseFormProps) => {
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
-    defaultValues: course || {
-      course_name: '',
-      course_code: '',
-      description: '',
-      duration_months: 6,
-      credits: 3,
-      department: '',
-      max_students: 30,
-      status: 'active'
-    }
+export const CourseForm = ({ onSubmit, onCancel, initialData }: CourseFormProps) => {
+  const { register, handleSubmit, formState: { errors } } = useForm<CourseFormData>({
+    resolver: zodResolver(courseSchema),
+    defaultValues: initialData,
   });
-  const { toast } = useToast();
-
-  const saveMutation = useMutation({
-    mutationFn: async (data: any) => {
-      if (course) {
-        const { error } = await supabase
-          .from('education_courses')
-          .update(data)
-          .eq('id', course.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('education_courses')
-          .insert([data]);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      toast({
-        title: course ? "Course updated" : "Course created",
-        description: `Course has been successfully ${course ? 'updated' : 'created'}.`,
-      });
-      onSuccess();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to save course. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const onSubmit = (data: any) => {
-    saveMutation.mutate(data);
-  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{course ? 'Edit Course' : 'Create New Course'}</CardTitle>
+    <Card className="glass-effect">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>
+          {initialData ? 'Edit Course' : 'Create New Course'}
+        </CardTitle>
+        <Button variant="ghost" size="icon" onClick={onCancel}>
+          <X className="h-4 w-4" />
+        </Button>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="course_name">Course Name</Label>
               <Input
                 id="course_name"
-                {...register('course_name', { required: 'Course name is required' })}
+                {...register('course_name')}
+                className="mt-1"
               />
               {errors.course_name && (
-                <span className="text-red-500 text-sm">{errors.course_name.message}</span>
+                <p className="text-sm text-destructive mt-1">
+                  {errors.course_name.message}
+                </p>
               )}
             </div>
 
@@ -90,10 +65,72 @@ export const CourseForm = ({ course, onClose, onSuccess }: CourseFormProps) => {
               <Label htmlFor="course_code">Course Code</Label>
               <Input
                 id="course_code"
-                {...register('course_code', { required: 'Course code is required' })}
+                {...register('course_code')}
+                className="mt-1"
               />
               {errors.course_code && (
-                <span className="text-red-500 text-sm">{errors.course_code.message}</span>
+                <p className="text-sm text-destructive mt-1">
+                  {errors.course_code.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="duration_months">Duration (Months)</Label>
+              <Input
+                id="duration_months"
+                type="number"
+                {...register('duration_months', { valueAsNumber: true })}
+                className="mt-1"
+              />
+              {errors.duration_months && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.duration_months.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="credits">Credits</Label>
+              <Input
+                id="credits"
+                type="number"
+                {...register('credits', { valueAsNumber: true })}
+                className="mt-1"
+              />
+              {errors.credits && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.credits.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="department">Department</Label>
+              <Input
+                id="department"
+                {...register('department')}
+                className="mt-1"
+              />
+              {errors.department && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.department.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="max_students">Maximum Students</Label>
+              <Input
+                id="max_students"
+                type="number"
+                {...register('max_students', { valueAsNumber: true })}
+                className="mt-1"
+              />
+              {errors.max_students && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.max_students.message}
+                </p>
               )}
             </div>
           </div>
@@ -103,69 +140,17 @@ export const CourseForm = ({ course, onClose, onSuccess }: CourseFormProps) => {
             <Textarea
               id="description"
               {...register('description')}
+              className="mt-1"
               rows={3}
             />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="duration_months">Duration (months)</Label>
-              <Input
-                id="duration_months"
-                type="number"
-                {...register('duration_months', { required: 'Duration is required' })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="credits">Credits</Label>
-              <Input
-                id="credits"
-                type="number"
-                {...register('credits')}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="max_students">Max Students</Label>
-              <Input
-                id="max_students"
-                type="number"
-                {...register('max_students')}
-              />
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="department">Department</Label>
-              <Input
-                id="department"
-                {...register('department')}
-              />
-            </div>
-
-            <div>
-              <Label>Status</Label>
-              <Select onValueChange={(value) => setValue('status', value)} defaultValue={watch('status')}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? 'Saving...' : course ? 'Update Course' : 'Create Course'}
+            <Button type="submit">
+              {initialData ? 'Update Course' : 'Create Course'}
             </Button>
           </div>
         </form>
