@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      attendance_records: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          date: string
+          employee_id: string | null
+          id: string
+          notes: string | null
+          status: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date: string
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date?: string
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certifications: {
         Row: {
           created_at: string
@@ -64,6 +105,153 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      course_enrollments: {
+        Row: {
+          assigned_by: string | null
+          assignment_reason: string | null
+          completion_date: string | null
+          course_id: string | null
+          created_at: string
+          enrollment_date: string
+          grade: string | null
+          id: string
+          status: string
+          student_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          assignment_reason?: string | null
+          completion_date?: string | null
+          course_id?: string | null
+          created_at?: string
+          enrollment_date?: string
+          grade?: string | null
+          id?: string
+          status?: string
+          student_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          assignment_reason?: string | null
+          completion_date?: string | null
+          course_id?: string | null
+          created_at?: string
+          enrollment_date?: string
+          grade?: string | null
+          id?: string
+          status?: string
+          student_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "education_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      education_courses: {
+        Row: {
+          course_code: string
+          course_name: string
+          created_at: string
+          credits: number | null
+          department: string | null
+          description: string | null
+          duration_months: number
+          id: string
+          instructor_id: string | null
+          max_students: number | null
+          prerequisites: string[] | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          course_code: string
+          course_name: string
+          created_at?: string
+          credits?: number | null
+          department?: string | null
+          description?: string | null
+          duration_months: number
+          id?: string
+          instructor_id?: string | null
+          max_students?: number | null
+          prerequisites?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          course_code?: string
+          course_name?: string
+          created_at?: string
+          credits?: number | null
+          department?: string | null
+          description?: string | null
+          duration_months?: number
+          id?: string
+          instructor_id?: string | null
+          max_students?: number | null
+          prerequisites?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          created_at: string
+          department: string
+          employee_id: string
+          employment_status: string
+          hire_date: string
+          id: string
+          manager_id: string | null
+          position: string
+          salary: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          department: string
+          employee_id: string
+          employment_status?: string
+          hire_date: string
+          id?: string
+          manager_id?: string | null
+          position: string
+          salary?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          employee_id?: string
+          employment_status?: string
+          hire_date?: string
+          id?: string
+          manager_id?: string | null
+          position?: string
+          salary?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       incubation_projects: {
         Row: {
@@ -294,6 +482,99 @@ export type Database = {
           },
         ]
       }
+      livelihood_programs: {
+        Row: {
+          budget: number | null
+          coordinator_id: string | null
+          created_at: string
+          duration_weeks: number | null
+          expected_outcomes: string[] | null
+          focus_area: string
+          id: string
+          max_participants: number | null
+          program_name: string
+          program_status: string
+          target_demographic: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          coordinator_id?: string | null
+          created_at?: string
+          duration_weeks?: number | null
+          expected_outcomes?: string[] | null
+          focus_area: string
+          id?: string
+          max_participants?: number | null
+          program_name: string
+          program_status?: string
+          target_demographic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          coordinator_id?: string | null
+          created_at?: string
+          duration_weeks?: number | null
+          expected_outcomes?: string[] | null
+          focus_area?: string
+          id?: string
+          max_participants?: number | null
+          program_name?: string
+          program_status?: string
+          target_demographic?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      local_products: {
+        Row: {
+          category: string
+          certification_status: string | null
+          created_at: string
+          description: string | null
+          id: string
+          images: string[] | null
+          is_featured: boolean | null
+          price: number | null
+          producer_contact: string | null
+          producer_name: string
+          product_name: string
+          stock_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          certification_status?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_featured?: boolean | null
+          price?: number | null
+          producer_contact?: string | null
+          producer_name: string
+          product_name: string
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          certification_status?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_featured?: boolean | null
+          price?: number | null
+          producer_contact?: string | null
+          producer_name?: string
+          product_name?: string
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -423,6 +704,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      startup_applications: {
+        Row: {
+          applicant_id: string | null
+          application_status: string
+          business_idea: string
+          business_name: string
+          created_at: string
+          funding_required: number | null
+          id: string
+          industry: string | null
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          submitted_at: string
+          team_size: number | null
+          updated_at: string
+        }
+        Insert: {
+          applicant_id?: string | null
+          application_status?: string
+          business_idea: string
+          business_name: string
+          created_at?: string
+          funding_required?: number | null
+          id?: string
+          industry?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string
+          team_size?: number | null
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string | null
+          application_status?: string
+          business_idea?: string
+          business_name?: string
+          created_at?: string
+          funding_required?: number | null
+          id?: string
+          industry?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string
+          team_size?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       student_enrollments: {
         Row: {

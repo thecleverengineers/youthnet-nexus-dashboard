@@ -16,6 +16,14 @@ import { Education } from '@/pages/Education';
 import { SkillDevelopment } from '@/pages/SkillDevelopment';
 import { JobCentre } from '@/pages/JobCentre';
 import { CareerCentre } from '@/pages/CareerCentre';
+import { EducationDepartment } from '@/pages/EducationDepartment';
+import { Incubation } from '@/pages/Incubation';
+import { MadeInNagaland } from '@/pages/MadeInNagaland';
+import { LivelihoodIncubator } from '@/pages/LivelihoodIncubator';
+import { HRAdmin } from '@/pages/HRAdmin';
+import { Inventory } from '@/pages/Inventory';
+import { ReportsPage } from '@/pages/ReportsPage';
+import { Settings } from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
 
 function App() {
@@ -40,6 +48,13 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               } />
+              <Route path="/education-department" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <EducationDepartment />
+                  </Layout>
+                </ProtectedRoute>
+              } />
               <Route path="/skill-development" element={
                 <ProtectedRoute>
                   <Layout>
@@ -58,6 +73,55 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <CareerCentre />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/incubation" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Incubation />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/made-in-nagaland" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MadeInNagaland />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/livelihood-incubator" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <LivelihoodIncubator />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/hr-admin" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <HRAdmin />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/inventory" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Inventory />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/reports" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ReportsPage />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Settings />
                   </Layout>
                 </ProtectedRoute>
               } />
