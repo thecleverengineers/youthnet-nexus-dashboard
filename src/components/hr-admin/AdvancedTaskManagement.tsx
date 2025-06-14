@@ -48,9 +48,16 @@ interface Task {
   completed_at?: string;
 }
 
+interface Employee {
+  id: string;
+  employee_id: string;
+  position: string;
+  department: string;
+}
+
 export const AdvancedTaskManagement = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [employees, setEmployees] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -91,10 +98,16 @@ export const AdvancedTaskManagement = () => {
       // Load employees from database
       const { data: employeesData, error: employeesError } = await supabase
         .from('employees')
-        .select('id, employee_id, position, department')
-        .eq('employment_status', 'active');
+        .select('id, employee_id, position, department');
 
       if (employeesError) throw employeesError;
+
+      const employeesList: Employee[] = employeesData?.map(emp => ({
+        id: emp.id,
+        employee_id: emp.employee_id,
+        position: emp.position || 'Unknown Position',
+        department: emp.department || 'Unknown Department'
+      })) || [];
 
       // Mock tasks data instead of querying non-existent table
       const mockTasks: Task[] = [
@@ -102,7 +115,7 @@ export const AdvancedTaskManagement = () => {
           id: '1',
           title: 'Complete Q4 Performance Reviews',
           description: 'Conduct and finalize all employee performance reviews for Q4',
-          assigned_to: employeesData?.[0]?.id || 'emp-1',
+          assigned_to: employeesList[0]?.id || 'emp-1',
           assigned_by: 'manager-1',
           priority: 'high',
           status: 'in_progress',
@@ -121,7 +134,7 @@ export const AdvancedTaskManagement = () => {
           id: '2',
           title: 'Update Employee Handbook',
           description: 'Review and update company policies in the employee handbook',
-          assigned_to: employeesData?.[1]?.id || 'emp-2',
+          assigned_to: employeesList[1]?.id || 'emp-2',
           assigned_by: 'manager-1',
           priority: 'medium',
           status: 'pending',
@@ -140,7 +153,7 @@ export const AdvancedTaskManagement = () => {
           id: '3',
           title: 'Payroll System Integration',
           description: 'Integrate new payroll system with existing HR database',
-          assigned_to: employeesData?.[0]?.id || 'emp-1',
+          assigned_to: employeesList[0]?.id || 'emp-1',
           assigned_by: 'manager-1',
           priority: 'urgent',
           status: 'completed',
@@ -159,7 +172,7 @@ export const AdvancedTaskManagement = () => {
       ];
 
       setTasks(mockTasks);
-      setEmployees(employeesData || []);
+      setEmployees(employeesList);
       calculateStats(mockTasks);
 
     } catch (error) {
@@ -630,7 +643,7 @@ export const AdvancedTaskManagement = () => {
                           <div>
                             <p className="text-xs text-gray-400 mb-1">Progress</p>
                             <div className="flex items-center gap-2">
-                              <Progress value={task.completion_percentage} className="flex-1 h-2" />
+                              <Progress value={task.completion_percentage} className="flex-1 h-2"  />
                               <span className="text-xs text-white font-medium">{task.completion_percentage}%</span>
                             </div>
                           </div>
@@ -682,7 +695,7 @@ export const AdvancedTaskManagement = () => {
             </div>
           ) : (
             <div className="p-12 text-center">
-              <Target className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+              <Target className="h-16 w-16 text-gray-600 mx-auto mb-4 opacity-50" />
               <h3 className="text-lg font-semibold text-white mb-2">No Tasks Found</h3>
               <p className="text-gray-400 mb-6">
                 {searchTerm || statusFilter !== 'all' || priorityFilter !== 'all' 
