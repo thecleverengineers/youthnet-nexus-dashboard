@@ -39,8 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error fetching profile:', error);
-        // If profile doesn't exist, it should be created by the trigger
-        // Let's wait a moment and try again
+        // Wait a moment and try again - the trigger might still be processing
         setTimeout(async () => {
           const { data: retryData, error: retryError } = await supabase
             .from('profiles')
@@ -67,15 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log('Setting up auth state listener...');
     
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
+    // Set up auth state listener first
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -83,6 +74,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Refresh profile when user changes
+      if (session?.user && event === 'SIGNED_IN') {
+        // Small delay to ensure the database trigger has completed
+        setTimeout(() => {
+          refreshProfile();
+        }, 1000);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    // Then get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      
+      if (session?.user) {
+        refreshProfile();
+      }
     });
 
     return () => {
@@ -90,15 +103,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
-    if (user) {
-      console.log('User changed, refreshing profile...');
-      refreshProfile();
-    } else {
-      setProfile(null);
-    }
-  }, [user]);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -170,6 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         console.log('Sign out successful');
         toast.success('Signed out successfully!');
+        setProfile(null);
       }
     } catch (error) {
       console.error('Unexpected sign out error:', error);

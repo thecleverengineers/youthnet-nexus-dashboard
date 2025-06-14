@@ -44,7 +44,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
         onClose();
-        // Reset form
         setSignInEmail('');
         setSignInPassword('');
       }
@@ -70,7 +69,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const success = await signUp(signUpEmail, signUpPassword, fullName, role);
       if (success) {
         onClose();
-        // Reset form
         setSignUpEmail('');
         setSignUpPassword('');
         setFullName('');
@@ -84,7 +82,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
-  // Demo users - Create these accounts first using the Sign Up form
+  // Demo users
   const demoUsers = [
     { email: 'admin@youthnet.in', password: 'admin123', role: 'Admin', color: 'red' },
     { email: 'staff@youthnet.in', password: 'staff123', role: 'Staff', color: 'blue' },
@@ -103,7 +101,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (success) {
         onClose();
         toast.success('Demo login successful!');
-        // Reset form
         setSignInEmail('');
         setSignInPassword('');
       } else {
@@ -125,7 +122,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       try {
         console.log('Creating demo account for:', user.email);
         await signUp(user.email, user.password, user.role + ' User', user.role.toLowerCase());
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between creations
+        await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (error) {
         console.error('Error creating demo account:', user.email, error);
       }
