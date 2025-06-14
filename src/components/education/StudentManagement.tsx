@@ -9,14 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Search, Edit, Users, Mail, Phone } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export function StudentManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: students, isLoading } = useQuery({
@@ -26,7 +25,7 @@ export function StudentManagement() {
         .from('students')
         .select(`
           *,
-          profiles:user_id (
+          profiles!inner (
             full_name,
             email,
             phone
@@ -41,49 +40,47 @@ export function StudentManagement() {
 
   const createStudentMutation = useMutation({
     mutationFn: async (studentData: any) => {
-      // First create profile
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // First create user via auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: studentData.email,
         password: 'temporary123',
-        email_confirm: true,
-        user_metadata: {
-          full_name: studentData.full_name,
-          role: 'student'
+        options: {
+          data: {
+            full_name: studentData.full_name,
+            role: 'student'
+          }
         }
       });
 
       if (authError) throw authError;
 
-      // Then create student record
-      const { data: studentRecord, error: studentError } = await supabase
-        .from('students')
-        .insert({
-          user_id: authData.user.id,
-          student_id: `STU${Date.now()}`,
-          date_of_birth: studentData.date_of_birth,
-          gender: studentData.gender,
-          education_level: studentData.education_level,
-          emergency_contact: studentData.emergency_contact,
-          emergency_phone: studentData.emergency_phone,
-          status: studentData.status as 'pending' | 'active' | 'completed' | 'dropped'
-        })
-        .select();
+      // Then update student record with additional fields
+      if (authData.user) {
+        const { error: studentError } = await supabase
+          .from('students')
+          .update({
+            date_of_birth: studentData.date_of_birth,
+            gender: studentData.gender,
+            education_level: studentData.education_level,
+            emergency_contact: studentData.emergency_contact,
+            emergency_phone: studentData.emergency_phone,
+            status: studentData.status
+          })
+          .eq('user_id', authData.user.id);
       
-      if (studentError) throw studentError;
-      return studentRecord;
+        if (studentError) throw studentError;
+      }
+      
+      return authData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] });
       setIsDialogOpen(false);
       setEditingStudent(null);
-      toast({ title: "Student created successfully" });
+      toast.success('Student created successfully');
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Error creating student", 
-        description: error.message,
-        variant: "destructive"
-      });
+      toast.error(`Error creating student: ${error.message}`);
     }
   });
 
@@ -97,7 +94,7 @@ export function StudentManagement() {
           education_level: studentData.education_level,
           emergency_contact: studentData.emergency_contact,
           emergency_phone: studentData.emergency_phone,
-          status: studentData.status as 'pending' | 'active' | 'completed' | 'dropped'
+          status: studentData.status
         })
         .eq('id', id)
         .select();
@@ -109,7 +106,7 @@ export function StudentManagement() {
       queryClient.invalidateQueries({ queryKey: ['students'] });
       setIsDialogOpen(false);
       setEditingStudent(null);
-      toast({ title: "Student updated successfully" });
+      toast.success('Student updated successfully');
     }
   });
 
@@ -143,7 +140,7 @@ export function StudentManagement() {
       education_level: formData.get('education_level') as string,
       emergency_contact: formData.get('emergency_contact') as string,
       emergency_phone: formData.get('emergency_phone') as string,
-      status: formData.get('status') as 'pending' | 'active' | 'completed' | 'dropped'
+      status: formData.get('status') as string
     };
 
     if (editingStudent) {
@@ -287,8 +284,8 @@ export function StudentManagement() {
                     <p className="text-sm text-muted-foreground">ID: {student.student_id}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(student.status)}>
-                      {student.status}
+                    <Badge className={getStatusColor(student.status || 'pending')}>
+                      {student.status || 'pending'}
                     </Badge>
                     <Button
                       variant="ghost"

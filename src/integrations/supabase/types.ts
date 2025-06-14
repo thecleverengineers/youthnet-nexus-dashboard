@@ -129,12 +129,103 @@ export type Database = {
         }
         Relationships: []
       }
+      payroll: {
+        Row: {
+          ai_risk_score: number | null
+          created_at: string
+          deductions: number
+          employee_id: string
+          gross_pay: number
+          id: string
+          net_pay: number
+          payroll_cycle_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_risk_score?: number | null
+          created_at?: string
+          deductions?: number
+          employee_id: string
+          gross_pay?: number
+          id?: string
+          net_pay?: number
+          payroll_cycle_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_risk_score?: number | null
+          created_at?: string
+          deductions?: number
+          employee_id?: string
+          gross_pay?: number
+          id?: string
+          net_pay?: number
+          payroll_cycle_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_payroll_cycle_id_fkey"
+            columns: ["payroll_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_cycles: {
+        Row: {
+          ai_anomaly_detected: boolean | null
+          created_at: string
+          cycle_name: string
+          end_date: string
+          id: string
+          pay_date: string
+          start_date: string
+          status: string | null
+          total_net_pay: number | null
+          updated_at: string
+        }
+        Insert: {
+          ai_anomaly_detected?: boolean | null
+          created_at?: string
+          cycle_name: string
+          end_date: string
+          id?: string
+          pay_date: string
+          start_date: string
+          status?: string | null
+          total_net_pay?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ai_anomaly_detected?: boolean | null
+          created_at?: string
+          cycle_name?: string
+          end_date?: string
+          id?: string
+          pay_date?: string
+          start_date?: string
+          status?: string | null
+          total_net_pay?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          phone: string | null
           role: string
           updated_at: string
         }
@@ -143,6 +234,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          phone?: string | null
           role: string
           updated_at?: string
         }
@@ -151,6 +243,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          phone?: string | null
           role?: string
           updated_at?: string
         }
@@ -204,21 +297,39 @@ export type Database = {
       students: {
         Row: {
           created_at: string
+          date_of_birth: string | null
+          education_level: string | null
+          emergency_contact: string | null
+          emergency_phone: string | null
+          gender: string | null
           id: string
+          status: string | null
           student_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          date_of_birth?: string | null
+          education_level?: string | null
+          emergency_contact?: string | null
+          emergency_phone?: string | null
+          gender?: string | null
           id?: string
+          status?: string | null
           student_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          date_of_birth?: string | null
+          education_level?: string | null
+          emergency_contact?: string | null
+          emergency_phone?: string | null
+          gender?: string | null
           id?: string
+          status?: string | null
           student_id?: string
           updated_at?: string
           user_id?: string
