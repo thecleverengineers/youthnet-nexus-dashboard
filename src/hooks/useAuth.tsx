@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -51,21 +52,104 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Extract role from user metadata or default to student
       const userRole = user.user_metadata?.role || 'student';
       
-      // Call the ensure_user_profile function
-      const { error } = await supabase.rpc('ensure_user_profile', {
-        user_id: user.id,
-        user_email: user.email || '',
-        user_role: userRole
-      });
+      // Create profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || user.email || '',
+          role: userRole
+        });
 
-      if (error) {
-        console.error('Error creating user profile:', error);
-      } else {
-        // Refresh profile after creation
-        await refreshProfile();
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        return;
       }
+
+      // Create role-specific records
+      await createRoleSpecificRecord(user, userRole);
+      
+      // Refresh profile after creation
+      await refreshProfile();
     } catch (error) {
       console.error('Error in createUserProfile:', error);
+    }
+  };
+
+  const createRoleSpecificRecord = async (user: User, role: string) => {
+    const email = user.email || '';
+    const timestamp = Date.now().toString().slice(-6);
+    
+    try {
+      switch (role) {
+        case 'student':
+          await supabase
+            .from('students')
+            .insert({
+              user_id: user.id,
+              student_id: `STU${email.substring(0, 3).toUpperCase()}${timestamp}`,
+              enrollment_date: new Date().toISOString().split('T')[0],
+              status: 'pending'
+            });
+          break;
+          
+        case 'trainer':
+          await supabase
+            .from('trainers')
+            .insert({
+              user_id: user.id,
+              trainer_id: `TRA${email.substring(0, 3).toUpperCase()}${timestamp}`,
+              specialization: 'General Training',
+              hire_date: new Date().toISOString().split('T')[0],
+              status: 'active'
+            });
+          break;
+          
+        case 'staff':
+          await supabase
+            .from('employees')
+            .insert({
+              user_id: user.id,
+              employee_id: `EMP${email.substring(0, 3).toUpperCase()}${timestamp}`,
+              position: 'Staff Member',
+              department: 'General',
+              employment_status: 'active',
+              employment_type: 'full_time',
+              hire_date: new Date().toISOString().split('T')[0],
+              salary: 40000
+            });
+          break;
+          
+        case 'admin':
+          await supabase
+            .from('employees')
+            .insert({
+              user_id: user.id,
+              employee_id: `ADM${email.substring(0, 3).toUpperCase()}${timestamp}`,
+              position: 'Administrator',
+              department: 'Administration',
+              employment_status: 'active',
+              employment_type: 'full_time',
+              hire_date: new Date().toISOString().split('T')[0],
+              salary: 60000
+            });
+          break;
+          
+        default:
+          // Default to student
+          await supabase
+            .from('students')
+            .insert({
+              user_id: user.id,
+              student_id: `STU${email.substring(0, 3).toUpperCase()}${timestamp}`,
+              enrollment_date: new Date().toISOString().split('T')[0],
+              status: 'pending'
+            });
+          break;
+      }
+    } catch (error) {
+      console.error('Error creating role-specific record:', error);
     }
   };
 
