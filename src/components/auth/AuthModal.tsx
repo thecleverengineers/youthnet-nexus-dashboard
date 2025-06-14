@@ -32,16 +32,25 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!signInEmail || !signInPassword) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    
     setLoading(true);
+    console.log('Attempting to sign in with:', signInEmail);
     
     try {
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
         onClose();
-        toast.success('Welcome back!');
+        // Reset form
+        setSignInEmail('');
+        setSignInPassword('');
       }
     } catch (error) {
       console.error('Sign in error:', error);
+      toast.error('Failed to sign in. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -49,22 +58,33 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!signUpEmail || !signUpPassword || !fullName) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    
     setLoading(true);
+    console.log('Attempting to sign up:', signUpEmail, 'with role:', role);
     
     try {
       const success = await signUp(signUpEmail, signUpPassword, fullName, role);
       if (success) {
         onClose();
-        toast.success('Account created successfully!');
+        // Reset form
+        setSignUpEmail('');
+        setSignUpPassword('');
+        setFullName('');
+        setRole('student');
       }
     } catch (error) {
       console.error('Sign up error:', error);
+      toast.error('Failed to create account. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Demo users - these will need to be created manually first
+  // Demo users - Create these accounts first using the Sign Up form
   const demoUsers = [
     { email: 'admin@youthnet.in', password: 'admin123', role: 'Admin', color: 'red' },
     { email: 'staff@youthnet.in', password: 'staff123', role: 'Staff', color: 'blue' },
@@ -73,6 +93,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   ];
 
   const handleDemoLogin = async (email: string, password: string) => {
+    console.log('Demo login attempt for:', email);
     setSignInEmail(email);
     setSignInPassword(password);
     setLoading(true);
@@ -82,6 +103,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (success) {
         onClose();
         toast.success('Demo login successful!');
+        // Reset form
+        setSignInEmail('');
+        setSignInPassword('');
       } else {
         toast.error('Demo user not found. Please create the account first by signing up.');
       }
@@ -91,6 +115,24 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCreateDemoAccounts = async () => {
+    setLoading(true);
+    toast.info('Creating demo accounts...');
+    
+    for (const user of demoUsers) {
+      try {
+        console.log('Creating demo account for:', user.email);
+        await signUp(user.email, user.password, user.role + ' User', user.role.toLowerCase());
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between creations
+      } catch (error) {
+        console.error('Error creating demo account:', user.email, error);
+      }
+    }
+    
+    setLoading(false);
+    toast.success('Demo accounts created! You can now use the demo login buttons.');
   };
 
   return (
@@ -133,6 +175,17 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     </Button>
                   ))}
                 </div>
+                
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleCreateDemoAccounts}
+                  disabled={loading}
+                  className="w-full text-xs"
+                >
+                  Create Demo Accounts
+                </Button>
+                
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-muted" />

@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from '@/components/ui/stats-card';
+import { Button } from '@/components/ui/button';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { 
   Users, 
   GraduationCap, 
@@ -10,7 +12,6 @@ import {
   TrendingUp,
   Calendar,
   CheckCircle,
-  AlertCircle,
   LogOut,
   Zap,
   Activity,
@@ -19,7 +20,6 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
 
 const upcomingEvents = [
   { title: 'Digital Marketing Batch Graduation', date: '2024-01-15', type: 'graduation', priority: 'high' },
@@ -39,7 +39,36 @@ export const Dashboard = () => {
     loading 
   } = useDashboardData();
   
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, user } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // If not authenticated, show landing page
+  if (!user) {
+    return (
+      <>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
+                alt="YouthNet Logo" 
+                className="h-24 w-auto object-contain"
+              />
+            </div>
+            <h1 className="text-4xl font-bold text-white mb-2">Welcome to YouthNet</h1>
+            <p className="text-xl text-muted-foreground mb-6">Management Information System</p>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+              Empowering youth through comprehensive skill development, job placement, and entrepreneurship support.
+            </p>
+            <Button onClick={() => setShowAuthModal(true)} className="px-8 py-3 text-lg">
+              Get Started
+            </Button>
+          </div>
+        </div>
+        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      </>
+    );
+  }
 
   const stats = [
     { title: 'Total Students', value: studentsCount.toString(), change: '+12% from last month', changeType: 'positive' as const, icon: Users },

@@ -1,4 +1,11 @@
 
+-- Create the user_role enum type first
+CREATE TYPE user_role AS ENUM ('student', 'trainer', 'staff', 'admin');
+
+-- Create other enum types that are referenced
+CREATE TYPE employment_type AS ENUM ('full_time', 'part_time', 'contract', 'internship');
+CREATE TYPE training_status AS ENUM ('pending', 'active', 'completed', 'dropped');
+
 -- First, let's ensure we have the proper trigger to handle new user creation
 -- This trigger will automatically create profile and role-specific records when users sign up
 

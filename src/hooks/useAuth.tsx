@@ -51,8 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (!retryError && retryData) {
             console.log('Profile found on retry:', retryData);
             setProfile(retryData);
+          } else {
+            console.error('Profile still not found after retry:', retryError);
           }
-        }, 1000);
+        }, 2000);
       } else {
         console.log('Profile loaded:', data);
         setProfile(data);
