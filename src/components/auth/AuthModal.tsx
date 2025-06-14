@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -140,7 +141,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 
                 <Alert>
                   <AlertDescription className="text-xs">
-                    First click "Create Demo Accounts", then use the role buttons below to login instantly.
+                    Click "Create Demo Accounts" first, then use the role buttons below to login instantly.
                   </AlertDescription>
                 </Alert>
                 

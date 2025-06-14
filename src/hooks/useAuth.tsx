@@ -146,7 +146,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             full_name: fullName,
             role: role,
           },
-          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 
@@ -158,13 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('Sign up successful:', data);
-      
-      if (data.user && !data.session) {
-        toast.success('Account created! Please check your email to verify your account.');
-      } else {
-        toast.success('Account created successfully!');
-      }
-      
+      toast.success('Account created successfully!');
       setLoading(false);
       return true;
     } catch (error) {
@@ -198,7 +191,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               full_name: user.name,
               role: user.role,
             },
-            emailRedirectTo: `${window.location.origin}/`,
           },
         });
 
@@ -210,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         // Add delay between account creations to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
       
       setLoading(false);
