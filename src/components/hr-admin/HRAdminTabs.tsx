@@ -1,99 +1,81 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmployeeManagement } from './EmployeeManagement';
 import { AttendanceManagement } from './AttendanceManagement';
-import { TaskManagement } from './TaskManagement';
-import { EmployeeLogin } from './EmployeeLogin';
-import { EmployeeDashboard } from './EmployeeDashboard';
 import { PayrollManagement } from './PayrollManagement';
 import { PerformanceReviews } from './PerformanceReviews';
+import { TaskManagement } from './TaskManagement';
+import { AdvancedPayrollManagement } from './AdvancedPayrollManagement';
+import { AdvancedPerformanceReviews } from './AdvancedPerformanceReviews';
+import { AdvancedTaskManagement } from './AdvancedTaskManagement';
 import { AdvancedReportsAnalytics } from './AdvancedReportsAnalytics';
+import { StaffDataImport } from './StaffDataImport';
 
 export const HRAdminTabs = () => {
-  const [isEmployeeLoggedIn, setIsEmployeeLoggedIn] = useState(false);
-  const [currentView, setCurrentView] = useState('admin');
-
-  useEffect(() => {
-    const session = localStorage.getItem('employee_session');
-    setIsEmployeeLoggedIn(!!session);
-  }, []);
-
-  // Show employee dashboard if logged in as employee
-  if (isEmployeeLoggedIn && currentView === 'employee') {
-    return <EmployeeDashboard />;
-  }
-
-  // Show login screen if trying to access employee view without login
-  if (!isEmployeeLoggedIn && currentView === 'employee') {
-    return <EmployeeLogin />;
-  }
-
   return (
-    <div className="space-y-6">
-      {/* View Switcher */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gradient">HR & Administration</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentView('admin')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              currentView === 'admin' 
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' 
-                : 'bg-gray-800 text-muted-foreground hover:text-white'
-            }`}
-          >
-            Admin View
-          </button>
-          <button
-            onClick={() => setCurrentView('employee')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              currentView === 'employee' 
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
-                : 'bg-gray-800 text-muted-foreground hover:text-white'
-            }`}
-          >
-            Employee Portal
-          </button>
-        </div>
+    <div className="w-full space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          HR Administration
+        </h1>
+        <p className="text-gray-600 mt-2">Comprehensive human resource management system</p>
       </div>
 
-      {currentView === 'admin' && (
-        <Tabs defaultValue="employees" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="employees">Employees</TabsTrigger>
-            <TabsTrigger value="attendance">Attendance</TabsTrigger>
-            <TabsTrigger value="tasks">Tasks</TabsTrigger>
-            <TabsTrigger value="payroll">Payroll</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="employees" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
+          <TabsTrigger value="employees">Employees</TabsTrigger>
+          <TabsTrigger value="import">Import Staff</TabsTrigger>
+          <TabsTrigger value="attendance">Attendance</TabsTrigger>
+          <TabsTrigger value="payroll">Payroll</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="advanced-payroll">Advanced Payroll</TabsTrigger>
+          <TabsTrigger value="advanced-reviews">Advanced Reviews</TabsTrigger>
+          <TabsTrigger value="advanced-tasks">Advanced Tasks</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="employees">
-            <EmployeeManagement />
-          </TabsContent>
+        <TabsContent value="employees" className="space-y-6">
+          <EmployeeManagement />
+        </TabsContent>
 
-          <TabsContent value="attendance">
-            <AttendanceManagement />
-          </TabsContent>
+        <TabsContent value="import" className="space-y-6">
+          <StaffDataImport />
+        </TabsContent>
 
-          <TabsContent value="tasks">
-            <TaskManagement />
-          </TabsContent>
+        <TabsContent value="attendance" className="space-y-6">
+          <AttendanceManagement />
+        </TabsContent>
 
-          <TabsContent value="payroll">
-            <PayrollManagement />
-          </TabsContent>
+        <TabsContent value="payroll" className="space-y-6">
+          <PayrollManagement />
+        </TabsContent>
 
-          <TabsContent value="performance">
-            <PerformanceReviews />
-          </TabsContent>
+        <TabsContent value="reviews" className="space-y-6">
+          <PerformanceReviews />
+        </TabsContent>
 
-          <TabsContent value="reports">
-            <AdvancedReportsAnalytics />
-          </TabsContent>
-        </Tabs>
-      )}
+        <TabsContent value="tasks" className="space-y-6">
+          <TaskManagement />
+        </TabsContent>
+
+        <TabsContent value="advanced-payroll" className="space-y-6">
+          <AdvancedPayrollManagement />
+        </TabsContent>
+
+        <TabsContent value="advanced-reviews" className="space-y-6">
+          <AdvancedPerformanceReviews />
+        </TabsContent>
+
+        <TabsContent value="advanced-tasks" className="space-y-6">
+          <AdvancedTaskManagement />
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6">
+          <AdvancedReportsAnalytics />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

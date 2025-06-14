@@ -498,13 +498,15 @@ export type Database = {
           bank_account: string | null
           contract_end_date: string | null
           created_at: string
+          date_of_joining: string | null
           department: string
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           employee_id: string
           employment_status: string
           employment_type: Database["public"]["Enums"]["employment_type"] | null
-          hire_date: string
+          gender: string | null
+          hire_date: string | null
           id: string
           join_date: string | null
           manager_id: string | null
@@ -519,6 +521,7 @@ export type Database = {
           bank_account?: string | null
           contract_end_date?: string | null
           created_at?: string
+          date_of_joining?: string | null
           department: string
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -527,7 +530,8 @@ export type Database = {
           employment_type?:
             | Database["public"]["Enums"]["employment_type"]
             | null
-          hire_date: string
+          gender?: string | null
+          hire_date?: string | null
           id?: string
           join_date?: string | null
           manager_id?: string | null
@@ -542,6 +546,7 @@ export type Database = {
           bank_account?: string | null
           contract_end_date?: string | null
           created_at?: string
+          date_of_joining?: string | null
           department?: string
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -550,7 +555,8 @@ export type Database = {
           employment_type?:
             | Database["public"]["Enums"]["employment_type"]
             | null
-          hire_date?: string
+          gender?: string | null
+          hire_date?: string | null
           id?: string
           join_date?: string | null
           manager_id?: string | null
