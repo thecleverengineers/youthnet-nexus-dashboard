@@ -57,6 +57,14 @@ export const StaffDataImport = () => {
     return `EMP${initials}${String(index + 1).padStart(3, '0')}`;
   };
 
+  const generateUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
   const importPredefinedData = async () => {
     setImporting(true);
     try {
@@ -65,18 +73,17 @@ export const StaffDataImport = () => {
       for (let i = 0; i < STAFF_DATA.length; i++) {
         const staff = STAFF_DATA[i];
         const employeeId = generateEmployeeId(staff.name, i);
+        const profileId = generateUUID();
         
-        // First create profile
-        const { data: profileData, error: profileError } = await supabase
+        // First create profile with generated ID
+        const { error: profileError } = await supabase
           .from('profiles')
           .insert({
+            id: profileId,
             full_name: staff.name,
             email: `${staff.name.toLowerCase().replace(/\s+/g, '.')}@company.com`,
-            phone: null,
-            role: 'staff'
-          })
-          .select()
-          .single();
+            role: 'staff' as const
+          });
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
@@ -87,7 +94,7 @@ export const StaffDataImport = () => {
         const { error: employeeError } = await supabase
           .from('employees')
           .insert({
-            user_id: profileData.id,
+            user_id: profileId,
             employee_id: employeeId,
             position: staff.designation,
             department: 'Academic',
@@ -139,18 +146,17 @@ export const StaffDataImport = () => {
         if (!staff.name || !staff.designation) continue;
         
         const employeeId = generateEmployeeId(staff.name, i + STAFF_DATA.length);
+        const profileId = generateUUID();
         
-        // Create profile
-        const { data: profileData, error: profileError } = await supabase
+        // Create profile with generated ID
+        const { error: profileError } = await supabase
           .from('profiles')
           .insert({
+            id: profileId,
             full_name: staff.name,
             email: `${staff.name.toLowerCase().replace(/\s+/g, '.')}@company.com`,
-            phone: null,
-            role: 'staff'
-          })
-          .select()
-          .single();
+            role: 'staff' as const
+          });
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
@@ -161,7 +167,7 @@ export const StaffDataImport = () => {
         const { error: employeeError } = await supabase
           .from('employees')
           .insert({
-            user_id: profileData.id,
+            user_id: profileId,
             employee_id: employeeId,
             position: staff.designation,
             department: 'Academic',
