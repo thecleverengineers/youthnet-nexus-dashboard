@@ -34,11 +34,7 @@ function App() {
           <Toaster />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <RoleBasedRoute />
-                </ProtectedRoute>
-              } />
+              <Route path="/" element={<RoleBasedRoute />} />
               <Route path="/education" element={
                 <ProtectedRoute>
                   <Layout>

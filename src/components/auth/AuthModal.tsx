@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,8 +16,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const { signIn, signUp } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { signIn, signUp, createDemoAccounts, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   
   // Sign In Form
@@ -37,7 +36,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
-    setLoading(true);
     console.log('Attempting to sign in with:', signInEmail);
     
     try {
@@ -50,8 +48,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     } catch (error) {
       console.error('Sign in error:', error);
       toast.error('Failed to sign in. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -62,7 +58,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
-    setLoading(true);
     console.log('Attempting to sign up:', signUpEmail, 'with role:', role);
     
     try {
@@ -77,12 +72,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     } catch (error) {
       console.error('Sign up error:', error);
       toast.error('Failed to create account. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Demo users
+  // Demo users with credentials
   const demoUsers = [
     { email: 'admin@youthnet.in', password: 'admin123', role: 'Admin', color: 'red' },
     { email: 'staff@youthnet.in', password: 'staff123', role: 'Staff', color: 'blue' },
@@ -94,7 +87,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     console.log('Demo login attempt for:', email);
     setSignInEmail(email);
     setSignInPassword(password);
-    setLoading(true);
     
     try {
       const success = await signIn(email, password);
@@ -104,32 +96,19 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setSignInEmail('');
         setSignInPassword('');
       } else {
-        toast.error('Demo user not found. Please create the account first by signing up.');
+        toast.error('Demo account not found. Please create demo accounts first.');
       }
     } catch (error) {
       console.error('Demo login error:', error);
-      toast.error('Demo user not found. Please create the account first.');
-    } finally {
-      setLoading(false);
+      toast.error('Demo account not found. Please create demo accounts first.');
     }
   };
 
   const handleCreateDemoAccounts = async () => {
-    setLoading(true);
-    toast.info('Creating demo accounts...');
-    
-    for (const user of demoUsers) {
-      try {
-        console.log('Creating demo account for:', user.email);
-        await signUp(user.email, user.password, user.role + ' User', user.role.toLowerCase());
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error) {
-        console.error('Error creating demo account:', user.email, error);
-      }
+    const success = await createDemoAccounts();
+    if (success) {
+      toast.success('Demo accounts created! You can now use the demo login buttons.');
     }
-    
-    setLoading(false);
-    toast.success('Demo accounts created! You can now use the demo login buttons.');
   };
 
   return (
@@ -158,6 +137,23 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               {/* Demo Login Options */}
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-muted-foreground text-center">Demo Login</h3>
+                
+                <Alert>
+                  <AlertDescription className="text-xs">
+                    First click "Create Demo Accounts", then use the role buttons below to login instantly.
+                  </AlertDescription>
+                </Alert>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCreateDemoAccounts}
+                  disabled={loading}
+                  className="w-full text-xs border-primary/30 hover:bg-primary/10"
+                >
+                  {loading ? 'Creating Accounts...' : 'Create Demo Accounts'}
+                </Button>
+                
                 <div className="grid grid-cols-2 gap-2">
                   {demoUsers.map((user) => (
                     <Button
@@ -172,16 +168,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     </Button>
                   ))}
                 </div>
-                
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleCreateDemoAccounts}
-                  disabled={loading}
-                  className="w-full text-xs"
-                >
-                  Create Demo Accounts
-                </Button>
                 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">

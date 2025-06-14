@@ -13,6 +13,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   profile: any;
   refreshProfile: () => Promise<void>;
+  createDemoAccounts: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -107,6 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
       console.log('Attempting to sign in with:', email);
+      setLoading(true);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -115,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Sign in error:', error);
         toast.error(error.message);
+        setLoading(false);
         return false;
       }
 
@@ -124,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Unexpected sign in error:', error);
       toast.error('An unexpected error occurred');
+      setLoading(false);
       return false;
     }
   };
@@ -131,6 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string, role: string): Promise<boolean> => {
     try {
       console.log('Attempting to sign up:', email, 'with role:', role);
+      setLoading(true);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -146,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Sign up error:', error);
         toast.error(error.message);
+        setLoading(false);
         return false;
       }
 
@@ -157,10 +165,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         toast.success('Account created successfully!');
       }
       
+      setLoading(false);
       return true;
     } catch (error) {
       console.error('Unexpected sign up error:', error);
       toast.error('An unexpected error occurred');
+      setLoading(false);
+      return false;
+    }
+  };
+
+  const createDemoAccounts = async (): Promise<boolean> => {
+    const demoUsers = [
+      { email: 'admin@youthnet.in', password: 'admin123', role: 'admin', name: 'Admin User' },
+      { email: 'staff@youthnet.in', password: 'staff123', role: 'staff', name: 'Staff User' },
+      { email: 'trainer@youthnet.in', password: 'trainer123', role: 'trainer', name: 'Trainer User' },
+      { email: 'student@youthnet.in', password: 'student123', role: 'student', name: 'Student User' },
+    ];
+
+    try {
+      setLoading(true);
+      toast.info('Creating demo accounts...');
+      
+      for (const user of demoUsers) {
+        console.log('Creating demo account for:', user.email);
+        
+        const { data, error } = await supabase.auth.signUp({
+          email: user.email,
+          password: user.password,
+          options: {
+            data: {
+              full_name: user.name,
+              role: user.role,
+            },
+            emailRedirectTo: `${window.location.origin}/`,
+          },
+        });
+
+        if (error && !error.message.includes('User already registered')) {
+          console.error('Error creating demo account:', user.email, error);
+          toast.error(`Failed to create ${user.role} account: ${error.message}`);
+        } else {
+          console.log('Demo account created successfully:', user.email);
+        }
+        
+        // Add delay between account creations to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+      
+      setLoading(false);
+      toast.success('Demo accounts created successfully! You can now use the demo login buttons.');
+      return true;
+    } catch (error) {
+      console.error('Error in createDemoAccounts:', error);
+      toast.error('Failed to create demo accounts');
+      setLoading(false);
       return false;
     }
   };
@@ -191,6 +250,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
     profile,
     refreshProfile,
+    createDemoAccounts,
   };
 
   return (
