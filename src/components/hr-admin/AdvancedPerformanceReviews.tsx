@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -96,7 +95,27 @@ export const AdvancedPerformanceReviews = () => {
   const loadData = async () => {
     try {
       const [reviewsResponse, employeesResponse] = await Promise.all([
-        supabase.from('performance_reviews').select('*').order('created_at', { ascending: false }),
+        supabase
+          .from('performance_reviews')
+          .select(`
+            id,
+            employee_id,
+            reviewer_id,
+            review_period_start,
+            review_period_end,
+            overall_rating,
+            goals_achieved,
+            areas_for_improvement,
+            development_plan,
+            created_at,
+            updated_at,
+            ai_generated_insights,
+            skill_assessment,
+            career_recommendations,
+            peer_feedback,
+            self_assessment
+          `)
+          .order('created_at', { ascending: false }),
         supabase.from('employees').select('id, employee_id, position, department').eq('employment_status', 'active')
       ]);
 
@@ -104,7 +123,7 @@ export const AdvancedPerformanceReviews = () => {
         // Convert database response to proper PerformanceReview type
         const convertedReviews: PerformanceReview[] = reviewsResponse.data.map(review => ({
           ...review,
-          comments: review.comments || '', // Provide default value for required field
+          comments: '', // Set default value since comments field doesn't exist in DB response
           overall_rating: review.overall_rating as 'excellent' | 'good' | 'satisfactory' | 'needs_improvement' | 'unsatisfactory'
         }));
         setReviews(convertedReviews);
