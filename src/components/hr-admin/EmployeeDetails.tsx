@@ -4,99 +4,95 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   User, 
-  Mail, 
   Phone, 
+  Mail, 
   Calendar, 
   MapPin, 
-  DollarSign, 
-  Edit,
-  Building,
+  Building, 
+  DollarSign,
   Clock,
-  CreditCard,
   Award,
   FileText,
-  TrendingUp
+  Heart,
+  GraduationCap
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 
 interface EmployeeDetailsProps {
   employee: any;
   onClose: () => void;
-  onEdit: () => void;
 }
 
-export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsProps) => {
+export const EmployeeDetails = ({ employee, onClose }: EmployeeDetailsProps) => {
   const [leaveRequests, setLeaveRequests] = useState([]);
-  const [payrollRecords, setPayrollRecords] = useState([]);
-  const [performanceReviews, setPerformanceReviews] = useState([]);
   const [benefits, setBenefits] = useState([]);
   const [training, setTraining] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchEmployeeData();
+    loadEmployeeDetails();
   }, [employee.id]);
 
-  const fetchEmployeeData = async () => {
+  const loadEmployeeDetails = async () => {
     try {
+      setLoading(true);
+      
       // Fetch leave requests
-      const { data: leaves } = await supabase
+      const { data: leaveData, error: leaveError } = await supabase
         .from('leave_requests')
         .select('*')
         .eq('employee_id', employee.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // Fetch payroll records
-      const { data: payroll } = await supabase
-        .from('payroll')
-        .select('*')
-        .eq('employee_id', employee.id)
-        .order('pay_period_end', { ascending: false })
-        .limit(5);
+      if (leaveError) {
+        console.error('Error fetching leave requests:', leaveError);
+      } else {
+        setLeaveRequests(leaveData || []);
+      }
 
-      // Fetch performance reviews
-      const { data: reviews } = await supabase
-        .from('performance_reviews')
-        .select('*')
-        .eq('employee_id', employee.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      // Fetch benefits
-      const { data: empBenefits } = await supabase
+      // Fetch employee benefits
+      const { data: benefitsData, error: benefitsError } = await supabase
         .from('employee_benefits')
         .select('*')
-        .eq('employee_id', employee.id)
-        .eq('status', 'active');
+        .eq('employee_id', employee.id);
 
-      // Fetch training
-      const { data: empTraining } = await supabase
+      if (benefitsError) {
+        console.error('Error fetching benefits:', benefitsError);
+      } else {
+        setBenefits(benefitsData || []);
+      }
+
+      // Fetch employee training
+      const { data: trainingData, error: trainingError } = await supabase
         .from('employee_training')
         .select('*')
         .eq('employee_id', employee.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .order('created_at', { ascending: false });
 
-      setLeaveRequests(leaves || []);
-      setPayrollRecords(payroll || []);
-      setPerformanceReviews(reviews || []);
-      setBenefits(empBenefits || []);
-      setTraining(empTraining || []);
+      if (trainingError) {
+        console.error('Error fetching training:', trainingError);
+      } else {
+        setTraining(trainingData || []);
+      }
+
     } catch (error) {
-      console.error('Error fetching employee data:', error);
+      console.error('Error loading employee details:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'probation': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'on_leave': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'inactive': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-      case 'terminated': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'pending': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'approved': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'completed': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+      case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
       default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
@@ -106,47 +102,55 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
       {/* Header */}
       <Card className="futuristic-card">
         <CardContent className="p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-20 w-20 border-2 border-blue-500/30">
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-xl">
-                  {employee.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'NA'}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-2xl font-bold text-white">{employee.profiles?.full_name}</h2>
-                <p className="text-lg text-muted-foreground">{employee.position}</p>
-                <p className="text-sm text-muted-foreground">{employee.employee_id}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge className={getStatusColor(employee.employment_status)}>
-                    {employee.employment_status.replace('_', ' ')}
-                  </Badge>
-                  <Badge variant="outline">
-                    {employee.employment_type.replace('_', ' ')}
-                  </Badge>
+          <div className="flex items-center gap-6">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <User className="h-12 w-12 text-white" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {employee.profiles?.full_name || 'Unknown Employee'}
+              </h2>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Building className="h-4 w-4" />
+                  {employee.position} • {employee.department}
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  {employee.profiles?.email}
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="h-4 w-4" />
+                  {employee.profiles?.phone || 'N/A'}
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  ID: {employee.employee_id}
                 </div>
               </div>
+              <div className="mt-3">
+                <Badge className={getStatusColor(employee.employment_status)}>
+                  {employee.employment_status?.replace('_', ' ') || 'Unknown'}
+                </Badge>
+              </div>
             </div>
-            <Button onClick={onEdit} className="bg-gradient-to-r from-blue-500 to-purple-600">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
+            <Button variant="outline" onClick={onClose}>
+              Close
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Tabs */}
+      {/* Detailed Information */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="leave">Leave</TabsTrigger>
-          <TabsTrigger value="payroll">Payroll</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="benefits">Benefits</TabsTrigger>
           <TabsTrigger value="training">Training</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
+        <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="futuristic-card">
               <CardHeader>
@@ -156,17 +160,22 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-purple-400" />
-                  <span>{employee.profiles?.email || 'Not provided'}</span>
+                <div>
+                  <p className="text-sm text-muted-foreground">Full Name</p>
+                  <p className="text-white">{employee.profiles?.full_name || 'N/A'}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-green-400" />
-                  <span>{employee.profiles?.phone || 'Not provided'}</span>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-white">{employee.profiles?.email || 'N/A'}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-orange-400" />
-                  <span>{employee.profiles?.address || 'Not provided'}</span>
+                <div>
+                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="text-white">{employee.profiles?.phone || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Emergency Contact</p>
+                  <p className="text-white">{employee.emergency_contact_name || 'N/A'}</p>
+                  <p className="text-sm text-muted-foreground">{employee.emergency_contact_phone || ''}</p>
                 </div>
               </CardContent>
             </Card>
@@ -175,236 +184,181 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building className="h-5 w-5 text-green-400" />
-                  Employment Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-cyan-400" />
-                  <span>Hired: {new Date(employee.hire_date).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Building className="h-4 w-4 text-yellow-400" />
-                  <span>Department: {employee.department}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-emerald-400" />
-                  <span>Salary: ${employee.salary?.toLocaleString() || 'Not set'}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {employee.emergency_contact_name && (
-              <Card className="futuristic-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-5 w-5 text-red-400" />
-                    Emergency Contact
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <p className="font-medium">{employee.emergency_contact_name}</p>
-                    <p className="text-muted-foreground">{employee.emergency_contact_phone}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <Card className="futuristic-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-purple-400" />
-                  Financial Details
+                  Employment Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <p className="text-sm text-muted-foreground">Bank Account</p>
-                  <p>{employee.bank_account || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">Employee ID</p>
+                  <p className="text-white">{employee.employee_id}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Tax ID</p>
-                  <p>{employee.tax_id || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground">Position</p>
+                  <p className="text-white">{employee.position}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Department</p>
+                  <p className="text-white">{employee.department}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Employment Type</p>
+                  <p className="text-white">{employee.employment_type?.replace('_', ' ') || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Hire Date</p>
+                  <p className="text-white">
+                    {employee.hire_date ? format(new Date(employee.hire_date), 'MMM dd, yyyy') : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Salary</p>
+                  <p className="text-white">
+                    {employee.salary ? `$${Number(employee.salary).toLocaleString()}` : 'N/A'}
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="leave">
+        <TabsContent value="leave" className="space-y-4">
           <Card className="futuristic-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-orange-400" />
+                <Calendar className="h-5 w-5 text-orange-400" />
                 Leave Requests
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {leaveRequests.length > 0 ? (
-                <div className="space-y-4">
-                  {leaveRequests.map((leave) => (
-                    <div key={leave.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50">
-                      <div>
-                        <p className="font-medium">{leave.leave_type.replace('_', ' ')}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}
-                        </p>
-                        <p className="text-sm text-muted-foreground">{leave.days_requested} days</p>
-                      </div>
-                      <Badge className={leave.status === 'approved' ? 'bg-green-500/20 text-green-400' : 
-                                       leave.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                                       'bg-yellow-500/20 text-yellow-400'}>
-                        {leave.status}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">No leave requests found</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="payroll">
-          <Card className="futuristic-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-emerald-400" />
-                Payroll History
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {payrollRecords.length > 0 ? (
-                <div className="space-y-4">
-                  {payrollRecords.map((record) => (
-                    <div key={record.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50">
-                      <div>
-                        <p className="font-medium">
-                          {new Date(record.pay_period_start).toLocaleDateString()} - {new Date(record.pay_period_end).toLocaleDateString()}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Gross: ${record.gross_pay} | Net: ${record.net_pay}
-                        </p>
-                      </div>
-                      <Badge className={record.payment_status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}>
-                        {record.payment_status}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">No payroll records found</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="performance">
-          <Card className="futuristic-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-blue-400" />
-                Performance Reviews
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {performanceReviews.length > 0 ? (
-                <div className="space-y-4">
-                  {performanceReviews.map((review) => (
-                    <div key={review.id} className="p-4 rounded-lg bg-gray-800/50">
+              {loading ? (
+                <p className="text-muted-foreground">Loading...</p>
+              ) : leaveRequests.length > 0 ? (
+                <div className="space-y-3">
+                  {leaveRequests.map((leave: any) => (
+                    <div key={leave.id} className="p-4 rounded-lg bg-gray-800/50 border border-gray-700/50">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium">
-                          {new Date(review.review_period_start).toLocaleDateString()} - {new Date(review.review_period_end).toLocaleDateString()}
-                        </p>
-                        <Badge className={review.overall_rating === 'excellent' ? 'bg-green-500/20 text-green-400' :
-                                         review.overall_rating === 'good' ? 'bg-blue-500/20 text-blue-400' :
-                                         review.overall_rating === 'satisfactory' ? 'bg-yellow-500/20 text-yellow-400' :
-                                         'bg-red-500/20 text-red-400'}>
-                          {review.overall_rating}
+                        <h4 className="font-medium text-white capitalize">
+                          {leave.leave_type?.replace('_', ' ')} Leave
+                        </h4>
+                        <Badge className={getStatusColor(leave.status)}>
+                          {leave.status}
                         </Badge>
                       </div>
-                      {review.goals_achieved && (
-                        <p className="text-sm text-muted-foreground mt-2">{review.goals_achieved}</p>
+                      <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                        <div>
+                          <p>Start Date: {format(new Date(leave.start_date), 'MMM dd, yyyy')}</p>
+                          <p>End Date: {format(new Date(leave.end_date), 'MMM dd, yyyy')}</p>
+                        </div>
+                        <div>
+                          <p>Days: {leave.days_requested}</p>
+                          <p>Applied: {format(new Date(leave.created_at), 'MMM dd, yyyy')}</p>
+                        </div>
+                      </div>
+                      {leave.reason && (
+                        <p className="mt-2 text-sm text-gray-300">Reason: {leave.reason}</p>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">No performance reviews found</p>
+                <p className="text-muted-foreground text-center py-8">No leave requests found</p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="benefits">
+        <TabsContent value="benefits" className="space-y-4">
           <Card className="futuristic-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-purple-400" />
+                <Heart className="h-5 w-5 text-red-400" />
                 Employee Benefits
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {benefits.length > 0 ? (
-                <div className="space-y-4">
-                  {benefits.map((benefit) => (
-                    <div key={benefit.id} className="p-4 rounded-lg bg-gray-800/50">
-                      <div className="flex items-center justify-between">
+              {loading ? (
+                <p className="text-muted-foreground">Loading...</p>
+              ) : benefits.length > 0 ? (
+                <div className="space-y-3">
+                  {benefits.map((benefit: any) => (
+                    <div key={benefit.id} className="p-4 rounded-lg bg-gray-800/50 border border-gray-700/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-white">{benefit.benefit_name}</h4>
+                        <Badge className={getStatusColor(benefit.status)}>
+                          {benefit.status}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
                         <div>
-                          <p className="font-medium">{benefit.benefit_name}</p>
-                          <p className="text-sm text-muted-foreground">{benefit.benefit_type}</p>
-                          <p className="text-sm text-muted-foreground">Provider: {benefit.provider || 'N/A'}</p>
+                          <p>Type: {benefit.benefit_type}</p>
+                          <p>Provider: {benefit.provider || 'N/A'}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm">Coverage: ${benefit.coverage_amount || 'N/A'}</p>
-                          <p className="text-sm text-muted-foreground">Premium: ${benefit.premium_amount || 'N/A'}</p>
+                        <div>
+                          <p>Coverage: ${benefit.coverage_amount || 'N/A'}</p>
+                          <p>Premium: ${benefit.premium_amount || 'N/A'}</p>
                         </div>
                       </div>
+                      <p className="mt-2 text-sm text-gray-300">
+                        Active from {format(new Date(benefit.start_date), 'MMM dd, yyyy')}
+                        {benefit.end_date && ` to ${format(new Date(benefit.end_date), 'MMM dd, yyyy')}`}
+                      </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">No benefits enrolled</p>
+                <p className="text-muted-foreground text-center py-8">No benefits found</p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="training">
+        <TabsContent value="training" className="space-y-4">
           <Card className="futuristic-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-cyan-400" />
+                <GraduationCap className="h-5 w-5 text-purple-400" />
                 Training & Development
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {training.length > 0 ? (
-                <div className="space-y-4">
-                  {training.map((course) => (
-                    <div key={course.id} className="p-4 rounded-lg bg-gray-800/50">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{course.training_name}</p>
-                          <p className="text-sm text-muted-foreground">{course.training_type}</p>
-                          <p className="text-sm text-muted-foreground">Provider: {course.provider || 'Internal'}</p>
-                        </div>
-                        <Badge className={course.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                                         course.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
-                                         'bg-yellow-500/20 text-yellow-400'}>
+              {loading ? (
+                <p className="text-muted-foreground">Loading...</p>
+              ) : training.length > 0 ? (
+                <div className="space-y-3">
+                  {training.map((course: any) => (
+                    <div key={course.id} className="p-4 rounded-lg bg-gray-800/50 border border-gray-700/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-white">{course.training_name}</h4>
+                        <Badge className={getStatusColor(course.status)}>
                           {course.status}
                         </Badge>
                       </div>
-                      {course.certification_earned && (
-                        <p className="text-sm text-green-400 mt-2">Certification: {course.certification_earned}</p>
+                      <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                        <div>
+                          <p>Type: {course.training_type}</p>
+                          <p>Provider: {course.provider || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p>Cost: ${course.cost || 'N/A'}</p>
+                          {course.certification_earned && (
+                            <p>Certification: {course.certification_earned}</p>
+                          )}
+                        </div>
+                      </div>
+                      {course.start_date && (
+                        <p className="mt-2 text-sm text-gray-300">
+                          {course.start_date && `Started: ${format(new Date(course.start_date), 'MMM dd, yyyy')}`}
+                          {course.completion_date && ` • Completed: ${format(new Date(course.completion_date), 'MMM dd, yyyy')}`}
+                        </p>
+                      )}
+                      {course.notes && (
+                        <p className="mt-2 text-sm text-gray-300">Notes: {course.notes}</p>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">No training records found</p>
+                <p className="text-muted-foreground text-center py-8">No training records found</p>
               )}
             </CardContent>
           </Card>

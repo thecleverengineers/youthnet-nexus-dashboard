@@ -83,7 +83,8 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
 
         toast.success('Employee updated successfully!');
       } else {
-        // Create new employee
+        // Create new employee - this will be a simplified version
+        // as we don't have user creation functionality here
         const { error } = await supabase
           .from('employees')
           .insert([{
@@ -100,6 +101,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
             emergency_contact_phone: formData.emergency_contact_phone,
             bank_account: formData.bank_account,
             tax_id: formData.tax_id,
+            // Note: user_id will need to be set separately when user is created
           }]);
 
         if (error) throw error;
@@ -221,8 +223,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
                     <SelectItem value="full_time">Full Time</SelectItem>
                     <SelectItem value="part_time">Part Time</SelectItem>
                     <SelectItem value="contract">Contract</SelectItem>
-                    <SelectItem value="intern">Intern</SelectItem>
-                    <SelectItem value="consultant">Consultant</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Task {
   id: string;
@@ -66,48 +67,65 @@ export const EmployeeDashboard = () => {
     setEmployee(empData);
 
     try {
-      // Use mock data since attendance_records table doesn't exist
+      // Fetch today's attendance from the now-existing attendance_records table
       const today = format(new Date(), 'yyyy-MM-dd');
-      const mockAttendance: AttendanceRecord = {
-        id: '1',
-        employee_id: empData.id,
-        date: today,
-        check_in: '09:00:00',
-        status: 'present'
-      };
+      const { data: attendanceData } = await supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('employee_id', empData.id)
+        .eq('date', today)
+        .maybeSingle();
 
-      setAttendance(mockAttendance);
-
-      // Use mock tasks data since employee_tasks table doesn't exist
-      const mockTasks: Task[] = [
-        {
+      if (attendanceData) {
+        setAttendance(attendanceData);
+      } else {
+        // Create a mock attendance record if none exists
+        const mockAttendance: AttendanceRecord = {
           id: '1',
-          title: 'Complete Monthly Report',
-          description: 'Prepare and submit monthly performance report',
-          status: 'in_progress',
-          due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: '2',
-          title: 'Team Meeting Preparation',
-          description: 'Prepare agenda for weekly team meeting',
-          status: 'completed',
-          due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: '3',
-          title: 'Client Presentation',
-          description: 'Create presentation for client meeting',
-          status: 'pending',
-          due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
-        }
-      ];
+          employee_id: empData.id,
+          date: today,
+          check_in: '09:00:00',
+          status: 'present'
+        };
+        setAttendance(mockAttendance);
+      }
 
-      setTasks(mockTasks);
+      // Fetch employee tasks from the now-existing employee_tasks table
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('employee_tasks')
+        .select('*')
+        .eq('assigned_to', empData.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-      // Calculate stats from mock data
-      const completed = mockTasks.filter(t => t.status === 'completed').length;
-      const total = mockTasks.length;
+      if (tasksError) {
+        console.error('Error fetching tasks:', tasksError);
+        // Use mock data as fallback
+        const mockTasks: Task[] = [
+          {
+            id: '1',
+            title: 'Complete Monthly Report',
+            description: 'Prepare and submit monthly performance report',
+            status: 'in_progress',
+            due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: '2',
+            title: 'Team Meeting Preparation',
+            description: 'Prepare agenda for weekly team meeting',
+            status: 'completed',
+            due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ];
+        setTasks(mockTasks);
+      } else {
+        setTasks(tasksData || []);
+      }
+
+      // Calculate stats from actual data
+      const tasksToUse = tasksData || [];
+      const completed = tasksToUse.filter(t => t.status === 'completed').length;
+      const total = tasksToUse.length;
       
       setStats({
         tasksCompleted: completed,

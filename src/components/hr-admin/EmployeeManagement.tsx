@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -276,62 +277,46 @@ export const EmployeeManagement = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Button variant="outline" className="hover:bg-gray-500/20">
+              <Filter className="h-4 w-4 mr-2" />
+              More Filters
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Employee Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="futuristic-card">
-              <CardContent className="p-6">
-                <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-                  <div className="h-4 bg-gray-700 rounded w-2/3"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : filteredEmployees.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEmployees.map((employee) => (
-            <EmployeeCard
-              key={employee.id}
-              employee={employee}
-              onEdit={handleEdit}
-              onView={handleView}
-            />
-          ))}
-        </div>
-      ) : (
-        <Card className="futuristic-card">
-          <CardContent className="p-12 text-center">
-            <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">No employees found</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchTerm || statusFilter !== 'all' || departmentFilter !== 'all'
-                ? 'Try adjusting your filters'
-                : 'Get started by adding your first employee or importing staff data'
-              }
-            </p>
-            {!searchTerm && statusFilter === 'all' && departmentFilter === 'all' && (
-              <div className="flex gap-2 justify-center">
-                <Button onClick={() => setShowForm(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Employee
-                </Button>
-                <Button variant="outline" onClick={() => window.location.href = '#import'}>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Import Staff
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      {/* Employee List */}
+      <Card className="futuristic-card">
+        <CardHeader>
+          <CardTitle>Employee Directory</CardTitle>
+          <CardDescription>
+            {filteredEmployees.length} of {employees.length} employees
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
+          ) : filteredEmployees.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredEmployees.map((employee) => (
+                <EmployeeCard
+                  key={employee.id}
+                  employee={employee}
+                  onEdit={handleEdit}
+                  onView={handleView}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No employees found matching your criteria</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Employee Details Modal */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
@@ -345,10 +330,6 @@ export const EmployeeManagement = () => {
               onClose={() => {
                 setShowDetails(false);
                 setSelectedEmployee(null);
-              }}
-              onEdit={() => {
-                setShowDetails(false);
-                setShowForm(true);
               }}
             />
           )}
