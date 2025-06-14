@@ -67,52 +67,65 @@ export const StaffDataImport = () => {
     setImporting(true);
     try {
       let successCount = 0;
+      let errorCount = 0;
       
       for (let i = 0; i < STAFF_DATA.length; i++) {
         const staff = STAFF_DATA[i];
         const employeeId = generateEmployeeId(staff.name, i);
         const profileId = generateUUID();
         
-        // First create profile with generated ID
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: profileId,
-            full_name: staff.name,
-            email: `${staff.name.toLowerCase().replace(/\s+/g, '.')}@youthnet.com`,
-            role: 'staff' as const
-          });
+        try {
+          // First create profile with generated ID
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: profileId,
+              full_name: staff.name,
+              email: `${staff.name.toLowerCase().replace(/\s+/g, '.')}@youthnet.com`,
+              role: 'staff' as const
+            });
 
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          continue;
-        }
+          if (profileError) {
+            console.error('Profile creation error for', staff.name, ':', profileError);
+            errorCount++;
+            continue;
+          }
 
-        // Then create employee record
-        const { error: employeeError } = await supabase
-          .from('employees')
-          .insert({
-            user_id: profileId,
-            employee_id: employeeId,
-            position: staff.designation,
-            department: 'Academic',
-            employment_status: 'active',
-            employment_type: 'full_time',
-            gender: staff.gender.toLowerCase(),
-            date_of_joining: staff.dateOfJoining,
-            hire_date: staff.dateOfJoining,
-            salary: 50000
-          });
+          // Then create employee record
+          const { error: employeeError } = await supabase
+            .from('employees')
+            .insert({
+              user_id: profileId,
+              employee_id: employeeId,
+              position: staff.designation,
+              department: 'Academic',
+              employment_status: 'active',
+              employment_type: 'full_time',
+              gender: staff.gender.toLowerCase(),
+              date_of_joining: staff.dateOfJoining,
+              hire_date: staff.dateOfJoining,
+              salary: 50000
+            });
 
-        if (employeeError) {
-          console.error('Employee creation error:', employeeError);
-        } else {
-          successCount++;
+          if (employeeError) {
+            console.error('Employee creation error for', staff.name, ':', employeeError);
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        } catch (error) {
+          console.error('Unexpected error importing', staff.name, ':', error);
+          errorCount++;
         }
       }
 
-      toast.success(`Successfully imported ${successCount} staff members out of ${STAFF_DATA.length}`);
+      if (successCount > 0) {
+        toast.success(`Successfully imported ${successCount} staff members${errorCount > 0 ? ` (${errorCount} failed)` : ''}`);
+      } else {
+        toast.error(`Failed to import staff members. ${errorCount} errors occurred.`);
+      }
     } catch (error: any) {
+      console.error('Import process error:', error);
       toast.error('Error importing staff data: ' + error.message);
     } finally {
       setImporting(false);
@@ -138,6 +151,7 @@ export const StaffDataImport = () => {
     setImporting(true);
     try {
       let successCount = 0;
+      let errorCount = 0;
       
       for (let i = 0; i < customStaff.length; i++) {
         const staff = customStaff[i];
@@ -146,47 +160,59 @@ export const StaffDataImport = () => {
         const employeeId = generateEmployeeId(staff.name, i + STAFF_DATA.length);
         const profileId = generateUUID();
         
-        // Create profile with generated ID
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: profileId,
-            full_name: staff.name,
-            email: `${staff.name.toLowerCase().replace(/\s+/g, '.')}@youthnet.com`,
-            role: 'staff' as const
-          });
+        try {
+          // Create profile with generated ID
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: profileId,
+              full_name: staff.name,
+              email: `${staff.name.toLowerCase().replace(/\s+/g, '.')}@youthnet.com`,
+              role: 'staff' as const
+            });
 
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          continue;
-        }
+          if (profileError) {
+            console.error('Profile creation error for', staff.name, ':', profileError);
+            errorCount++;
+            continue;
+          }
 
-        // Create employee record
-        const { error: employeeError } = await supabase
-          .from('employees')
-          .insert({
-            user_id: profileId,
-            employee_id: employeeId,
-            position: staff.designation,
-            department: 'Academic',
-            employment_status: 'active',
-            employment_type: 'full_time',
-            gender: staff.gender.toLowerCase(),
-            date_of_joining: staff.dateOfJoining,
-            hire_date: staff.dateOfJoining,
-            salary: 50000
-          });
+          // Create employee record
+          const { error: employeeError } = await supabase
+            .from('employees')
+            .insert({
+              user_id: profileId,
+              employee_id: employeeId,
+              position: staff.designation,
+              department: 'Academic',
+              employment_status: 'active',
+              employment_type: 'full_time',
+              gender: staff.gender.toLowerCase(),
+              date_of_joining: staff.dateOfJoining,
+              hire_date: staff.dateOfJoining,
+              salary: 50000
+            });
 
-        if (employeeError) {
-          console.error('Employee creation error:', employeeError);
-        } else {
-          successCount++;
+          if (employeeError) {
+            console.error('Employee creation error for', staff.name, ':', employeeError);
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        } catch (error) {
+          console.error('Unexpected error importing', staff.name, ':', error);
+          errorCount++;
         }
       }
 
-      toast.success(`Successfully imported ${successCount} custom staff members`);
-      setCustomStaff([{ name: '', gender: '', dateOfJoining: '', designation: '' }]);
+      if (successCount > 0) {
+        toast.success(`Successfully imported ${successCount} custom staff members${errorCount > 0 ? ` (${errorCount} failed)` : ''}`);
+        setCustomStaff([{ name: '', gender: '', dateOfJoining: '', designation: '' }]);
+      } else if (errorCount > 0) {
+        toast.error(`Failed to import custom staff members. ${errorCount} errors occurred.`);
+      }
     } catch (error: any) {
+      console.error('Custom import process error:', error);
       toast.error('Error importing custom staff data: ' + error.message);
     } finally {
       setImporting(false);
