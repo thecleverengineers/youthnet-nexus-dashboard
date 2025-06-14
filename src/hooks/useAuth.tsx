@@ -24,9 +24,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<any>(null);
 
   const refreshProfile = async () => {
-    if (!user) return;
+    if (!user) {
+      setProfile(null);
+      return;
+    }
     
     try {
+      console.log('Fetching profile for user:', user.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -35,11 +39,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error fetching profile:', error);
-        // If profile doesn't exist, create it
-        if (error.code === 'PGRST116') {
-          await createUserProfile(user);
-        }
+        // If profile doesn't exist, it should be created by the trigger
+        // Let's wait a moment and try again
+        setTimeout(async () => {
+          const { data: retryData, error: retryError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+          
+          if (!retryError && retryData) {
+            console.log('Profile found on retry:', retryData);
+            setProfile(retryData);
+          }
+        }, 1000);
       } else {
+        console.log('Profile loaded:', data);
         setProfile(data);
       }
     } catch (error) {
@@ -47,115 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const createUserProfile = async (user: User) => {
-    try {
-      // Extract role from user metadata or default to student
-      const userRole = user.user_metadata?.role || 'student';
-      
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: user.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || user.email || '',
-          role: userRole
-        });
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        return;
-      }
-
-      // Create role-specific records
-      await createRoleSpecificRecord(user, userRole);
-      
-      // Refresh profile after creation
-      await refreshProfile();
-    } catch (error) {
-      console.error('Error in createUserProfile:', error);
-    }
-  };
-
-  const createRoleSpecificRecord = async (user: User, role: string) => {
-    const email = user.email || '';
-    const timestamp = Date.now().toString().slice(-6);
-    
-    try {
-      switch (role) {
-        case 'student':
-          await supabase
-            .from('students')
-            .insert({
-              user_id: user.id,
-              student_id: `STU${email.substring(0, 3).toUpperCase()}${timestamp}`,
-              enrollment_date: new Date().toISOString().split('T')[0],
-              status: 'pending'
-            });
-          break;
-          
-        case 'trainer':
-          await supabase
-            .from('trainers')
-            .insert({
-              user_id: user.id,
-              trainer_id: `TRA${email.substring(0, 3).toUpperCase()}${timestamp}`,
-              specialization: 'General Training',
-              hire_date: new Date().toISOString().split('T')[0],
-              status: 'active'
-            });
-          break;
-          
-        case 'staff':
-          await supabase
-            .from('employees')
-            .insert({
-              user_id: user.id,
-              employee_id: `EMP${email.substring(0, 3).toUpperCase()}${timestamp}`,
-              position: 'Staff Member',
-              department: 'General',
-              employment_status: 'active',
-              employment_type: 'full_time',
-              hire_date: new Date().toISOString().split('T')[0],
-              salary: 40000
-            });
-          break;
-          
-        case 'admin':
-          await supabase
-            .from('employees')
-            .insert({
-              user_id: user.id,
-              employee_id: `ADM${email.substring(0, 3).toUpperCase()}${timestamp}`,
-              position: 'Administrator',
-              department: 'Administration',
-              employment_status: 'active',
-              employment_type: 'full_time',
-              hire_date: new Date().toISOString().split('T')[0],
-              salary: 60000
-            });
-          break;
-          
-        default:
-          // Default to student
-          await supabase
-            .from('students')
-            .insert({
-              user_id: user.id,
-              student_id: `STU${email.substring(0, 3).toUpperCase()}${timestamp}`,
-              enrollment_date: new Date().toISOString().split('T')[0],
-              status: 'pending'
-            });
-          break;
-      }
-    } catch (error) {
-      console.error('Error creating role-specific record:', error);
-    }
-  };
-
   useEffect(() => {
+    console.log('Setting up auth state listener...');
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -165,16 +77,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
     if (user) {
+      console.log('User changed, refreshing profile...');
       refreshProfile();
     } else {
       setProfile(null);
@@ -183,19 +100,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting to sign in with:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('Sign in error:', error);
         toast.error(error.message);
         return false;
       }
 
+      console.log('Sign in successful:', data);
       toast.success('Signed in successfully!');
       return true;
     } catch (error) {
+      console.error('Unexpected sign in error:', error);
       toast.error('An unexpected error occurred');
       return false;
     }
@@ -203,7 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string, role: string): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log('Attempting to sign up:', email, 'with role:', role);
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -211,28 +133,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             full_name: fullName,
             role: role,
           },
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 
       if (error) {
+        console.error('Sign up error:', error);
         toast.error(error.message);
         return false;
       }
 
-      toast.success('Account created successfully! Please check your email to verify your account.');
+      console.log('Sign up successful:', data);
+      
+      if (data.user && !data.session) {
+        toast.success('Account created! Please check your email to verify your account.');
+      } else {
+        toast.success('Account created successfully!');
+      }
+      
       return true;
     } catch (error) {
+      console.error('Unexpected sign up error:', error);
       toast.error('An unexpected error occurred');
       return false;
     }
   };
 
   const signOut = async (): Promise<void> => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success('Signed out successfully!');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+        toast.error(error.message);
+      } else {
+        console.log('Sign out successful');
+        toast.success('Signed out successfully!');
+      }
+    } catch (error) {
+      console.error('Unexpected sign out error:', error);
+      toast.error('An unexpected error occurred');
     }
   };
 
