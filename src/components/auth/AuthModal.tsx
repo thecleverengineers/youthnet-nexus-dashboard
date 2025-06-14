@@ -75,15 +75,15 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md futuristic-card">
-        <DialogHeader>
-          <DialogTitle className="text-center text-gradient">Welcome to YouthNet</DialogTitle>
+      <DialogContent className="w-full max-w-md mx-auto p-6 bg-background border rounded-lg shadow-lg">
+        <DialogHeader className="text-center mb-6">
+          <DialogTitle className="text-2xl font-bold text-foreground">Welcome to YouthNet</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="signin" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
+            <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
           </TabsList>
           
           <TabsContent value="signin" className="space-y-4">
@@ -98,7 +98,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     size="sm"
                     onClick={() => handleQuickLogin(cred.email, cred.password)}
                     disabled={loading}
-                    className={`hover:bg-${cred.color}-500/20 border-${cred.color}-500/30`}
+                    className="text-xs hover:bg-primary/10 border-primary/30 transition-colors"
                   >
                     {cred.role}
                   </Button>
@@ -115,19 +115,20 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
 
             <form onSubmit={handleSignIn} className="space-y-4">
-              <div>
-                <Label htmlFor="signin-email">Email</Label>
+              <div className="space-y-2">
+                <Label htmlFor="signin-email" className="text-sm font-medium">Email</Label>
                 <Input
                   id="signin-email"
                   type="email"
                   value={signInEmail}
                   onChange={(e) => setSignInEmail(e.target.value)}
                   placeholder="Enter your email"
+                  className="w-full"
                   required
                 />
               </div>
-              <div>
-                <Label htmlFor="signin-password">Password</Label>
+              <div className="space-y-2">
+                <Label htmlFor="signin-password" className="text-sm font-medium">Password</Label>
                 <div className="relative">
                   <Input
                     id="signin-password"
@@ -135,13 +136,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     value={signInPassword}
                     onChange={(e) => setSignInPassword(e.target.value)}
                     placeholder="Enter your password"
+                    className="w-full pr-10"
                     required
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -156,20 +158,21 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           
           <TabsContent value="signup" className="space-y-4">
             <form onSubmit={handleSignUp} className="space-y-4">
-              <div>
-                <Label htmlFor="fullname">Full Name</Label>
+              <div className="space-y-2">
+                <Label htmlFor="fullname" className="text-sm font-medium">Full Name</Label>
                 <Input
                   id="fullname"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Enter your full name"
+                  className="w-full"
                   required
                 />
               </div>
-              <div>
-                <Label htmlFor="role">Role</Label>
+              <div className="space-y-2">
+                <Label htmlFor="role" className="text-sm font-medium">Role</Label>
                 <Select value={role} onValueChange={setRole}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -180,19 +183,20 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="signup-email">Email</Label>
+              <div className="space-y-2">
+                <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
                 <Input
                   id="signup-email"
                   type="email"
                   value={signUpEmail}
                   onChange={(e) => setSignUpEmail(e.target.value)}
                   placeholder="Enter your email"
+                  className="w-full"
                   required
                 />
               </div>
-              <div>
-                <Label htmlFor="signup-password">Password</Label>
+              <div className="space-y-2">
+                <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
                 <div className="relative">
                   <Input
                     id="signup-password"
@@ -200,13 +204,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     value={signUpPassword}
                     onChange={(e) => setSignUpPassword(e.target.value)}
                     placeholder="Create a password"
+                    className="w-full pr-10"
                     required
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
