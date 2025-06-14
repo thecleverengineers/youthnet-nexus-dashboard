@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,8 @@ import {
   Clock, 
   Activity,
   Download,
-  Upload
+  Upload,
+  RefreshCw
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -55,6 +55,7 @@ export const EmployeeManagement = () => {
 
       if (error) throw error;
 
+      console.log('Fetched employees:', data);
       setEmployees(data || []);
       
       // Calculate stats
@@ -68,6 +69,7 @@ export const EmployeeManagement = () => {
       
       setStats(stats);
     } catch (error: any) {
+      console.error('Error fetching employees:', error);
       toast.error('Failed to fetch employees: ' + error.message);
     } finally {
       setLoading(false);
@@ -76,6 +78,24 @@ export const EmployeeManagement = () => {
 
   useEffect(() => {
     fetchEmployees();
+    
+    // Set up real-time subscription for employees table
+    const channel = supabase
+      .channel('employees-changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'employees' }, () => {
+        fetchEmployees();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'employees' }, () => {
+        fetchEmployees();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'employees' }, () => {
+        fetchEmployees();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const filteredEmployees = employees.filter(employee => {
@@ -124,6 +144,15 @@ export const EmployeeManagement = () => {
               </CardDescription>
             </div>
             <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={fetchEmployees}
+                disabled={loading}
+                className="hover:bg-blue-500/20"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
               <Button variant="outline" className="hover:bg-green-500/20">
                 <Download className="h-4 w-4 mr-2" />
                 Export
@@ -285,14 +314,20 @@ export const EmployeeManagement = () => {
             <p className="text-muted-foreground mb-4">
               {searchTerm || statusFilter !== 'all' || departmentFilter !== 'all'
                 ? 'Try adjusting your filters'
-                : 'Get started by adding your first employee'
+                : 'Get started by adding your first employee or importing staff data'
               }
             </p>
             {!searchTerm && statusFilter === 'all' && departmentFilter === 'all' && (
-              <Button onClick={() => setShowForm(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Employee
-              </Button>
+              <div className="flex gap-2 justify-center">
+                <Button onClick={() => setShowForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Employee
+                </Button>
+                <Button variant="outline" onClick={() => window.location.href = '#import'}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import Staff
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>

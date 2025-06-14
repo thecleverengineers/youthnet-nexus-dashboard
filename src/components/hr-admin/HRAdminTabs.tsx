@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmployeeManagement } from './EmployeeManagement';
 import { AttendanceManagement } from './AttendanceManagement';
@@ -13,6 +13,8 @@ import { AdvancedReportsAnalytics } from './AdvancedReportsAnalytics';
 import { StaffDataImport } from './StaffDataImport';
 
 export const HRAdminTabs = () => {
+  const [activeTab,] = useState('employees');
+
   return (
     <div className="w-full space-y-6">
       <div>
