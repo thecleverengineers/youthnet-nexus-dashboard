@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -95,8 +94,16 @@ export const AdvancedTaskManagement = () => {
       ]);
 
       if (tasksResponse.data) {
-        setTasks(tasksResponse.data);
-        calculateStats(tasksResponse.data);
+        // Convert database response to proper Task type
+        const convertedTasks: Task[] = tasksResponse.data.map(task => ({
+          ...task,
+          priority: task.priority as 'low' | 'medium' | 'high' | 'urgent',
+          status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+          tags: task.tags || [],
+          dependencies: task.dependencies || []
+        }));
+        setTasks(convertedTasks);
+        calculateStats(convertedTasks);
       }
       if (employeesResponse.data) setEmployees(employeesResponse.data);
 

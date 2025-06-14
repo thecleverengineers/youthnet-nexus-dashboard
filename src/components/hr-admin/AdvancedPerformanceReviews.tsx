@@ -100,7 +100,15 @@ export const AdvancedPerformanceReviews = () => {
         supabase.from('employees').select('id, employee_id, position, department').eq('employment_status', 'active')
       ]);
 
-      if (reviewsResponse.data) setReviews(reviewsResponse.data);
+      if (reviewsResponse.data) {
+        // Convert database response to proper PerformanceReview type
+        const convertedReviews: PerformanceReview[] = reviewsResponse.data.map(review => ({
+          ...review,
+          comments: review.comments || '', // Provide default value for required field
+          overall_rating: review.overall_rating as 'excellent' | 'good' | 'satisfactory' | 'needs_improvement' | 'unsatisfactory'
+        }));
+        setReviews(convertedReviews);
+      }
       if (employeesResponse.data) setEmployees(employeesResponse.data);
 
       // Calculate analytics
