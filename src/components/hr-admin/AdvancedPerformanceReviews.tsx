@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,7 +70,9 @@ export const AdvancedPerformanceReviews = () => {
     improvementTrends: 0
   });
 
-  const [newReview, setNewReview] = useState({
+  const [newRe
+
+view, setNewReview] = useState({
     employee_id: '',
     review_period_start: '',
     review_period_end: '',
@@ -97,42 +100,28 @@ export const AdvancedPerformanceReviews = () => {
       const [reviewsResponse, employeesResponse] = await Promise.all([
         supabase
           .from('performance_reviews')
-          .select(`
-            id,
-            employee_id,
-            reviewer_id,
-            review_period_start,
-            review_period_end,
-            overall_rating,
-            goals_achieved,
-            areas_for_improvement,
-            development_plan,
-            created_at,
-            updated_at,
-            ai_generated_insights,
-            skill_assessment,
-            career_recommendations,
-            peer_feedback,
-            self_assessment
-          `)
+          .select('*')
           .order('created_at', { ascending: false }),
-        supabase.from('employees').select('id, employee_id, position, department').eq('employment_status', 'active')
+        supabase.from('employees').select('id, employee_id, position, department')
       ]);
 
+      let reviewsData: PerformanceReview[] = [];
+      
       if (reviewsResponse.data) {
         // Convert database response to proper PerformanceReview type
-        const convertedReviews: PerformanceReview[] = reviewsResponse.data.map(review => ({
+        reviewsData = reviewsResponse.data.map(review => ({
           ...review,
           comments: '', // Set default value since comments field doesn't exist in DB response
           overall_rating: review.overall_rating as 'excellent' | 'good' | 'satisfactory' | 'needs_improvement' | 'unsatisfactory'
         }));
-        setReviews(convertedReviews);
+        setReviews(reviewsData);
       }
+      
       if (employeesResponse.data) setEmployees(employeesResponse.data);
 
       // Calculate analytics
-      const total = reviewsResponse.data?.length || 0;
-      const ratings = reviewsResponse.data?.map(r => {
+      const total = reviewsData.length;
+      const ratings = reviewsData.map(r => {
         switch (r.overall_rating) {
           case 'excellent': return 5;
           case 'good': return 4;
@@ -141,7 +130,7 @@ export const AdvancedPerformanceReviews = () => {
           case 'unsatisfactory': return 1;
           default: return 3;
         }
-      }) || [];
+      });
       
       const avgRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
 
@@ -475,7 +464,9 @@ export const AdvancedPerformanceReviews = () => {
                 </p>
               </div>
               <div className="p-3 bg-purple-500/20 rounded-xl">
-                <FileText className="h-8 w-8 text-purple-400" />
+                <FileText clas
+
+sName="h-8 w-8 text-purple-400" />
               </div>
             </div>
           </CardContent>

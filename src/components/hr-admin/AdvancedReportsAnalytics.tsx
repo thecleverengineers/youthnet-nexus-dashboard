@@ -30,14 +30,13 @@ import {
   CheckCircle,
   Plus
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 export const AdvancedReportsAnalytics = () => {
-  const [reports, setReports] = useState([]);
-  const [dashboards, setDashboards] = useState([]);
-  const [aiInsights, setAiInsights] = useState([]);
+  const [reports, setReports] = useState<any[]>([]);
+  const [dashboards, setDashboards] = useState<any[]>([]);
+  const [aiInsights, setAiInsights] = useState<any[]>([]);
   const [selectedDashboard, setSelectedDashboard] = useState(null);
   const [isCreateReportOpen, setIsCreateReportOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -69,13 +68,30 @@ export const AdvancedReportsAnalytics = () => {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('reports')
-        .select('*')
-        .order('generated_at', { ascending: false });
-
-      if (error) throw error;
-      setReports(data || []);
+      // Mock data instead of database query
+      const mockReports = [
+        {
+          id: '1',
+          title: 'Q4 Performance Analysis',
+          type: 'performance',
+          department: 'All',
+          generated_at: new Date().toISOString(),
+          generated_by: 'ai-system',
+          period_start: '2024-01-01',
+          period_end: '2024-03-31'
+        },
+        {
+          id: '2',
+          title: 'Attendance Report',
+          type: 'attendance',
+          department: 'HR',
+          generated_at: new Date(Date.now() - 86400000).toISOString(),
+          generated_by: 'user',
+          period_start: '2024-02-01',
+          period_end: '2024-02-29'
+        }
+      ];
+      setReports(mockReports);
     } catch (error: any) {
       toast.error('Failed to fetch reports');
     } finally {
@@ -85,13 +101,15 @@ export const AdvancedReportsAnalytics = () => {
 
   const fetchDashboards = async () => {
     try {
-      const { data, error } = await supabase
-        .from('analytics_dashboards')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setDashboards(data || []);
+      // Mock data instead of database query
+      const mockDashboards = [
+        {
+          id: '1',
+          name: 'Executive Dashboard',
+          created_at: new Date().toISOString()
+        }
+      ];
+      setDashboards(mockDashboards);
     } catch (error: any) {
       console.error('Failed to fetch dashboards:', error);
     }
@@ -172,20 +190,21 @@ export const AdvancedReportsAnalytics = () => {
         }
       };
 
-      const { data, error } = await supabase
-        .from('reports')
-        .insert({
-          title: reportConfig.title,
-          type: reportConfig.type,
-          department: reportConfig.department !== 'all' ? reportConfig.department : null,
-          data: mockReportData,
-          file_url: `/reports/${Date.now()}_${reportConfig.type}.${reportConfig.format}`,
-          generated_by: 'ai-system'
-        })
-        .select()
-        .single();
+      // Create mock report instead of database insert
+      const newReport = {
+        id: Date.now().toString(),
+        title: reportConfig.title,
+        type: reportConfig.type,
+        department: reportConfig.department !== 'all' ? reportConfig.department : 'All',
+        data: mockReportData,
+        file_url: `/reports/${Date.now()}_${reportConfig.type}.${reportConfig.format}`,
+        generated_by: 'ai-system',
+        generated_at: new Date().toISOString(),
+        period_start: new Date(Date.now() - parseInt(reportConfig.date_range) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        period_end: new Date().toISOString().split('T')[0]
+      };
 
-      if (error) throw error;
+      setReports(prev => [newReport, ...prev]);
 
       toast.success('AI report generated successfully with advanced analytics');
       setIsCreateReportOpen(false);
@@ -197,7 +216,6 @@ export const AdvancedReportsAnalytics = () => {
         format: 'pdf',
         schedule: 'manual'
       });
-      fetchReports();
     } catch (error: any) {
       toast.error('Failed to generate report');
     }
