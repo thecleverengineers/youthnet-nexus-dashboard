@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,9 +69,7 @@ export const AdvancedPerformanceReviews = () => {
     improvementTrends: 0
   });
 
-  const [newRe
-
-view, setNewReview] = useState({
+  const [newReview, setNewReview] = useState({
     employee_id: '',
     review_period_start: '',
     review_period_end: '',
@@ -464,9 +461,7 @@ view, setNewReview] = useState({
                 </p>
               </div>
               <div className="p-3 bg-purple-500/20 rounded-xl">
-                <FileText clas
-
-sName="h-8 w-8 text-purple-400" />
+                <FileText className="h-8 w-8 text-purple-400" />
               </div>
             </div>
           </CardContent>
