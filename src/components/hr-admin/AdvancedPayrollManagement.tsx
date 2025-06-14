@@ -36,11 +36,11 @@ export const AdvancedPayrollManagement = () => {
         .from('payroll')
         .select(`
           *,
-          employees!inner(
+          employees!payroll_employee_id_fkey(
             employee_id,
             position,
             department,
-            profiles!inner(full_name)
+            profiles!employees_user_id_fkey(full_name)
           )
         `)
         .eq('payroll_cycle_id', selectedCycle);
@@ -59,7 +59,7 @@ export const AdvancedPayrollManagement = () => {
         .from('employees')
         .select(`
           *,
-          profiles!inner(full_name, email)
+          profiles!employees_user_id_fkey(full_name, email)
         `)
         .order('created_at');
       
@@ -146,8 +146,8 @@ export const AdvancedPayrollManagement = () => {
   };
 
   const currentCycle = payrollCycles?.find(cycle => cycle.id === selectedCycle);
-  const totalNetPay = payrollData?.reduce((sum, entry) => sum + (entry.net_pay || 0), 0) || 0;
-  const highRiskCount = payrollData?.filter(entry => (entry.ai_risk_score || 0)> 0.7).length || 0;
+  const totalNetPay = payrollData?.reduce((sum, entry) => sum +Number(entry.net_pay || 0), 0) || 0;
+  const highRiskCount = payrollData?.filter(entry => Number(entry.ai_risk_score || 0) > 0.7).length || 0;
 
   return (
     <div className="space-y-6">
@@ -200,7 +200,7 @@ export const AdvancedPayrollManagement = () => {
                       </Badge>
                       {cycle.total_net_pay && (
                         <span className="text-sm font-medium">
-                          ${cycle.total_net_pay.toLocaleString()}
+                          ${Number(cycle.total_net_pay).toLocaleString()}
                         </span>
                       )}
                     </div>
@@ -314,12 +314,12 @@ export const AdvancedPayrollManagement = () => {
                         </div>
                         <div className="text-right">
                           <div className="font-semibold">
-                            ${entry.net_pay?.toLocaleString()}
+                            ${Number(entry.net_pay || 0).toLocaleString()}
                           </div>
                           <div className="text-sm text-gray-600">
-                            Gross: ${entry.gross_pay?.toLocaleString()}
+                            Gross: ${Number(entry.gross_pay || 0).toLocaleString()}
                           </div>
-                          {entry.ai_risk_score && entry.ai_risk_score > 0.7 && (
+                          {Number(entry.ai_risk_score || 0) > 0.7 && (
                             <Badge variant="destructive" className="mt-1">
                               High Risk
                             </Badge>

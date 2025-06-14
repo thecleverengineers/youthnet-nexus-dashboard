@@ -14,13 +14,13 @@ export function EnrollmentManagement() {
         .from('student_enrollments')
         .select(`
           *,
-          students!inner (
+          students!student_enrollments_student_id_fkey (
             student_id,
-            profiles!inner (
+            profiles!students_user_id_fkey (
               full_name
             )
           ),
-          training_programs!inner (
+          training_programs!student_enrollments_program_id_fkey (
             name,
             duration_weeks
           )

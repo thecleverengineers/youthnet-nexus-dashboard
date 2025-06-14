@@ -40,7 +40,7 @@ export const StudentAssignment = () => {
         .from('students')
         .select(`
           *,
-          profiles!inner(full_name, email)
+          profiles!students_user_id_fkey(full_name, email)
         `)
         .order('created_at', { ascending: false });
       
@@ -56,11 +56,11 @@ export const StudentAssignment = () => {
         .from('course_enrollments')
         .select(`
           *,
-          students!inner(
+          students!course_enrollments_student_id_fkey(
             student_id,
-            profiles!inner(full_name, email)
+            profiles!students_user_id_fkey(full_name, email)
           ),
-          education_courses!inner(course_name, course_code)
+          education_courses!course_enrollments_course_id_fkey(course_name, course_code)
         `)
         .order('enrollment_date', { ascending: false });
       

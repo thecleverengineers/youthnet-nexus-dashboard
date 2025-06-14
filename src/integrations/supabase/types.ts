@@ -127,7 +127,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "employees_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payroll: {
         Row: {
@@ -218,6 +226,78 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      performance_reviews: {
+        Row: {
+          ai_generated_insights: string | null
+          areas_for_improvement: string | null
+          career_recommendations: Json | null
+          created_at: string
+          development_plan: string | null
+          employee_id: string
+          goals_achieved: string | null
+          id: string
+          overall_rating: string
+          peer_feedback: Json | null
+          review_period_end: string
+          review_period_start: string
+          reviewer_id: string | null
+          self_assessment: Json | null
+          skill_assessment: Json | null
+          updated_at: string
+        }
+        Insert: {
+          ai_generated_insights?: string | null
+          areas_for_improvement?: string | null
+          career_recommendations?: Json | null
+          created_at?: string
+          development_plan?: string | null
+          employee_id: string
+          goals_achieved?: string | null
+          id?: string
+          overall_rating: string
+          peer_feedback?: Json | null
+          review_period_end: string
+          review_period_start: string
+          reviewer_id?: string | null
+          self_assessment?: Json | null
+          skill_assessment?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          ai_generated_insights?: string | null
+          areas_for_improvement?: string | null
+          career_recommendations?: Json | null
+          created_at?: string
+          development_plan?: string | null
+          employee_id?: string
+          goals_achieved?: string | null
+          id?: string
+          overall_rating?: string
+          peer_feedback?: Json | null
+          review_period_end?: string
+          review_period_start?: string
+          reviewer_id?: string | null
+          self_assessment?: Json | null
+          skill_assessment?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -334,7 +414,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trainers: {
         Row: {
@@ -364,7 +452,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trainers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_programs: {
         Row: {

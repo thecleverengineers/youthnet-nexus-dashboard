@@ -25,7 +25,7 @@ export function StudentManagement() {
         .from('students')
         .select(`
           *,
-          profiles!inner (
+          profiles!students_user_id_fkey (
             full_name,
             email,
             phone
