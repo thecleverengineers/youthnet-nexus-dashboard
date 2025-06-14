@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, TrendingUp, Calendar, Award } from 'lucide-react';
+import { Users, Calendar, Award } from 'lucide-react';
 
 export function EnrollmentManagement() {
   const { data: recentEnrollments, isLoading } = useQuery({
@@ -14,13 +14,13 @@ export function EnrollmentManagement() {
         .from('student_enrollments')
         .select(`
           *,
-          students:student_id (
+          students (
             student_id,
-            profiles:user_id (
+            profiles (
               full_name
             )
           ),
-          training_programs:program_id (
+          training_programs (
             name,
             duration_weeks
           )
@@ -65,10 +65,10 @@ export function EnrollmentManagement() {
               <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex-1">
                   <div className="font-medium">
-                    {enrollment.students?.profiles?.full_name}
+                    {enrollment.students?.profiles?.full_name || 'Unknown Student'}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {enrollment.training_programs?.name}
+                    {enrollment.training_programs?.name || 'Unknown Program'}
                   </div>
                   <div className="text-xs text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
@@ -79,12 +79,6 @@ export function EnrollmentManagement() {
                   <Badge className={getStatusColor(enrollment.status)}>
                     {enrollment.status}
                   </Badge>
-                  {enrollment.completion_date && (
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Award className="h-3 w-3" />
-                      Completed: {new Date(enrollment.completion_date).toLocaleDateString()}
-                    </div>
-                  )}
                 </div>
               </div>
             ))

@@ -9,7 +9,296 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      course_enrollments: {
+        Row: {
+          assignment_reason: string | null
+          course_id: string
+          created_at: string
+          enrollment_date: string
+          id: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          assignment_reason?: string | null
+          course_id: string
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          assignment_reason?: string | null
+          course_id?: string
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "education_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      education_courses: {
+        Row: {
+          course_code: string
+          course_name: string
+          created_at: string
+          credits: number | null
+          department: string | null
+          description: string | null
+          duration_months: number
+          id: string
+          max_students: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          course_code: string
+          course_name: string
+          created_at?: string
+          credits?: number | null
+          department?: string | null
+          description?: string | null
+          duration_months?: number
+          id?: string
+          max_students?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          course_code?: string
+          course_name?: string
+          created_at?: string
+          credits?: number | null
+          department?: string | null
+          description?: string | null
+          duration_months?: number
+          id?: string
+          max_students?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          created_at: string
+          department: string | null
+          employee_id: string
+          id: string
+          position: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          employee_id: string
+          id?: string
+          position?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          employee_id?: string
+          id?: string
+          position?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_enrollments: {
+        Row: {
+          created_at: string
+          enrollment_date: string
+          id: string
+          program_id: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          program_id: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          program_id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_enrollments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "training_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          created_at: string
+          id: string
+          student_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          student_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          student_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trainers: {
+        Row: {
+          created_at: string
+          experience_years: number | null
+          id: string
+          specialization: string | null
+          trainer_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          experience_years?: number | null
+          id?: string
+          specialization?: string | null
+          trainer_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          experience_years?: number | null
+          id?: string
+          specialization?: string | null
+          trainer_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      training_programs: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_weeks: number
+          id: string
+          max_participants: number
+          name: string
+          status: string
+          trainer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_weeks?: number
+          id?: string
+          max_participants?: number
+          name: string
+          status?: string
+          trainer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_weeks?: number
+          id?: string
+          max_participants?: number
+          name?: string
+          status?: string
+          trainer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_programs_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

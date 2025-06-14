@@ -6,13 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { CourseForm } from './CourseForm';
 
 export const CourseManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: courses, isLoading } = useQuery({
@@ -39,17 +38,10 @@ export const CourseManagement = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['education-courses'] });
-      toast({
-        title: "Course deleted",
-        description: "Course has been successfully deleted.",
-      });
+      toast.success('Course deleted successfully!');
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to delete course. Please try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      toast.error('Failed to delete course: ' + error.message);
     },
   });
 
@@ -65,7 +57,11 @@ export const CourseManagement = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading courses...</div>;
+    return (
+      <div className="flex justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (
@@ -82,18 +78,20 @@ export const CourseManagement = () => {
       </div>
 
       {showForm && (
-        <CourseForm
-          course={editingCourse}
-          onClose={() => {
-            setShowForm(false);
-            setEditingCourse(null);
-          }}
-          onSuccess={() => {
-            setShowForm(false);
-            setEditingCourse(null);
-            queryClient.invalidateQueries({ queryKey: ['education-courses'] });
-          }}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <CourseForm
+            course={editingCourse}
+            onClose={() => {
+              setShowForm(false);
+              setEditingCourse(null);
+            }}
+            onSuccess={() => {
+              setShowForm(false);
+              setEditingCourse(null);
+              queryClient.invalidateQueries({ queryKey: ['education-courses'] });
+            }}
+          />
+        </div>
       )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -113,9 +111,11 @@ export const CourseManagement = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                {course.description}
-              </p>
+              {course.description && (
+                <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+                  {course.description}
+                </p>
+              )}
               
               <div className="space-y-2 text-sm">
                 {course.department && (
