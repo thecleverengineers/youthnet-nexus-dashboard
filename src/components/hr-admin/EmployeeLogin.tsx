@@ -95,8 +95,12 @@ export const EmployeeLogin = () => {
       <div className="w-full max-w-md space-y-6">
         {/* Logo and Header */}
         <div className="text-center space-y-4">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 via-purple-500 to-blue-600 rounded-2xl flex items-center justify-center neon-glow-blue mx-auto">
-            <Shield className="text-white h-10 w-10" />
+          <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto overflow-hidden">
+            <img 
+              src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
+              alt="YouthNet Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gradient">Employee Portal</h1>

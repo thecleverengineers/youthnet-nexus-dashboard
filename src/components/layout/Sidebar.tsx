@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -13,8 +14,7 @@ import {
   Settings,
   BarChart3,
   Package,
-  ChevronRight,
-  Zap
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,8 +42,12 @@ export const Sidebar = () => {
       {/* Logo */}
       <div className="flex h-16 items-center px-6 border-b border-white/10">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-500 to-blue-600 rounded-xl flex items-center justify-center neon-glow-blue">
-            <Zap className="text-white h-5 w-5" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden">
+            <img 
+              src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
+              alt="YouthNet Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
             <span className="text-xl font-bold text-gradient">YouthNet</span>
