@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
@@ -10,6 +9,7 @@ const queryClient = new QueryClient();
 
 import { Layout } from '@/components/layout/Layout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { RoleBasedRoute } from '@/components/auth/RoleBasedRoute';
 import { Dashboard } from '@/pages/Dashboard';
 import Index from '@/pages/Index';
 import { Education } from '@/pages/Education';
@@ -36,9 +36,7 @@ function App() {
             <Routes>
               <Route path="/" element={
                 <ProtectedRoute>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
+                  <RoleBasedRoute />
                 </ProtectedRoute>
               } />
               <Route path="/education" element={

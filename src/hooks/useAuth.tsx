@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -26,16 +25,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshProfile = async () => {
     if (!user) return;
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-    
-    if (error) {
-      console.error('Error fetching profile:', error);
-    } else {
-      setProfile(data);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        // If profile doesn't exist, create it
+        if (error.code === 'PGRST116') {
+          await createUserProfile(user);
+        }
+      } else {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Error in refreshProfile:', error);
+    }
+  };
+
+  const createUserProfile = async (user: User) => {
+    try {
+      // Extract role from user metadata or default to student
+      const userRole = user.user_metadata?.role || 'student';
+      
+      // Call the ensure_user_profile function
+      const { error } = await supabase.rpc('ensure_user_profile', {
+        user_id: user.id,
+        user_email: user.email || '',
+        user_role: userRole
+      });
+
+      if (error) {
+        console.error('Error creating user profile:', error);
+      } else {
+        // Refresh profile after creation
+        await refreshProfile();
+      }
+    } catch (error) {
+      console.error('Error in createUserProfile:', error);
     }
   };
 
