@@ -30,7 +30,7 @@ export const StartupApplications = ()=> {
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
-    approved: 0,
+    selected: 0,
     rejected: 0
   });
 
@@ -50,10 +50,10 @@ export const StartupApplications = ()=> {
       const stats = data?.reduce((acc, app) => {
         acc.total++;
         if (app.application_status === 'pending') acc.pending++;
-        if (app.application_status === 'approved') acc.approved++;
+        if (app.application_status === 'selected') acc.selected++;
         if (app.application_status === 'rejected') acc.rejected++;
         return acc;
-      }, { total: 0, pending: 0, approved: 0, rejected: 0 }) || { total: 0, pending: 0, approved: 0, rejected: 0 };
+      }, { total: 0, pending: 0, selected: 0, rejected: 0 }) || { total: 0, pending: 0, selected: 0, rejected: 0 };
       
       setStats(stats);
     } catch (error: any) {
@@ -82,9 +82,10 @@ export const StartupApplications = ()=> {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'approved': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'selected': return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
       case 'shortlisted': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'interviewed': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
       default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
@@ -160,8 +161,8 @@ export const StartupApplications = ()=> {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Approved</p>
-                <p className="text-3xl font-bold text-green-400">{stats.approved}</p>
+                <p className="text-sm text-muted-foreground">Selected</p>
+                <p className="text-3xl font-bold text-green-400">{stats.selected}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-400" />
             </div>
@@ -203,7 +204,8 @@ export const StartupApplications = ()=> {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="shortlisted">Shortlisted</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="interviewed">Interviewed</SelectItem>
+                <SelectItem value="selected">Selected</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>

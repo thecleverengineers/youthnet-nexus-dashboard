@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,7 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   due_date: string;
 }
 
@@ -383,6 +382,7 @@ export const EmployeeDashboard = () => {
                         className={
                           task.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
                           task.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                          task.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
                           'bg-gray-500/20 text-gray-400 border-gray-500/30'
                         }
                       >
