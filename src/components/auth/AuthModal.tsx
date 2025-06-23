@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -19,6 +19,7 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { signIn, signUp, createDemoAccounts, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [creatingDemo, setCreatingDemo] = useState(false);
   
   // Sign In Form
   const [signInEmail, setSignInEmail] = useState('');
@@ -86,29 +87,31 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const handleDemoLogin = async (email: string, password: string) => {
     console.log('Demo login attempt for:', email);
-    setSignInEmail(email);
-    setSignInPassword(password);
     
     try {
       const success = await signIn(email, password);
       if (success) {
         onClose();
-        toast.success('Demo login successful!');
-        setSignInEmail('');
-        setSignInPassword('');
-      } else {
-        toast.error('Demo account not found. Please create demo accounts first.');
+        toast.success(`Demo ${email.split('@')[0]} login successful!`);
       }
     } catch (error) {
       console.error('Demo login error:', error);
-      toast.error('Demo account not found. Please create demo accounts first.');
+      toast.error('Demo account login failed. Please try creating demo accounts first.');
     }
   };
 
   const handleCreateDemoAccounts = async () => {
-    const success = await createDemoAccounts();
-    if (success) {
-      toast.success('Demo accounts created! You can now use the demo login buttons.');
+    setCreatingDemo(true);
+    try {
+      const success = await createDemoAccounts();
+      if (success) {
+        toast.success('Demo accounts are ready! You can now use the role buttons below.');
+      }
+    } catch (error) {
+      console.error('Error creating demo accounts:', error);
+      toast.error('Failed to create demo accounts. Please try again.');
+    } finally {
+      setCreatingDemo(false);
     }
   };
 
@@ -137,11 +140,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <TabsContent value="signin" className="space-y-4">
               {/* Demo Login Options */}
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground text-center">Demo Login</h3>
+                <h3 className="text-sm font-medium text-muted-foreground text-center">Quick Demo Access</h3>
                 
                 <Alert>
+                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-xs">
-                    Click "Create Demo Accounts" first, then use the role buttons below to login instantly.
+                    Use these demo accounts to explore different user roles instantly.
                   </AlertDescription>
                 </Alert>
                 
@@ -149,10 +153,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   variant="outline"
                   size="sm"
                   onClick={handleCreateDemoAccounts}
-                  disabled={loading}
+                  disabled={loading || creatingDemo}
                   className="w-full text-xs border-primary/30 hover:bg-primary/10"
                 >
-                  {loading ? 'Creating Accounts...' : 'Create Demo Accounts'}
+                  {creatingDemo ? 'Setting up Demo Accounts...' : 'Setup Demo Accounts'}
                 </Button>
                 
                 <div className="grid grid-cols-2 gap-2">
@@ -223,6 +227,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  New accounts require email confirmation. For instant access, use the demo accounts on the Sign In tab.
+                </AlertDescription>
+              </Alert>
+              
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullname" className="text-sm font-medium">Full Name</Label>

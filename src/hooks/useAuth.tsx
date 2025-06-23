@@ -148,7 +148,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Sign in error:', error);
-        toast.error(error.message);
+        
+        // Handle specific error cases
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Please check your email and confirm your account, or use the demo accounts.');
+        } else if (error.message.includes('Invalid login credentials')) {
+          toast.error('Invalid email or password. Please check your credentials.');
+        } else {
+          toast.error(error.message);
+        }
         setLoading(false);
         return false;
       }
@@ -188,7 +196,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('Sign up successful:', data.user?.id);
-      toast.success('Account created successfully!');
+      
+      if (data.user && !data.user.email_confirmed_at) {
+        toast.success('Account created! Please check your email to confirm your account.');
+      } else {
+        toast.success('Account created successfully!');
+      }
+      
       setLoading(false);
       return true;
     } catch (error) {
@@ -211,6 +225,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       toast.info('Creating demo accounts...');
       
+      let successCount = 0;
+      
       for (const user of demoUsers) {
         console.log('Creating demo account for:', user.email);
         
@@ -225,11 +241,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
 
-        if (error && !error.message.includes('User already registered')) {
-          console.error('Error creating demo account:', user.email, error);
-          toast.error(`Failed to create ${user.role} account: ${error.message}`);
+        if (error) {
+          if (error.message.includes('User already registered')) {
+            console.log('Demo account already exists:', user.email);
+            successCount++;
+          } else {
+            console.error('Error creating demo account:', user.email, error);
+            toast.error(`Failed to create ${user.role} account: ${error.message}`);
+          }
         } else {
           console.log('Demo account created successfully:', user.email);
+          successCount++;
         }
         
         // Add delay between account creations to avoid rate limiting
@@ -237,8 +259,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       setLoading(false);
-      toast.success('Demo accounts created successfully! You can now use the demo login buttons.');
-      return true;
+      
+      if (successCount === demoUsers.length) {
+        toast.success('All demo accounts are ready! You can now use the demo login buttons.');
+        return true;
+      } else if (successCount > 0) {
+        toast.success(`${successCount} demo accounts are ready! You can now use the demo login buttons.`);
+        return true;
+      } else {
+        toast.error('Failed to create demo accounts');
+        return false;
+      }
     } catch (error) {
       console.error('Error in createDemoAccounts:', error);
       toast.error('Failed to create demo accounts');
