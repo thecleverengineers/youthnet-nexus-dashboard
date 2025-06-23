@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,8 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  console.log('AuthModal: Component rendering, isOpen:', isOpen);
+  
   const { signIn, signUp, createDemoAccounts, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [creatingDemo, setCreatingDemo] = useState(false);
@@ -38,17 +39,18 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
-    console.log('Attempting to sign in with:', signInEmail);
+    console.log('AuthModal: Attempting to sign in with:', signInEmail);
     
     try {
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
+        console.log('AuthModal: Sign in successful, closing modal');
         onClose();
         setSignInEmail('');
         setSignInPassword('');
       }
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('AuthModal: Sign in error:', error);
       toast.error('Failed to sign in. Please try again.');
     }
   };
@@ -60,11 +62,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
-    console.log('Attempting to sign up:', signUpEmail, 'with role:', role);
+    console.log('AuthModal: Attempting to sign up:', signUpEmail, 'with role:', role);
     
     try {
       const success = await signUp(signUpEmail, signUpPassword, fullName, role);
       if (success) {
+        console.log('AuthModal: Sign up successful, closing modal');
         onClose();
         setSignUpEmail('');
         setSignUpPassword('');
@@ -72,7 +75,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setRole('student');
       }
     } catch (error) {
-      console.error('Sign up error:', error);
+      console.error('AuthModal: Sign up error:', error);
       toast.error('Failed to create account. Please try again.');
     }
   };
@@ -86,21 +89,23 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   ];
 
   const handleDemoLogin = async (email: string, password: string) => {
-    console.log('Demo login attempt for:', email);
+    console.log('AuthModal: Demo login attempt for:', email);
     
     try {
       const success = await signIn(email, password);
       if (success) {
+        console.log('AuthModal: Demo login successful for:', email);
         onClose();
         toast.success(`Demo ${email.split('@')[0]} login successful!`);
       }
     } catch (error) {
-      console.error('Demo login error:', error);
+      console.error('AuthModal: Demo login error:', error);
       toast.error('Demo account login failed. Please try creating demo accounts first.');
     }
   };
 
   const handleCreateDemoAccounts = async () => {
+    console.log('AuthModal: Creating demo accounts...');
     setCreatingDemo(true);
     try {
       const success = await createDemoAccounts();
@@ -108,7 +113,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         toast.success('Demo accounts are ready! You can now use the role buttons below.');
       }
     } catch (error) {
-      console.error('Error creating demo accounts:', error);
+      console.error('AuthModal: Error creating demo accounts:', error);
       toast.error('Failed to create demo accounts. Please try again.');
     } finally {
       setCreatingDemo(false);

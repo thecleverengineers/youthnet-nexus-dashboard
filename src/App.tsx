@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
@@ -9,7 +10,7 @@ const queryClient = new QueryClient();
 
 import { Layout } from '@/components/layout/Layout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { RoleBasedRoute } from '@/components/auth/RoleBasedRoute';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 import { Dashboard } from '@/pages/Dashboard';
 import Index from '@/pages/Index';
 import { Education } from '@/pages/Education';
@@ -27,6 +28,8 @@ import { Settings } from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
 
 function App() {
+  console.log('App: Component rendering');
+  
   return (
     <ThemeProvider defaultTheme="light" storageKey="youthnet-theme">
       <QueryClientProvider client={queryClient}>
@@ -34,7 +37,7 @@ function App() {
           <Toaster />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<RoleBasedRoute />} />
+              <Route path="/" element={<AuthGuard />} />
               <Route path="/education" element={
                 <ProtectedRoute>
                   <Layout>

@@ -19,6 +19,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  console.log('AuthProvider: Initializing...');
+  
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,12 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (!user) {
+      console.log('AuthProvider: No user to refresh profile for');
       setProfile(null);
       return;
     }
     
     try {
-      console.log('Fetching profile for user:', user.id);
+      console.log('AuthProvider: Fetching profile for user:', user.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -39,11 +42,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single();
       
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('AuthProvider: Error fetching profile:', error);
         
         // Try to create profile if it doesn't exist
         if (error.code === 'PGRST116') {
-          console.log('Profile not found, attempting to create...');
+          console.log('AuthProvider: Profile not found, attempting to create...');
           
           // Wait a bit and try again - the trigger might be processing
           setTimeout(async () => {
@@ -54,10 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               .single();
             
             if (!retryError && retryData) {
-              console.log('Profile found on retry:', retryData);
+              console.log('AuthProvider: Profile found on retry:', retryData);
               setProfile(retryData);
             } else {
-              console.error('Profile still not found after retry. Creating manually...');
+              console.error('AuthProvider: Profile still not found after retry. Creating manually...');
               
               // Try to create profile manually if trigger failed
               const userMetadata = user.user_metadata || {};
@@ -75,70 +78,89 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .single();
               
               if (!createError && createdProfile) {
-                console.log('Profile created manually:', createdProfile);
+                console.log('AuthProvider: Profile created manually:', createdProfile);
                 setProfile(createdProfile);
                 toast.success('Profile created successfully!');
               } else {
-                console.error('Failed to create profile manually:', createError);
+                console.error('AuthProvider: Failed to create profile manually:', createError);
                 toast.error('Failed to create profile. Please try signing in again.');
               }
             }
           }, 3000);
         }
       } else {
-        console.log('Profile loaded:', data);
+        console.log('AuthProvider: Profile loaded successfully:', data);
         setProfile(data);
       }
     } catch (error) {
-      console.error('Error in refreshProfile:', error);
+      console.error('AuthProvider: Error in refreshProfile:', error);
       toast.error('Error loading profile. Please refresh the page.');
     }
   };
 
   useEffect(() => {
-    console.log('Setting up auth state listener...');
+    console.log('AuthProvider: Setting up auth state listener...');
+    
+    let mounted = true;
     
     // Set up auth state listener first
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
+      console.log('AuthProvider: Auth state changed:', event, session?.user?.email);
+      
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
       
-      // Refresh profile when user changes
-      if (session?.user && event === 'SIGNED_IN') {
+      // Handle profile refresh based on auth events
+      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        console.log('AuthProvider: User signed in, refreshing profile after delay');
         // Small delay to ensure the database trigger has completed
         setTimeout(() => {
-          refreshProfile();
+          if (mounted) {
+            refreshProfile();
+          }
         }, 1000);
-      } else {
+      } else if (event === 'SIGNED_OUT') {
+        console.log('AuthProvider: User signed out, clearing profile');
         setProfile(null);
+      }
+      
+      // Set loading to false after processing auth state change
+      if (mounted) {
+        setLoading(false);
       }
     });
 
     // Then get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.id);
+      console.log('AuthProvider: Initial session check:', session?.user?.email);
+      
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
       
       if (session?.user) {
+        console.log('AuthProvider: Initial session found, refreshing profile');
         refreshProfile();
       }
+      
+      setLoading(false);
     });
 
     return () => {
-      console.log('Cleaning up auth subscription');
+      console.log('AuthProvider: Cleaning up auth subscription');
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
-      console.log('Attempting to sign in with:', email);
+      console.log('AuthProvider: Attempting to sign in with:', email);
       setLoading(true);
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -147,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error('Sign in error:', error);
+        console.error('AuthProvider: Sign in error:', error);
         
         // Handle specific error cases
         if (error.message.includes('Email not confirmed')) {
@@ -161,11 +183,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      console.log('Sign in successful:', data.user?.id);
+      console.log('AuthProvider: Sign in successful:', data.user?.email);
       toast.success('Signed in successfully!');
       return true;
     } catch (error) {
-      console.error('Unexpected sign in error:', error);
+      console.error('AuthProvider: Unexpected sign in error:', error);
       toast.error('An unexpected error occurred');
       setLoading(false);
       return false;
@@ -174,7 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string, role: string): Promise<boolean> => {
     try {
-      console.log('Attempting to sign up:', email, 'with role:', role);
+      console.log('AuthProvider: Attempting to sign up:', email, 'with role:', role);
       setLoading(true);
       
       const { data, error } = await supabase.auth.signUp({
@@ -189,13 +211,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        console.error('Sign up error:', error);
+        console.error('AuthProvider: Sign up error:', error);
         toast.error(error.message);
         setLoading(false);
         return false;
       }
 
-      console.log('Sign up successful:', data.user?.id);
+      console.log('AuthProvider: Sign up successful:', data.user?.email);
       
       if (data.user && !data.user.email_confirmed_at) {
         toast.success('Account created! Please check your email to confirm your account.');
@@ -206,7 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return true;
     } catch (error) {
-      console.error('Unexpected sign up error:', error);
+      console.error('AuthProvider: Unexpected sign up error:', error);
       toast.error('An unexpected error occurred');
       setLoading(false);
       return false;
@@ -228,7 +250,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let successCount = 0;
       
       for (const user of demoUsers) {
-        console.log('Creating demo account for:', user.email);
+        console.log('AuthProvider: Creating demo account for:', user.email);
         
         const { data, error } = await supabase.auth.signUp({
           email: user.email,
@@ -243,14 +265,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (error) {
           if (error.message.includes('User already registered')) {
-            console.log('Demo account already exists:', user.email);
+            console.log('AuthProvider: Demo account already exists:', user.email);
             successCount++;
           } else {
-            console.error('Error creating demo account:', user.email, error);
+            console.error('AuthProvider: Error creating demo account:', user.email, error);
             toast.error(`Failed to create ${user.role} account: ${error.message}`);
           }
         } else {
-          console.log('Demo account created successfully:', user.email);
+          console.log('AuthProvider: Demo account created successfully:', user.email);
           successCount++;
         }
         
@@ -271,7 +293,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
     } catch (error) {
-      console.error('Error in createDemoAccounts:', error);
+      console.error('AuthProvider: Error in createDemoAccounts:', error);
       toast.error('Failed to create demo accounts');
       setLoading(false);
       return false;
@@ -280,17 +302,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async (): Promise<void> => {
     try {
+      console.log('AuthProvider: Signing out...');
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('Sign out error:', error);
+        console.error('AuthProvider: Sign out error:', error);
         toast.error(error.message);
       } else {
-        console.log('Sign out successful');
+        console.log('AuthProvider: Sign out successful');
         toast.success('Signed out successfully!');
         setProfile(null);
       }
     } catch (error) {
-      console.error('Unexpected sign out error:', error);
+      console.error('AuthProvider: Unexpected sign out error:', error);
       toast.error('An unexpected error occurred');
     }
   };
@@ -306,6 +329,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshProfile,
     createDemoAccounts,
   };
+
+  console.log('AuthProvider: Providing context with state:', { 
+    hasUser: !!user, 
+    hasProfile: !!profile, 
+    loading 
+  });
 
   return (
     <AuthContext.Provider value={value}>
