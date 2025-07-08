@@ -7,9 +7,12 @@ import { isMongoDBAuth } from '@/config/auth';
  * based on the configuration in src/config/auth.ts
  */
 export function useUnifiedAuth() {
-  const supabaseAuth = useAuth();
-  const mongoAuth = useMongoAuth();
-  
-  // Return the appropriate auth provider based on configuration
-  return isMongoDBAuth() ? mongoAuth : supabaseAuth;
+  // Only call the auth hook for the configured provider to avoid errors
+  if (isMongoDBAuth()) {
+    const mongoAuth = useMongoAuth();
+    return mongoAuth;
+  } else {
+    const supabaseAuth = useAuth();
+    return supabaseAuth;
+  }
 }
