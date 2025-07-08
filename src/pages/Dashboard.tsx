@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { useAuth } from '@/hooks/useAuth';
+import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
 
 const upcomingEvents = [
   { title: 'Digital Marketing Batch Graduation', date: '2024-01-15', type: 'graduation', priority: 'high' },
@@ -39,7 +39,7 @@ export const Dashboard = () => {
     loading 
   } = useDashboardData();
   
-  const { signOut, profile, user } = useAuth();
+  const { signOut, profile, user } = useUnifiedAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // If not authenticated, show landing page

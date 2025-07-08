@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Clock, BookOpen, Award, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
 
 export function StudentDashboard() {
-  const { user } = useAuth();
+  const { user } = useUnifiedAuth();
   const [student, setStudent] = useState<any>(null);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

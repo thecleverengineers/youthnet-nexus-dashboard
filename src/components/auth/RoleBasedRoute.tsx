@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
 import { StudentDashboard } from '@/components/dashboards/StudentDashboard';
 import { TrainerDashboard } from '@/components/dashboards/TrainerDashboard';
 import { StaffDashboard } from '@/components/dashboards/StaffDashboard';
@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RefreshCw, LogIn } from 'lucide-react';
 
 export const RoleBasedRoute = () => {
-  const { profile, loading, user, refreshProfile } = useAuth();
+  const { profile, loading, user, refreshProfile } = useUnifiedAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 

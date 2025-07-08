@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/hooks/useAuth';
+import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -18,7 +18,7 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   console.log('AuthModal: Component rendering, isOpen:', isOpen);
   
-  const { signIn, signUp, createDemoAccounts, loading } = useAuth();
+  const { signIn, signUp, createDemoAccounts, loading } = useUnifiedAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [creatingDemo, setCreatingDemo] = useState(false);
   

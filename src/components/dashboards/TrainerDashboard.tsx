@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, BookOpen, Clock, Award } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
 
 export function TrainerDashboard() {
-  const { user } = useAuth();
+  const { user } = useUnifiedAuth();
   const [trainer, setTrainer] = useState<any>(null);
   const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

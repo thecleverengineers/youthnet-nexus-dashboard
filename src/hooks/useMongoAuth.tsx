@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 interface User {
   _id: string;
+  id: string; // For compatibility with Supabase auth
   email: string;
   profile: {
     fullName: string;
@@ -19,6 +20,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  session: null; // For compatibility with Supabase auth
   loading: boolean;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, fullName: string, role: string) => Promise<boolean>;
@@ -26,6 +28,7 @@ interface AuthContextType {
   profile: User | null;
   refreshProfile: () => Promise<void>;
   updateProfile: (data: { fullName?: string; phone?: string }) => Promise<boolean>;
+  createDemoAccounts: () => Promise<boolean>;
 }
 
 const MongoAuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,7 +46,9 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
       
       if (response.success && response.data?.user) {
         console.log('MongoAuthProvider: Profile loaded:', response.data.user);
-        setUser(response.data.user);
+        // Add id field for compatibility with Supabase auth
+        const userWithId = { ...response.data.user, id: response.data.user._id };
+        setUser(userWithId);
       } else {
         console.log('MongoAuthProvider: No profile data received');
         setUser(null);
@@ -96,8 +101,9 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
         setAuthToken(token);
         localStorage.setItem('refresh_token', refreshToken);
         
-        // Set user
-        setUser(user);
+        // Set user with compatibility id
+        const userWithId = { ...user, id: user._id };
+        setUser(userWithId);
         
         toast.success('Signed in successfully!');
         return true;
@@ -135,8 +141,9 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
         setAuthToken(token);
         localStorage.setItem('refresh_token', refreshToken);
         
-        // Set user
-        setUser(user);
+        // Set user with compatibility id
+        const userWithId = { ...user, id: user._id };
+        setUser(userWithId);
         
         toast.success('Account created successfully!');
         return true;
@@ -186,7 +193,8 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
       const response = await authApi.updateProfile(profileData);
       
       if (response.success && response.data?.user) {
-        setUser(response.data.user);
+        const userWithId = { ...response.data.user, id: response.data.user._id };
+        setUser(userWithId);
         toast.success('Profile updated successfully!');
         return true;
       } else {
@@ -200,8 +208,58 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const createDemoAccounts = async (): Promise<boolean> => {
+    const demoUsers = [
+      { email: 'admin@youthnet.in', password: 'admin123', role: 'admin', fullName: 'Admin User' },
+      { email: 'staff@youthnet.in', password: 'staff123', role: 'staff', fullName: 'Staff User' },
+      { email: 'trainer@youthnet.in', password: 'trainer123', role: 'trainer', fullName: 'Trainer User' },
+      { email: 'student@youthnet.in', password: 'student123', role: 'student', fullName: 'Student User' },
+    ];
+
+    try {
+      console.log('MongoAuthProvider: Creating demo accounts...');
+      let successCount = 0;
+      
+      for (const user of demoUsers) {
+        try {
+          await authApi.register({
+            email: user.email,
+            password: user.password,
+            fullName: user.fullName,
+            role: user.role
+          });
+          successCount++;
+        } catch (error) {
+          // User might already exist - that's okay
+          if (error.response?.status === 409) {
+            console.log('MongoAuthProvider: Demo account already exists:', user.email);
+            successCount++;
+          } else {
+            console.error('MongoAuthProvider: Error creating demo account:', user.email, error);
+          }
+        }
+      }
+      
+      if (successCount === demoUsers.length) {
+        toast.success('All demo accounts are ready!');
+        return true;
+      } else if (successCount > 0) {
+        toast.success(`${successCount} demo accounts are ready!`);
+        return true;
+      } else {
+        toast.error('Failed to create demo accounts');
+        return false;
+      }
+    } catch (error) {
+      console.error('MongoAuthProvider: Error in createDemoAccounts:', error);
+      toast.error('Failed to create demo accounts');
+      return false;
+    }
+  };
+
   const value = {
     user,
+    session: null, // For compatibility with Supabase auth
     loading,
     signIn,
     signUp,
@@ -209,6 +267,7 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     profile: user, // For compatibility with existing code
     refreshProfile,
     updateProfile,
+    createDemoAccounts,
   };
 
   console.log('MongoAuthProvider: Providing context with state:', { 
