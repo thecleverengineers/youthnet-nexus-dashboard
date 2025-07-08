@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useMongoAuth } from '@/hooks/useMongoAuth';
+import { isMongoDBAuth } from '@/config/auth';
 import { StudentDashboard } from '@/components/dashboards/StudentDashboard';
 import { TrainerDashboard } from '@/components/dashboards/TrainerDashboard';
 import { StaffDashboard } from '@/components/dashboards/StaffDashboard';
@@ -14,7 +16,12 @@ import { useState } from 'react';
 export const AuthGuard = () => {
   console.log('AuthGuard: Component rendering');
   
-  const { profile, loading, user, refreshProfile } = useAuth();
+  const supabaseAuth = useAuth();
+  const mongoAuth = useMongoAuth();
+  
+  // Use appropriate auth provider based on configuration
+  const auth = isMongoDBAuth() ? mongoAuth : supabaseAuth;
+  const { profile, loading, user, refreshProfile } = auth;
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 

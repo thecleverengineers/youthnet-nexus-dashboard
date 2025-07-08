@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
+import { MongoAuthProvider } from '@/hooks/useMongoAuth';
+import { isMongoDBAuth } from '@/config/auth';
 
 const queryClient = new QueryClient();
 
@@ -30,10 +32,12 @@ import NotFound from '@/pages/NotFound';
 function App() {
   console.log('App: Component rendering');
   
+  const AuthProviderComponent = isMongoDBAuth() ? MongoAuthProvider : AuthProvider;
+  
   return (
     <ThemeProvider defaultTheme="light" storageKey="youthnet-theme">
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
+        <AuthProviderComponent>
           <Toaster />
           <BrowserRouter>
             <Routes>
@@ -126,7 +130,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </AuthProvider>
+        </AuthProviderComponent>
       </QueryClientProvider>
     </ThemeProvider>
   );
