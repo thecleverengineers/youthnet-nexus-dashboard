@@ -21,6 +21,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { signIn, signUp, createDemoAccounts, loading } = useUnifiedAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [creatingDemo, setCreatingDemo] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   // Sign In Form
   const [signInEmail, setSignInEmail] = useState('');
@@ -42,6 +43,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     console.log('AuthModal: Attempting to sign in with:', signInEmail);
     
     try {
+      setConnectionError(null); // Clear any previous errors
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
         console.log('AuthModal: Sign in successful, closing modal');
@@ -58,6 +60,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       }
     } catch (error) {
       console.error('AuthModal: Sign in error:', error);
+      
+      // Check for network errors and set connection error
+      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+        setConnectionError('Cannot connect to server. Please ensure the MongoDB backend server is running on port 5000.');
+      } else {
+        setConnectionError(null);
+      }
+      
       toast.error('Failed to sign in. Please try again.');
     }
   };
@@ -156,6 +166,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
+              {/* Connection Error Alert */}
+              {connectionError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    {connectionError}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               {/* Demo Login Options */}
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-muted-foreground text-center">Quick Demo Access</h3>

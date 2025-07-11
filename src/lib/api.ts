@@ -151,10 +151,42 @@ export const authApi = {
 
 // Error handling utility
 export const handleApiError = (error: any): string => {
+  // Network errors (server not reachable)
+  if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+    return 'Cannot connect to server. Please ensure the MongoDB backend server is running on port 5000.';
+  }
+  
+  // Connection timeout
+  if (error.code === 'ECONNABORTED') {
+    return 'Connection timeout. Please check your internet connection and try again.';
+  }
+  
+  // Server response errors
   if (error.response?.data?.message) {
     return error.response.data.message;
   }
   
+  // HTTP status specific errors
+  if (error.response?.status) {
+    switch (error.response.status) {
+      case 400:
+        return 'Invalid request. Please check your input and try again.';
+      case 401:
+        return 'Authentication failed. Please check your credentials.';
+      case 403:
+        return 'Access denied. You do not have permission to perform this action.';
+      case 404:
+        return 'Resource not found. The requested endpoint may not exist.';
+      case 500:
+        return 'Server error. Please try again later.';
+      case 503:
+        return 'Service unavailable. Please try again later.';
+      default:
+        return `Server error (${error.response.status}). Please try again.`;
+    }
+  }
+  
+  // Generic error message
   if (error.message) {
     return error.message;
   }
