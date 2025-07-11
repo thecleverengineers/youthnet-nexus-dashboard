@@ -7,6 +7,25 @@ const User = require('../models/User');
 const Student = require('../models/Student');
 const Trainer = require('../models/Trainer');
 const Employee = require('../models/Employee');
+const TrainingProgram = require('../models/TrainingProgram');
+const InventoryItem = require('../models/InventoryItem');
+const EducationCourse = require('../models/EducationCourse');
+const AttendanceRecord = require('../models/AttendanceRecord');
+const JobPosting = require('../models/JobPosting');
+const JobApplication = require('../models/JobApplication');
+const SkillAssessment = require('../models/SkillAssessment');
+const Certification = require('../models/Certification');
+const IncubationProject = require('../models/IncubationProject');
+const StartupApplication = require('../models/StartupApplication');
+const LivelihoodProgram = require('../models/LivelihoodProgram');
+const LocalProduct = require('../models/LocalProduct');
+const EmployeeTask = require('../models/EmployeeTask');
+const Report = require('../models/Report');
+const StudentEnrollment = require('../models/StudentEnrollment');
+const CourseEnrollment = require('../models/CourseEnrollment');
+const PayrollCycle = require('../models/PayrollCycle');
+const Payroll = require('../models/Payroll');
+const LeaveRequest = require('../models/LeaveRequest');
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -59,10 +78,31 @@ const importSupabaseData = async () => {
 
     // Clear existing data (optional - comment out if you want to preserve existing data)
     console.log('Clearing existing MongoDB data...');
-    await User.deleteMany({});
-    await Student.deleteMany({});
-    await Trainer.deleteMany({});
-    await Employee.deleteMany({});
+    await Promise.all([
+      User.deleteMany({}),
+      Student.deleteMany({}),
+      Trainer.deleteMany({}),
+      Employee.deleteMany({}),
+      TrainingProgram.deleteMany({}),
+      InventoryItem.deleteMany({}),
+      EducationCourse.deleteMany({}),
+      AttendanceRecord.deleteMany({}),
+      JobPosting.deleteMany({}),
+      JobApplication.deleteMany({}),
+      SkillAssessment.deleteMany({}),
+      Certification.deleteMany({}),
+      IncubationProject.deleteMany({}),
+      StartupApplication.deleteMany({}),
+      LivelihoodProgram.deleteMany({}),
+      LocalProduct.deleteMany({}),
+      EmployeeTask.deleteMany({}),
+      Report.deleteMany({}),
+      StudentEnrollment.deleteMany({}),
+      CourseEnrollment.deleteMany({}),
+      PayrollCycle.deleteMany({}),
+      Payroll.deleteMany({}),
+      LeaveRequest.deleteMany({})
+    ]);
 
     // Import Users from profiles
     console.log('Importing users...');
