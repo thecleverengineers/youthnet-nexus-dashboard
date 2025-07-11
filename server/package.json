@@ -8,7 +8,8 @@
     "dev": "nodemon app.js",
     "test": "jest",
     "migrate": "node scripts/migrate.js",
-    "import:supabase": "node scripts/run-import.js"
+    "import:supabase": "node scripts/run-import.js",
+    "create:admin": "node scripts/create-admin.js"
   },
   "dependencies": {
     "express": "^4.18.2",
