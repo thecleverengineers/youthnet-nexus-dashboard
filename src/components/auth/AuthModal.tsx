@@ -45,7 +45,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
         console.log('AuthModal: Sign in successful, closing modal');
-        onClose();
+        toast.success('Login successful! Welcome to YouthNet', {
+          description: 'Redirecting to your dashboard...',
+          duration: 2000,
+        });
+        // Close modal and redirect after showing toast
+        setTimeout(() => {
+          onClose();
+        }, 1000);
         setSignInEmail('');
         setSignInPassword('');
       }
@@ -95,8 +102,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const success = await signIn(email, password);
       if (success) {
         console.log('AuthModal: Demo login successful for:', email);
-        onClose();
-        toast.success(`Demo ${email.split('@')[0]} login successful!`);
+        toast.success(`Demo ${email.split('@')[0]} login successful!`, {
+          description: 'Redirecting to your dashboard...',
+          duration: 2000,
+        });
+        // Close modal and redirect after showing toast
+        setTimeout(() => {
+          onClose();
+        }, 1000);
       }
     } catch (error) {
       console.error('AuthModal: Demo login error:', error);
