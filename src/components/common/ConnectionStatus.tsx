@@ -5,7 +5,7 @@ import { enhancedApi } from '@/lib/enhanced-api';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Wifi, WifiOff, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, AlertTriangle, CheckCircle, Server } from 'lucide-react';
 
 interface ConnectionStatusProps {
   showDetails?: boolean;
@@ -18,10 +18,12 @@ export function ConnectionStatus({ showDetails = false, className = '' }: Connec
     connected: boolean;
     responseTime: number;
     lastCheck: Date | null;
+    baseUrl: string;
   }>({
     connected: false,
     responseTime: 0,
     lastCheck: null,
+    baseUrl: enhancedApi.getBaseURL(),
   });
   const [checking, setChecking] = useState(false);
 
@@ -33,12 +35,15 @@ export function ConnectionStatus({ showDetails = false, className = '' }: Connec
         connected: health.api,
         responseTime: health.response_time,
         lastCheck: new Date(),
+        baseUrl: enhancedApi.getBaseURL(),
       });
     } catch (error) {
+      console.error('Connection check failed:', error);
       setApiStatus({
         connected: false,
         responseTime: -1,
         lastCheck: new Date(),
+        baseUrl: enhancedApi.getBaseURL(),
       });
     } finally {
       setChecking(false);
@@ -100,14 +105,17 @@ export function ConnectionStatus({ showDetails = false, className = '' }: Connec
 
       {showDetails && (
         <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 gap-2 text-sm">
             <div className="flex items-center gap-2">
               <Wifi className="h-4 w-4" />
               <span>Internet: {isOnline ? 'Connected' : 'Disconnected'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className={`h-2 w-2 rounded-full ${apiStatus.connected ? 'bg-green-500' : 'bg-red-500'}`} />
+              <Server className="h-4 w-4" />
               <span>API: {apiStatus.connected ? 'Online' : 'Offline'}</span>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Backend URL: {apiStatus.baseUrl}
             </div>
           </div>
 
@@ -141,13 +149,13 @@ export function ConnectionStatus({ showDetails = false, className = '' }: Connec
         </div>
       )}
 
-      {(!isOnline || !apiStatus.connected) && (
+      {!apiStatus.connected && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             {!isOnline 
               ? 'You are currently offline. Some features may not work properly.'
-              : 'Unable to connect to the server. Please check your connection and try again.'
+              : `Unable to connect to the backend server at ${apiStatus.baseUrl}. Please ensure the YouthNet API is running.`
             }
           </AlertDescription>
         </Alert>
