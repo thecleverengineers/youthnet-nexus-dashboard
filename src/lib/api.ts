@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-// API Configuration
+// API Configuration - Updated for production deployment
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-api-domain.com/api' 
+  ? 'https://your-backend-domain.com/api' // Update this with your deployed backend URL
   : 'http://localhost:5000/api';
 
 // Create axios instance

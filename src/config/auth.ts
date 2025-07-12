@@ -1,3 +1,4 @@
+
 // Auth provider configuration
 type AuthProvider = 'supabase' | 'mongodb';
 
@@ -5,7 +6,7 @@ export const authConfig = {
   provider: 'mongodb' as AuthProvider,
   mongodb: {
     apiUrl: process.env.NODE_ENV === 'production' 
-      ? 'https://your-api-domain.com/api' 
+      ? 'https://your-backend-domain.com/api' // Update this with your deployed backend URL
       : 'http://localhost:5000/api',
   },
   supabase: {
