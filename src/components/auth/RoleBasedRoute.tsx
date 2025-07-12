@@ -140,23 +140,17 @@ export const RoleBasedRoute = () => {
   console.log('Routing user with profile:', profile);
   console.log('Dashboard data loaded:', !!dashboardData.stats);
 
-  // Pass dashboard data to components
-  const dashboardProps = {
-    dashboardData,
-    userProfile: profile,
-  };
-
   switch (profile.role || profile.profile?.role) {
     case 'student':
-      return <StudentDashboard {...dashboardProps} />;
+      return <StudentDashboard />;
     case 'trainer':
-      return <TrainerDashboard {...dashboardProps} />;
+      return <TrainerDashboard />;
     case 'staff':
-      return <StaffDashboard {...dashboardProps} />;
+      return <StaffDashboard />;
     case 'admin':
-      return <AdminDashboard {...dashboardProps} />;
+      return <AdminDashboard />;
     default:
       console.log('Unknown role, defaulting to student dashboard:', profile.role);
-      return <StudentDashboard {...dashboardProps} />;
+      return <StudentDashboard />;
   }
 };

@@ -62,7 +62,7 @@ export function ConnectionStatus({ showDetails = false, className = '' }: Connec
   const getStatusColor = () => {
     if (!isOnline) return 'destructive';
     if (!apiStatus.connected) return 'destructive';
-    if (apiStatus.responseTime > 2000) return 'warning';
+    if (apiStatus.responseTime > 2000) return 'secondary';
     return 'default';
   };
 

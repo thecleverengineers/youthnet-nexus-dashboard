@@ -7,7 +7,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuHeader,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
@@ -138,7 +137,7 @@ export function NotificationCenter() {
       </DropdownMenuTrigger>
       
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuHeader className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
           {unreadCount > 0 && (
             <Button
@@ -150,7 +149,7 @@ export function NotificationCenter() {
               Mark all read
             </Button>
           )}
-        </DropdownMenuHeader>
+        </div>
         
         <ScrollArea className="h-96">
           {notifications.length === 0 ? (

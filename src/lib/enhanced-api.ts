@@ -1,8 +1,8 @@
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { toast } from 'sonner';
 
-export interface ApiResponse<T = any> {
+export interface EnhancedApiResponse<T = any> {
   success: boolean;
   data?: T;
   message?: string;
@@ -15,13 +15,20 @@ export interface ApiResponse<T = any> {
   };
 }
 
-export interface PaginationParams {
+export interface EnhancedPaginationParams {
   page?: number;
   limit?: number;
   search?: string;
   sort?: string;
   order?: 'asc' | 'desc';
   filters?: Record<string, any>;
+}
+
+interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
+  metadata?: {
+    startTime: Date;
+    requestId: string;
+  };
 }
 
 class EnhancedApiClient {
@@ -48,7 +55,7 @@ class EnhancedApiClient {
   private setupInterceptors() {
     // Request interceptor
     this.instance.interceptors.request.use(
-      (config) => {
+      (config: ExtendedAxiosRequestConfig) => {
         const token = localStorage.getItem('auth_token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -72,7 +79,7 @@ class EnhancedApiClient {
     // Response interceptor with retry logic
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
-        const config = response.config as any;
+        const config = response.config as ExtendedAxiosRequestConfig;
         const endTime = new Date();
         const duration = endTime.getTime() - (config.metadata?.startTime?.getTime() || 0);
         console.log(`[API] ${config.method?.toUpperCase()} ${config.url} - ${duration}ms - ID: ${config.metadata?.requestId}`);
@@ -163,7 +170,7 @@ class EnhancedApiClient {
   }
 
   // Generic request method with caching
-  public async request<T = any>(config: AxiosRequestConfig & { cache?: boolean }): Promise<ApiResponse<T>> {
+  public async request<T = any>(config: AxiosRequestConfig & { cache?: boolean }): Promise<EnhancedApiResponse<T>> {
     try {
       // Cancel previous request if it's the same endpoint
       const requestKey = `${config.method}-${config.url}`;
@@ -176,7 +183,7 @@ class EnhancedApiClient {
       this.requestQueue.set(requestKey, abortController);
       config.signal = abortController.signal;
 
-      const response = await this.instance.request<ApiResponse<T>>(config);
+      const response = await this.instance.request<EnhancedApiResponse<T>>(config);
       
       // Clean up
       this.requestQueue.delete(requestKey);
@@ -192,7 +199,7 @@ class EnhancedApiClient {
   }
 
   // Enhanced GET request with caching
-  public async get<T = any>(url: string, params?: any, options?: { cache?: boolean }): Promise<ApiResponse<T>> {
+  public async get<T = any>(url: string, params?: any, options?: { cache?: boolean }): Promise<EnhancedApiResponse<T>> {
     return this.request<T>({ 
       method: 'GET', 
       url, 
@@ -202,7 +209,7 @@ class EnhancedApiClient {
   }
 
   // Batch requests
-  public async batch<T = any>(requests: Array<{ method: string; url: string; data?: any }>): Promise<ApiResponse<T>[]> {
+  public async batch<T = any>(requests: Array<{ method: string; url: string; data?: any }>): Promise<EnhancedApiResponse<T>[]> {
     try {
       const promises = requests.map(req => this.request<T>(req));
       const results = await Promise.allSettled(promises);
@@ -231,7 +238,7 @@ class EnhancedApiClient {
       filters?: Record<string, any>;
       limit?: number;
     }
-  ): Promise<ApiResponse<T[]>> {
+  ): Promise<EnhancedApiResponse<T[]>> {
     const searchParams = {
       search: query,
       limit: options?.limit || 10,
@@ -247,7 +254,7 @@ class EnhancedApiClient {
     file: File, 
     onProgress?: (progress: number) => void,
     additionalData?: Record<string, any>
-  ): Promise<ApiResponse<T>> {
+  ): Promise<EnhancedApiResponse<T>> {
     const formData = new FormData();
     formData.append('file', file);
     
@@ -352,7 +359,7 @@ export const enhancedApi = new EnhancedApiClient();
 export const userApi = {
   getProfile: () => enhancedApi.get('/auth/profile'),
   updateProfile: (data: any) => enhancedApi.request({ method: 'PUT', url: '/auth/profile', data }),
-  getUsers: (params?: PaginationParams) => enhancedApi.get('/users', params),
+  getUsers: (params?: EnhancedPaginationParams) => enhancedApi.get('/users', params),
   searchUsers: (query: string) => enhancedApi.search('/users/search', query),
 };
 
@@ -364,13 +371,11 @@ export const dashboardApi = {
 
 export const adminApi = {
   getSystemHealth: () => enhancedApi.healthCheck(),
-  getSystemLogs: (params?: PaginationParams) => enhancedApi.get('/admin/logs', params),
+  getSystemLogs: (params?: EnhancedPaginationParams) => enhancedApi.get('/admin/logs', params),
   manageUsers: {
-    list: (params?: PaginationParams) => enhancedApi.get('/admin/users', params),
+    list: (params?: EnhancedPaginationParams) => enhancedApi.get('/admin/users', params),
     create: (userData: any) => enhancedApi.request({ method: 'POST', url: '/admin/users', data: userData }),
     update: (id: string, userData: any) => enhancedApi.request({ method: 'PUT', url: `/admin/users/${id}`, data: userData }),
     delete: (id: string) => enhancedApi.request({ method: 'DELETE', url: `/admin/users/${id}` }),
   }
 };
-
-export type { ApiResponse, PaginationParams };
