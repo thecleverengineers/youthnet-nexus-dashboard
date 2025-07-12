@@ -27,7 +27,7 @@ const mockDashboardData = {
   ]
 };
 
-export default function Dashboard() {
+export function Dashboard() {
   const { 
     data: dashboardData, 
     isLoading, 
@@ -247,3 +247,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default Dashboard;

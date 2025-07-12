@@ -15,6 +15,18 @@ interface HealthCheckResponse {
   timestamp: string;
 }
 
+interface RequestMetadata {
+  requestId: string;
+  startTime: number;
+}
+
+// Extend the AxiosRequestConfig to include metadata
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    metadata?: RequestMetadata;
+  }
+}
+
 class EnhancedApiClient {
   private client: AxiosInstance;
   private baseURL: string;
@@ -62,7 +74,7 @@ class EnhancedApiClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response) => {
-        const duration = Date.now() - response.config.metadata?.startTime;
+        const duration = Date.now() - (response.config.metadata?.startTime || 0);
         console.info(`[API] Response received in ${duration}ms - ID: ${response.config.metadata?.requestId}`);
         return response;
       },
@@ -108,7 +120,7 @@ class EnhancedApiClient {
         throw new Error(response.data.message || 'API request failed');
       }
       
-      return response.data.data || response.data;
+      return response.data.data as T || response.data as T;
     } catch (error: any) {
       if (error.isApiError) {
         throw error;
@@ -176,4 +188,23 @@ class EnhancedApiClient {
   }
 }
 
+// Create dashboard-specific API methods
+class DashboardApiClient {
+  constructor(private apiClient: EnhancedApiClient) {}
+
+  async getStats() {
+    return this.apiClient.get('/api/dashboard/stats');
+  }
+
+  async getRecentActivity() {
+    return this.apiClient.get('/api/dashboard/activity');
+  }
+
+  async getAnalytics(period: string = '30d') {
+    return this.apiClient.get(`/api/dashboard/analytics?period=${period}`);
+  }
+}
+
 export const enhancedApi = new EnhancedApiClient();
+export const dashboardApi = new DashboardApiClient(enhancedApi);
+export type EnhancedApiResponse<T = any> = ApiResponse<T>;
