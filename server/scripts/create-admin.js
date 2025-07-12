@@ -5,7 +5,7 @@ require('dotenv').config();
 async function createAdminUser() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://youthnet:4H07qS5z912CO6IR@db-mongodb-nyc3-34944-ffbfb8c2.mongo.ondigitalocean.com/youthnet');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://youthnet:R5406JQXc19Ss8Z3@db-mongodb-nyc3-34944-ffbfb8c2.mongo.ondigitalocean.com/youthnet?tls=true&authSource=admin&replicaSet=db-mongodb-nyc3-34944');
     console.log('Connected to MongoDB');
 
     // Check if admin already exists
