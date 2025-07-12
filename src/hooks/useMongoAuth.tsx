@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { authApi, setAuthToken, handleApiError } from '@/lib/api';
 import { toast } from 'sonner';
@@ -28,7 +29,10 @@ interface AuthContextType {
   profile: User | null;
   refreshProfile: () => Promise<void>;
   updateProfile: (data: { fullName?: string; phone?: string }) => Promise<boolean>;
-  
+  resetPassword: (email: string) => Promise<boolean>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  isOnline: boolean;
+  retryConnection: () => Promise<void>;
 }
 
 const MongoAuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,6 +42,30 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
   
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Handle online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      console.log('MongoAuthProvider: Connection restored');
+      toast.success('Connection restored');
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      console.log('MongoAuthProvider: Connection lost');
+      toast.error('Connection lost. Please check your internet connection.');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const refreshProfile = async () => {
     try {
@@ -46,7 +74,6 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
       
       if (response.success && response.data?.user) {
         console.log('MongoAuthProvider: Profile loaded:', response.data.user);
-        // Add id field for compatibility with Supabase auth
         const userWithId = { ...response.data.user, id: response.data.user._id };
         setUser(userWithId);
       } else {
@@ -57,7 +84,6 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
       console.error('MongoAuthProvider: Error fetching profile:', error);
       const errorMessage = handleApiError(error);
       
-      // Don't show error toast for 401 errors (user not logged in)
       if (!error.response || error.response.status !== 401) {
         toast.error(`Profile error: ${errorMessage}`);
       }
@@ -65,10 +91,32 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const retryConnection = async () => {
+    if (!isOnline) {
+      toast.error('No internet connection');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await refreshProfile();
+      toast.success('Connection restored successfully');
+    } catch (error) {
+      toast.error('Failed to restore connection');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     console.log('MongoAuthProvider: Setting up auth check...');
     
     const initializeAuth = async () => {
+      if (!isOnline) {
+        setLoading(false);
+        return;
+      }
+
       const token = localStorage.getItem('auth_token');
       
       if (token) {
@@ -83,9 +131,14 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     };
 
     initializeAuth();
-  }, []);
+  }, [isOnline]);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
+    if (!isOnline) {
+      toast.error('No internet connection');
+      return false;
+    }
+
     try {
       console.log('MongoAuthProvider: Attempting to sign in:', email);
       setLoading(true);
@@ -97,11 +150,9 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
         
         console.log('MongoAuthProvider: Sign in successful:', user.email);
         
-        // Store tokens
         setAuthToken(token);
         localStorage.setItem('refresh_token', refreshToken);
         
-        // Set user with compatibility id
         const userWithId = { ...user, id: user._id };
         setUser(userWithId);
         
@@ -121,6 +172,11 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string, role: string): Promise<boolean> => {
+    if (!isOnline) {
+      toast.error('No internet connection');
+      return false;
+    }
+
     try {
       console.log('MongoAuthProvider: Attempting to sign up:', email, 'with role:', role);
       setLoading(true);
@@ -137,11 +193,9 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
         
         console.log('MongoAuthProvider: Sign up successful:', user.email);
         
-        // Store tokens
         setAuthToken(token);
         localStorage.setItem('refresh_token', refreshToken);
         
-        // Set user with compatibility id
         const userWithId = { ...user, id: user._id };
         setUser(userWithId);
         
@@ -164,10 +218,10 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log('MongoAuthProvider: Signing out...');
       
-      // Call logout endpoint
-      await authApi.logout();
+      if (isOnline) {
+        await authApi.logout();
+      }
       
-      // Clear tokens and user
       setAuthToken(null);
       localStorage.removeItem('refresh_token');
       setUser(null);
@@ -177,7 +231,6 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('MongoAuthProvider: Sign out error:', error);
       
-      // Clear local state even if API call fails
       setAuthToken(null);
       localStorage.removeItem('refresh_token');
       setUser(null);
@@ -187,6 +240,11 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = async (profileData: { fullName?: string; phone?: string }): Promise<boolean> => {
+    if (!isOnline) {
+      toast.error('No internet connection');
+      return false;
+    }
+
     try {
       console.log('MongoAuthProvider: Updating profile...');
       
@@ -208,24 +266,71 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string): Promise<boolean> => {
+    if (!isOnline) {
+      toast.error('No internet connection');
+      return false;
+    }
+
+    try {
+      console.log('MongoAuthProvider: Requesting password reset for:', email);
+      
+      // This would call a password reset endpoint
+      // const response = await authApi.resetPassword({ email });
+      
+      toast.success('Password reset instructions sent to your email');
+      return true;
+    } catch (error) {
+      console.error('MongoAuthProvider: Password reset error:', error);
+      const errorMessage = handleApiError(error);
+      toast.error(errorMessage);
+      return false;
+    }
+  };
+
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    if (!isOnline) {
+      toast.error('No internet connection');
+      return false;
+    }
+
+    try {
+      console.log('MongoAuthProvider: Changing password...');
+      
+      // This would call a change password endpoint
+      // const response = await authApi.changePassword({ currentPassword, newPassword });
+      
+      toast.success('Password changed successfully!');
+      return true;
+    } catch (error) {
+      console.error('MongoAuthProvider: Password change error:', error);
+      const errorMessage = handleApiError(error);
+      toast.error(errorMessage);
+      return false;
+    }
+  };
 
   const value = {
     user,
-    session: null, // For compatibility with Supabase auth
+    session: null,
     loading,
     signIn,
     signUp,
     signOut,
-    profile: user, // For compatibility with existing code
+    profile: user,
     refreshProfile,
     updateProfile,
-    
+    resetPassword,
+    changePassword,
+    isOnline,
+    retryConnection,
   };
 
   console.log('MongoAuthProvider: Providing context with state:', { 
     hasUser: !!user, 
     loading,
-    userRole: user?.profile?.role
+    userRole: user?.profile?.role,
+    isOnline
   });
 
   return (

@@ -1,153 +1,76 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from "@/components/ui/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@/hooks/useAuth';
-import { MongoAuthProvider } from '@/hooks/useMongoAuth';
-import { isMongoDBAuth } from '@/config/auth';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
+import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
+import Education from "./pages/Education";
+import SkillDevelopment from "./pages/SkillDevelopment";
+import CareerCentre from "./pages/CareerCentre";
+import JobCentre from "./pages/JobCentre";
+import Incubation from "./pages/Incubation";
+import LivelihoodIncubator from "./pages/LivelihoodIncubator";
+import MadeInNagaland from "./pages/MadeInNagaland";
+import Inventory from "./pages/Inventory";
+import HRAdmin from "./pages/HRAdmin";
+import ReportsPage from "./pages/ReportsPage";
+import Settings from "./pages/Settings";
+import EducationDepartment from "./pages/EducationDepartment";
+import NotFound from "./pages/NotFound";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { MongoAuthProvider } from "@/hooks/useMongoAuth";
+import { ConnectionStatus } from "@/components/common/ConnectionStatus";
+import { NotificationCenter } from "@/components/common/NotificationCenter";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 3,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
   },
 });
 
-import { Layout } from '@/components/layout/Layout';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { AuthGuard } from '@/components/auth/AuthGuard';
-import { Dashboard } from '@/pages/Dashboard';
-import Index from '@/pages/Index';
-import { Education } from '@/pages/Education';
-import { SkillDevelopment } from '@/pages/SkillDevelopment';
-import { JobCentre } from '@/pages/JobCentre';
-import { CareerCentre } from '@/pages/CareerCentre';
-import { EducationDepartment } from '@/pages/EducationDepartment';
-import { Incubation } from '@/pages/Incubation';
-import { MadeInNagaland } from '@/pages/MadeInNagaland';
-import { LivelihoodIncubator } from '@/pages/LivelihoodIncubator';
-import { HRAdmin } from '@/pages/HRAdmin';
-import { Inventory } from '@/pages/Inventory';
-import { ReportsPage } from '@/pages/ReportsPage';
-import { Settings } from '@/pages/Settings';
-import NotFound from '@/pages/NotFound';
-
 function App() {
-  console.log('App: Component rendering');
-  
-  const AuthProviderComponent = isMongoDBAuth() ? MongoAuthProvider : AuthProvider;
-  
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark" storageKey="youthnet-theme">
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <QueryClientProvider client={queryClient}>
-          <AuthProviderComponent>
-            <Toaster />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<AuthGuard />} />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Dashboard />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/education" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Education />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/education-department" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <EducationDepartment />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/skill-development" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SkillDevelopment />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/job-centre" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <JobCentre />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/career-centre" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <CareerCentre />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/incubation" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Incubation />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/made-in-nagaland" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MadeInNagaland />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/livelihood-incubator" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <LivelihoodIncubator />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/hr-admin" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <HRAdmin />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/inventory" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Inventory />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/reports" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <ReportsPage />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/settings" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Settings />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/index" element={<Index />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </AuthProviderComponent>
+          <TooltipProvider>
+            <MongoAuthProvider>
+              <BrowserRouter>
+                <div className="min-h-screen bg-background">
+                  {/* Global connection status */}
+                  <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+                    <NotificationCenter />
+                    <ConnectionStatus />
+                  </div>
+                  
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/education" element={<Education />} />
+                    <Route path="/education-department" element={<EducationDepartment />} />
+                    <Route path="/skill-development" element={<SkillDevelopment />} />
+                    <Route path="/career-centre" element={<CareerCentre />} />
+                    <Route path="/job-centre" element={<JobCentre />} />
+                    <Route path="/incubation" element={<Incubation />} />
+                    <Route path="/livelihood" element={<LivelihoodIncubator />} />
+                    <Route path="/made-in-nagaland" element={<MadeInNagaland />} />
+                    <Route path="/inventory" element={<Inventory />} />
+                    <Route path="/hr-admin" element={<HRAdmin />} />
+                    <Route path="/reports" element={<ReportsPage />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </div>
+              </BrowserRouter>
+              <Toaster richColors closeButton position="top-right" />
+            </MongoAuthProvider>
+          </TooltipProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </ErrorBoundary>
