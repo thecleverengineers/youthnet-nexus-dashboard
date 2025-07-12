@@ -19,7 +19,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Education', href: '/education', icon: GraduationCap },
   { name: 'Skill Development', href: '/skill-development', icon: Users },
   { name: 'Job Centre', href: '/job-centre', icon: Briefcase },

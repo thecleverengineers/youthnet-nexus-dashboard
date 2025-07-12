@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
@@ -7,8 +6,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
 import { MongoAuthProvider } from '@/hooks/useMongoAuth';
 import { isMongoDBAuth } from '@/config/auth';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
+    },
+  },
+});
 
 import { Layout } from '@/components/layout/Layout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -35,104 +44,113 @@ function App() {
   const AuthProviderComponent = isMongoDBAuth() ? MongoAuthProvider : AuthProvider;
   
   return (
-    <ThemeProvider defaultTheme="light" storageKey="youthnet-theme">
-      <QueryClientProvider client={queryClient}>
-        <AuthProviderComponent>
-          <Toaster />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<AuthGuard />} />
-              <Route path="/education" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Education />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/education-department" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <EducationDepartment />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/skill-development" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <SkillDevelopment />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/job-centre" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <JobCentre />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/career-centre" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <CareerCentre />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/incubation" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Incubation />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/made-in-nagaland" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <MadeInNagaland />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/livelihood-incubator" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <LivelihoodIncubator />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/hr-admin" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <HRAdmin />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/inventory" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/reports" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <ReportsPage />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Settings />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/index" element={<Index />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProviderComponent>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark" storageKey="youthnet-theme">
+        <QueryClientProvider client={queryClient}>
+          <AuthProviderComponent>
+            <Toaster />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<AuthGuard />} />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Dashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/education" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Education />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/education-department" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <EducationDepartment />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/skill-development" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <SkillDevelopment />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/job-centre" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <JobCentre />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/career-centre" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <CareerCentre />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/incubation" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Incubation />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/made-in-nagaland" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <MadeInNagaland />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/livelihood-incubator" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <LivelihoodIncubator />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/hr-admin" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <HRAdmin />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/inventory" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Inventory />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/reports" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <ReportsPage />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Settings />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/index" element={<Index />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProviderComponent>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
