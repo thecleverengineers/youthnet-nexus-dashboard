@@ -48,9 +48,9 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
     setError('');
 
     try {
-      console.log('Validating API Secret with URL:', `${authConfig.php.apiUrl}/youthnet-api/api/install/validate`);
+      console.log('Validating API Secret with URL:', `${authConfig.php.apiUrl}/api/install/validate`);
       
-      const response = await fetch(`${authConfig.php.apiUrl}/youthnet-api/api/install/validate`, {
+      const response = await fetch(`${authConfig.php.apiUrl}/api/install/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
       
       // More user-friendly error messages
       if (error.message === 'Failed to fetch') {
-        setError('Cannot connect to the server. Please ensure the PHP backend is running and accessible.');
+        setError('Cannot connect to the server. Please ensure the PHP backend is running and accessible at the configured URL.');
       } else {
         setError('Failed to validate API Secret. Please check your connection and try again.');
       }
@@ -94,7 +94,7 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
     setError('');
 
     try {
-      const response = await fetch(`${authConfig.php.apiUrl}/youthnet-api/api/install/database`, {
+      const response = await fetch(`${authConfig.php.apiUrl}/api/install/database`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -303,6 +303,7 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
               <>
                 <p>Step 1 of 2: API Validation</p>
                 <p>The permanent API secret is: <span className="font-mono font-semibold">7492836150</span></p>
+                <p className="mt-2 text-xs">Server URL: <span className="font-mono">{authConfig.php.apiUrl}</span></p>
               </>
             ) : (
               <>
