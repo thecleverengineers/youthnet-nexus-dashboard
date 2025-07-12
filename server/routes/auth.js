@@ -1,5 +1,6 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Student = require('../models/Student');
 const Trainer = require('../models/Trainer');
@@ -9,6 +10,8 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 const router = express.Router();
+
+const JWT_SECRET = process.env.JWT_SECRET || 'youthnet_jwt_secret_key_2024';
 
 // Rate limiting for auth endpoints
 const authLimiter = rateLimit({
@@ -264,8 +267,7 @@ router.post('/refresh', async (req, res) => {
       });
     }
 
-    // Verify refresh token (implementation depends on your refresh token strategy)
-    // For now, we'll just generate new tokens
+    // Verify refresh token
     const decoded = jwt.verify(refreshToken, JWT_SECRET + '_refresh');
     const user = await User.findById(decoded.userId);
     
