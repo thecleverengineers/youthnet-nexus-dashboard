@@ -35,7 +35,7 @@ class ApiClient {
 
   constructor() {
     this.baseURL = process.env.NODE_ENV === 'production' 
-      ? 'https://your-api-domain.com/api' 
+      ? 'http://64.227.152.214/api' // Updated with your DigitalOcean droplet IP
       : 'http://localhost:5000/api';
 
     this.instance = axios.create({
