@@ -23,10 +23,16 @@ export interface PaginationParams {
   filters?: Record<string, any>;
 }
 
-interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
-  metadata?: {
-    startTime: Date;
-  };
+interface RequestMetadata {
+  requestId: string;
+  startTime: number;
+}
+
+// Extend the AxiosRequestConfig to include metadata
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    metadata?: RequestMetadata;
+  }
 }
 
 class ApiClient {
@@ -52,14 +58,15 @@ class ApiClient {
   private setupInterceptors() {
     // Request interceptor
     this.instance.interceptors.request.use(
-      (config: ExtendedAxiosRequestConfig) => {
+      (config) => {
         const token = localStorage.getItem('authToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
         
-        // Add request timestamp for performance monitoring
-        config.metadata = { startTime: new Date() };
+        // Add request metadata for performance monitoring
+        const requestId = Date.now().toString(36) + '-' + Math.random().toString(36).substr(2);
+        config.metadata = { requestId, startTime: Date.now() };
         
         console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
         return config;
@@ -73,10 +80,8 @@ class ApiClient {
     // Response interceptor
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
-        const config = response.config as ExtendedAxiosRequestConfig;
-        const endTime = new Date();
-        const duration = endTime.getTime() - (config.metadata?.startTime?.getTime() || 0);
-        console.log(`[API] ${config.method?.toUpperCase()} ${config.url} - ${duration}ms`);
+        const duration = Date.now() - (response.config.metadata?.startTime || 0);
+        console.log(`[API] ${response.config.method?.toUpperCase()} ${response.config.url} - ${duration}ms`);
         
         return response;
       },

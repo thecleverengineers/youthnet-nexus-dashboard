@@ -10,8 +10,28 @@ import { Users, GraduationCap, Briefcase, TrendingUp, AlertTriangle, RefreshCw }
 import { apiClient } from '@/lib/api-client';
 import { ConnectionStatus } from '@/components/common/ConnectionStatus';
 
+// Define the dashboard data interface
+interface DashboardData {
+  totalStudents: number;
+  activePrograms: number;
+  jobPlacements: number;
+  completionRate: number;
+  recentActivities: Array<{
+    id: number;
+    type: string;
+    description: string;
+    timestamp: string;
+  }>;
+  upcomingEvents: Array<{
+    id: number;
+    title: string;
+    date: string;
+    type: string;
+  }>;
+}
+
 // Mock data fallback when API is not available
-const mockDashboardData = {
+const mockDashboardData: DashboardData = {
   totalStudents: 156,
   activePrograms: 12,
   jobPlacements: 34,
@@ -29,7 +49,7 @@ const mockDashboardData = {
 
 export function Dashboard() {
   const { 
-    data: dashboardData, 
+    data: apiResponse, 
     isLoading, 
     error, 
     refetch,
@@ -43,7 +63,7 @@ export function Dashboard() {
       } catch (error: any) {
         console.error('Dashboard API error:', error);
         // Return mock data when API fails
-        return mockDashboardData;
+        return { success: true, data: mockDashboardData };
       }
     },
     retry: 2,
@@ -51,8 +71,9 @@ export function Dashboard() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const data = dashboardData || mockDashboardData;
-  const isUsingMockData = !dashboardData || isError;
+  // Extract the actual dashboard data from the API response or use mock data
+  const data: DashboardData = apiResponse?.data || mockDashboardData;
+  const isUsingMockData = !apiResponse?.success || isError;
 
   if (isLoading) {
     return (
@@ -208,7 +229,7 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {data.recentActivities?.map((activity: any) => (
+                {data.recentActivities?.map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-4 p-3 border rounded-lg">
                     <div className="flex-1">
                       <span className="font-medium">{activity.description}</span>
@@ -230,7 +251,7 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {data.upcomingEvents?.map((event: any) => (
+                {data.upcomingEvents?.map((event) => (
                   <div key={event.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <div className="font-medium">{event.title}</div>
