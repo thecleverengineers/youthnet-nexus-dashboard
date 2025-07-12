@@ -6,7 +6,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
 import { MongoAuthProvider } from '@/hooks/useMongoAuth';
-import { isMongoDBAuth } from '@/config/auth';
+import { PHPAuthProvider } from '@/hooks/usePHPAuth';
+import { isMongoDBAuth, isSupabaseAuth, isPHPAuth } from '@/config/auth';
 
 const queryClient = new QueryClient();
 
@@ -32,7 +33,15 @@ import NotFound from '@/pages/NotFound';
 function App() {
   console.log('App: Component rendering');
   
-  const AuthProviderComponent = isMongoDBAuth() ? MongoAuthProvider : AuthProvider;
+  // Select the appropriate auth provider based on configuration
+  let AuthProviderComponent;
+  if (isPHPAuth()) {
+    AuthProviderComponent = PHPAuthProvider;
+  } else if (isMongoDBAuth()) {
+    AuthProviderComponent = MongoAuthProvider;
+  } else {
+    AuthProviderComponent = AuthProvider;
+  }
   
   return (
     <ThemeProvider defaultTheme="light" storageKey="youthnet-theme">

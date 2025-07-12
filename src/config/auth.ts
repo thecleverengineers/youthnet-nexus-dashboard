@@ -1,8 +1,14 @@
+
 // Auth provider configuration
-type AuthProvider = 'supabase' | 'mongodb';
+type AuthProvider = 'supabase' | 'mongodb' | 'php';
 
 export const authConfig = {
-  provider: 'mongodb' as AuthProvider,
+  provider: 'php' as AuthProvider,
+  php: {
+    apiUrl: process.env.NODE_ENV === 'production' 
+      ? 'http://143.244.171.76/youthnet-api' 
+      : 'http://localhost/youthnet-api',
+  },
   mongodb: {
     apiUrl: process.env.NODE_ENV === 'production' 
       ? 'https://your-api-domain.com/api' 
@@ -16,3 +22,4 @@ export const authConfig = {
 
 export const isMongoDBAuth = (): boolean => authConfig.provider === 'mongodb';
 export const isSupabaseAuth = (): boolean => authConfig.provider === 'supabase';
+export const isPHPAuth = (): boolean => authConfig.provider === 'php';
