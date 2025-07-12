@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { enhancedApi, dashboardApi, ApiResponse } from '@/lib/enhanced-api';
+import { enhancedApi, dashboardApi, EnhancedApiResponse } from '@/lib/enhanced-api';
 import { useUnifiedAuth } from './useUnifiedAuth';
 import { toast } from 'sonner';
 
