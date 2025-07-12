@@ -8,6 +8,8 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { MongoAuthProvider } from '@/hooks/useMongoAuth';
 import { PHPAuthProvider } from '@/hooks/usePHPAuth';
 import { isMongoDBAuth, isSupabaseAuth, isPHPAuth } from '@/config/auth';
+import { useInstallation } from '@/hooks/useInstallation';
+import { AppInstaller } from '@/components/installer/AppInstaller';
 
 const queryClient = new QueryClient();
 
@@ -30,9 +32,24 @@ import { ReportsPage } from '@/pages/ReportsPage';
 import { Settings } from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
 
-function App() {
-  console.log('App: Component rendering');
-  
+function AppContent() {
+  const { isInstalled, isLoading, markAsInstalled } = useInstallation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading application...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isInstalled) {
+    return <AppInstaller onInstallComplete={markAsInstalled} />;
+  }
+
   // Select the appropriate auth provider based on configuration
   let AuthProviderComponent;
   if (isPHPAuth()) {
@@ -42,7 +59,7 @@ function App() {
   } else {
     AuthProviderComponent = AuthProvider;
   }
-  
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="youthnet-theme">
       <QueryClientProvider client={queryClient}>
@@ -143,6 +160,12 @@ function App() {
       </QueryClientProvider>
     </ThemeProvider>
   );
+}
+
+function App() {
+  console.log('App: Component rendering');
+  
+  return <AppContent />;
 }
 
 export default App;

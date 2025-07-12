@@ -3,9 +3,6 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { toast } from 'sonner';
 import { authConfig } from '@/config/auth';
 
-// 10-digit numerical API secret
-const API_SECRET = '1234567890'; // Change this to match your backend secret
-
 interface User {
   _id: string;
   id: string; // For compatibility with Supabase auth
@@ -45,13 +42,23 @@ export function PHPAuthProvider({ children }: { children: ReactNode }) {
 
   const apiUrl = authConfig.php.apiUrl;
 
+  const getApiSecret = () => {
+    // Get API secret from localStorage (set during installation)
+    return localStorage.getItem('api_secret') || '';
+  };
+
   const makeRequest = async (endpoint: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('auth_token');
+    const apiSecret = getApiSecret();
     
+    if (!apiSecret) {
+      throw new Error('Application not properly installed. Please contact administrator.');
+    }
+
     const defaultOptions: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Secret': API_SECRET, // Include API secret in all requests
+        'X-API-Secret': apiSecret, // Use stored API secret
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     };
