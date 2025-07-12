@@ -28,7 +28,7 @@ interface AuthContextType {
   profile: User | null;
   refreshProfile: () => Promise<void>;
   updateProfile: (data: { fullName?: string; phone?: string }) => Promise<boolean>;
-  createDemoAccounts: () => Promise<boolean>;
+  
 }
 
 const MongoAuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -208,54 +208,6 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const createDemoAccounts = async (): Promise<boolean> => {
-    const demoUsers = [
-      { email: 'admin@youthnet.in', password: 'admin123', role: 'admin', fullName: 'Admin User' },
-      { email: 'staff@youthnet.in', password: 'staff123', role: 'staff', fullName: 'Staff User' },
-      { email: 'trainer@youthnet.in', password: 'trainer123', role: 'trainer', fullName: 'Trainer User' },
-      { email: 'student@youthnet.in', password: 'student123', role: 'student', fullName: 'Student User' },
-    ];
-
-    try {
-      console.log('MongoAuthProvider: Creating demo accounts...');
-      let successCount = 0;
-      
-      for (const user of demoUsers) {
-        try {
-          await authApi.register({
-            email: user.email,
-            password: user.password,
-            fullName: user.fullName,
-            role: user.role
-          });
-          successCount++;
-        } catch (error) {
-          // User might already exist - that's okay
-          if (error.response?.status === 409) {
-            console.log('MongoAuthProvider: Demo account already exists:', user.email);
-            successCount++;
-          } else {
-            console.error('MongoAuthProvider: Error creating demo account:', user.email, error);
-          }
-        }
-      }
-      
-      if (successCount === demoUsers.length) {
-        toast.success('All demo accounts are ready!');
-        return true;
-      } else if (successCount > 0) {
-        toast.success(`${successCount} demo accounts are ready!`);
-        return true;
-      } else {
-        toast.error('Failed to create demo accounts');
-        return false;
-      }
-    } catch (error) {
-      console.error('MongoAuthProvider: Error in createDemoAccounts:', error);
-      toast.error('Failed to create demo accounts');
-      return false;
-    }
-  };
 
   const value = {
     user,
@@ -267,7 +219,7 @@ export function MongoAuthProvider({ children }: { children: ReactNode }) {
     profile: user, // For compatibility with existing code
     refreshProfile,
     updateProfile,
-    createDemoAccounts,
+    
   };
 
   console.log('MongoAuthProvider: Providing context with state:', { 

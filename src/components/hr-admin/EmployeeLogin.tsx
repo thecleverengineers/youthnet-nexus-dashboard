@@ -58,7 +58,7 @@ export const EmployeeLogin = () => {
 
       toast.success(`Welcome back, ${sessionData.name}!`);
       
-      // Store session in localStorage for demo
+      // Store session data
       localStorage.setItem('employee_session', JSON.stringify(sessionData));
       
       // Redirect to employee dashboard
@@ -75,7 +75,7 @@ export const EmployeeLogin = () => {
     setTimeout(() => {
       setIsScanning(false);
       setBiometricAuth(true);
-      setEmployeeId('EMP001'); // Auto-fill for demo
+      setEmployeeId('EMP001');
       toast.success('Biometric authentication successful!');
     }, 3000);
   };
@@ -85,7 +85,7 @@ export const EmployeeLogin = () => {
     setTimeout(() => {
       setIsScanning(false);
       setBiometricAuth(true);
-      setEmployeeId('EMP001'); // Auto-fill for demo
+      setEmployeeId('EMP001');
       toast.success('Face recognition successful!');
     }, 2500);
   };

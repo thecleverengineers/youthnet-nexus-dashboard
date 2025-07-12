@@ -51,7 +51,7 @@ export const RoleBasedRoute = () => {
             <Alert className="text-left">
               <LogIn className="h-4 w-4" />
               <AlertDescription>
-                Please sign in to access your personalized dashboard. Use the demo accounts for instant access to explore different user roles.
+                Please sign in to access your personalized dashboard.
               </AlertDescription>
             </Alert>
             
@@ -60,13 +60,6 @@ export const RoleBasedRoute = () => {
               Access Dashboard
             </Button>
             
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>Demo Credentials:</p>
-              <p>Admin: admin@youthnet.in / admin123</p>
-              <p>Staff: staff@youthnet.in / staff123</p>
-              <p>Trainer: trainer@youthnet.in / trainer123</p>
-              <p>Student: student@youthnet.in / student123</p>
-            </div>
           </div>
         </div>
         <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />

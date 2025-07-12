@@ -101,7 +101,7 @@ export const AdvancedPayrollManagement = () => {
         gross_pay: 50000, // Base salary - in real app this would be calculated
         deductions: 5000, // Tax and other deductions
         net_pay: 45000, // Net after deductions
-        ai_risk_score: Math.random() * 0.3 // Random AI risk score for demo
+        ai_risk_score: 0
       }));
 
       const { error } = await supabase
