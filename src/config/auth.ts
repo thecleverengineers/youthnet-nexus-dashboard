@@ -6,7 +6,7 @@ type AuthProvider = 'supabase' | 'mongodb';
 export const authConfig = {
   provider: 'mongodb' as AuthProvider,
   mongodb: {
-    apiUrl: 'http://64.227.152.214:5000/api', // Production DigitalOcean droplet IP and port
+    apiUrl: 'http://143.244.171.76:5000/api', // Production DigitalOcean droplet IP and port
   },
   supabase: {
     url: "https://rstdujkrsfecrfmclnwu.supabase.co",
@@ -16,4 +16,3 @@ export const authConfig = {
 
 export const isMongoDBAuth = (): boolean => authConfig.provider === 'mongodb';
 export const isSupabaseAuth = (): boolean => authConfig.provider === 'supabase';
-

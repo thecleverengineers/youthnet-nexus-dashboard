@@ -40,7 +40,7 @@ class ApiClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = 'http://64.227.152.214:5000/api'; // Production DigitalOcean droplet IP and port
+    this.baseURL = 'http://143.244.171.76:5000/api'; // Production DigitalOcean droplet IP and port
 
     this.instance = axios.create({
       baseURL: this.baseURL,

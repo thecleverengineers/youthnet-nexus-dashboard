@@ -32,7 +32,7 @@ class EnhancedApiClient {
 
   constructor() {
     // Use production DigitalOcean droplet IP and port
-    this.baseURL = 'http://64.227.152.214:5000';
+    this.baseURL = 'http://143.244.171.76:5000';
     
     this.client = axios.create({
       baseURL: this.baseURL,
