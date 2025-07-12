@@ -90,7 +90,7 @@ PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_secure_jwt_secret
 JWT_REFRESH_SECRET=your_secure_refresh_secret
-ALLOWED_ORIGINS=https://your-lovable-app.lovable.app
+ALLOWED_ORIGINS=https://youthnet-nexus-dashboard.lovable.app
 ```
 
 ## Maintenance Commands

@@ -53,7 +53,7 @@ PORT=5000
 MONGODB_URI=mongodb+srv://youthnet:R5406JQXc19Ss8Z3@db-mongodb-nyc3-34944-ffbfb8c2.mongo.ondigitalocean.com/youthnet?tls=true&authSource=admin&replicaSet=db-mongodb-nyc3-34944
 JWT_SECRET=YN2024_Kp9mV$2nL8qW#6xR4jF!7zH3sA5tB9cE1uY&8oM*0iN+3vG^6dS@7eP4wQ!2lX5mZ8
 JWT_REFRESH_SECRET=YN2024_Zx8C#4vB1nM&9qE!6rT*3yU@7iO^5pA+2sD$0fG#8hJ!1kL&4mN*7bV^9cX@3eWfR6
-ALLOWED_ORIGINS=https://your-lovable-app.lovable.app
+ALLOWED_ORIGINS=https://youthnet-nexus-dashboard.lovable.app
 BCRYPT_SALT_ROUNDS=12
 API_RATE_LIMIT=100
 API_RATE_WINDOW=15

@@ -27,7 +27,7 @@ This guide covers deploying YouthNet application with MongoDB backend and React 
    MONGODB_URI=mongodb+srv://youthnet:R5406JQXc19Ss8Z3@db-mongodb-nyc3-34944-ffbfb8c2.mongo.ondigitalocean.com/youthnet?tls=true&authSource=admin&replicaSet=db-mongodb-nyc3-34944
    JWT_SECRET=your_secure_jwt_secret
    JWT_REFRESH_SECRET=your_secure_refresh_secret
-   ALLOWED_ORIGINS=https://your-lovable-app.lovable.app
+   ALLOWED_ORIGINS=https://youthnet-nexus-dashboard.lovable.app
    PORT=5000
    ```
 4. **Deploy the server** directory
@@ -53,14 +53,14 @@ This guide covers deploying YouthNet application with MongoDB backend and React 
 ## Step 3: Deploy Frontend via Lovable
 
 1. **Click "Publish"** button in Lovable
-2. **Copy the Lovable app URL** (e.g., https://app-name.lovable.app)
+2. **Copy the Lovable app URL** (e.g., https://youthnet-nexus-dashboard.lovable.app)
 3. **Update backend CORS** settings with this URL
 
 ## Step 4: Update CORS Settings
 
 Add your Lovable frontend URL to backend environment:
 ```
-ALLOWED_ORIGINS=https://your-lovable-app.lovable.app,https://your-custom-domain.com
+ALLOWED_ORIGINS=https://youthnet-nexus-dashboard.lovable.app
 ```
 
 ## Step 5: Test Deployment
@@ -78,7 +78,7 @@ NODE_ENV=production
 MONGODB_URI=mongodb+srv://youthnet:R5406JQXc19Ss8Z3@db-mongodb-nyc3-34944-ffbfb8c2.mongo.ondigitalocean.com/youthnet?tls=true&authSource=admin&replicaSet=db-mongodb-nyc3-34944
 JWT_SECRET=your_production_jwt_secret
 JWT_REFRESH_SECRET=your_production_refresh_secret
-ALLOWED_ORIGINS=https://your-lovable-app.lovable.app
+ALLOWED_ORIGINS=https://youthnet-nexus-dashboard.lovable.app
 PORT=5000
 BCRYPT_SALT_ROUNDS=12
 API_RATE_LIMIT=100

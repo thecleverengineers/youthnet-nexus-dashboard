@@ -6,7 +6,7 @@ const corsConfig = {
       : [
           'http://localhost:3000',
           'http://localhost:5173',
-          'https://your-lovable-app-domain.lovable.app' // Update with actual Lovable domain
+          'https://youthnet-nexus-dashboard.lovable.app' // Updated with your actual Lovable domain
         ];
     
     // Allow requests with no origin (mobile apps, etc.)
