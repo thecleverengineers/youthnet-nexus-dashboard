@@ -1,4 +1,3 @@
-
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { toast } from '@/hooks/use-toast';
 
@@ -41,9 +40,7 @@ class ApiClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.NODE_ENV === 'production' 
-      ? 'http://64.227.152.214:5000/api' // Updated with your DigitalOcean droplet IP and port
-      : 'http://localhost:5000/api';
+    this.baseURL = 'http://64.227.152.214:5000/api'; // Production DigitalOcean droplet IP and port
 
     this.instance = axios.create({
       baseURL: this.baseURL,
