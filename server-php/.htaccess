@@ -1,28 +1,48 @@
 
+# Enable rewrite engine
 RewriteEngine On
 
-# Handle CORS preflight requests
+# CORS headers
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Secret, X-Requested-With"
+Header always set Access-Control-Expose-Headers "Authorization"
+
+# Handle preflight requests
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
 
-# API routes
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# Health check endpoint
+RewriteRule ^health/?$ health.php [L]
 
-# Auth routes
-RewriteRule ^api/auth/register/?$ api/auth/register.php [L]
+# Authentication routes
 RewriteRule ^api/auth/login/?$ api/auth/login.php [L]
+RewriteRule ^api/auth/register/?$ api/auth/register.php [L]
+RewriteRule ^api/auth/refresh/?$ api/auth/refresh.php [L]
 RewriteRule ^api/auth/logout/?$ api/auth/logout.php [L]
 RewriteRule ^api/auth/profile/?$ api/auth/profile.php [L]
-RewriteRule ^api/auth/refresh/?$ api/auth/refresh.php [L]
 
 # Installation routes
 RewriteRule ^api/install/validate/?$ api/install/validate.php [L]
+RewriteRule ^api/install/database/?$ api/install/database.php [L]
 
-# Health check
-RewriteRule ^health/?$ health.php [L]
+# Deny access to sensitive files
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
 
-# Default fallback
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
+<Files "composer.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "composer.lock">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Deny access to vendor directory
+<IfModule mod_alias.c>
+    RedirectMatch 403 /vendor/
+</IfModule>
