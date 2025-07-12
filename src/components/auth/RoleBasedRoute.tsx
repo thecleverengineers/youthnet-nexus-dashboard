@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
-import { useAdvancedDashboard } from '@/hooks/useAdvancedDashboard';
 import { StudentDashboard } from '@/components/dashboards/StudentDashboard';
 import { TrainerDashboard } from '@/components/dashboards/TrainerDashboard';
 import { StaffDashboard } from '@/components/dashboards/StaffDashboard';
@@ -9,12 +8,10 @@ import { AdminDashboard } from '@/components/dashboards/AdminDashboard';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ConnectionStatus } from '@/components/common/ConnectionStatus';
-import { RefreshCw, LogIn, Loader2 } from 'lucide-react';
+import { RefreshCw, LogIn } from 'lucide-react';
 
 export const RoleBasedRoute = () => {
-  const { profile, loading, user, refreshProfile, isOnline } = useUnifiedAuth();
-  const dashboardData = useAdvancedDashboard();
+  const { profile, loading, user, refreshProfile } = useUnifiedAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -24,18 +21,13 @@ export const RoleBasedRoute = () => {
     setIsRefreshing(false);
   };
 
-  if (loading || dashboardData.loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Loader2 className="h-16 w-16 animate-spin mx-auto text-blue-500" />
-          <div className="space-y-2">
-            <p className="text-lg font-medium">Loading YouthNet Platform</p>
-            <p className="text-muted-foreground">Setting up your personalized experience...</p>
-            {!isOnline && (
-              <p className="text-sm text-yellow-600">Waiting for internet connection...</p>
-            )}
-          </div>
+          <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+          <p className="text-xs text-muted-foreground">Setting up your authentication...</p>
         </div>
       </div>
     );
@@ -59,29 +51,22 @@ export const RoleBasedRoute = () => {
             <Alert className="text-left">
               <LogIn className="h-4 w-4" />
               <AlertDescription>
-                Please sign in to access your personalized dashboard with real-time data and advanced features.
+                Please sign in to access your personalized dashboard. Use the demo accounts for instant access to explore different user roles.
               </AlertDescription>
             </Alert>
             
-            <div className="space-y-3">
-              <Button 
-                onClick={() => setShowAuthModal(true)} 
-                className="w-full px-8 py-3" 
-                size="lg"
-                disabled={!isOnline}
-              >
-                <LogIn className="h-5 w-5 mr-2" />
-                Access Your Dashboard
-              </Button>
-              
-              {!isOnline && (
-                <div className="text-sm text-yellow-600">
-                  Please check your internet connection
-                </div>
-              )}
-            </div>
+            <Button onClick={() => setShowAuthModal(true)} className="px-8 py-2" size="lg">
+              <LogIn className="h-4 w-4 mr-2" />
+              Access Dashboard
+            </Button>
             
-            <ConnectionStatus showDetails={true} />
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>Demo Credentials:</p>
+              <p>Admin: admin@youthnet.in / admin123</p>
+              <p>Staff: staff@youthnet.in / staff123</p>
+              <p>Trainer: trainer@youthnet.in / trainer123</p>
+              <p>Student: student@youthnet.in / student123</p>
+            </div>
           </div>
         </div>
         <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
@@ -93,16 +78,13 @@ export const RoleBasedRoute = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-6 max-w-md p-6">
-          <Loader2 className="h-16 w-16 animate-spin mx-auto text-yellow-500" />
+          <div className="w-16 h-16 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin mx-auto"></div>
           <h2 className="text-xl font-semibold text-white mb-2">Setting up your profile...</h2>
-          <p className="text-muted-foreground mb-4">
-            We're preparing your personalized dashboard with all the advanced features.
-          </p>
+          <p className="text-muted-foreground mb-4">This may take a moment for new accounts.</p>
           
           <Alert className="text-left">
             <AlertDescription>
-              Your profile is being created automatically. This includes setting up your role-based access, 
-              dashboard preferences, and notification settings.
+              Your profile is being created automatically. If this takes longer than expected, try refreshing your profile.
             </AlertDescription>
           </Alert>
           
@@ -110,7 +92,7 @@ export const RoleBasedRoute = () => {
             <Button 
               variant="outline" 
               onClick={handleRefreshProfile}
-              disabled={isRefreshing || !isOnline}
+              disabled={isRefreshing}
               className="flex items-center gap-2"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -121,16 +103,13 @@ export const RoleBasedRoute = () => {
               variant="ghost" 
               onClick={() => window.location.reload()}
               className="text-sm"
-              disabled={!isOnline}
             >
-              Reload Application
+              Refresh Page
             </Button>
           </div>
           
-          <ConnectionStatus showDetails={true} />
-          
           <p className="text-xs text-muted-foreground">
-            Having issues? The system will automatically retry. Contact support if this persists.
+            Profile loading issue? Contact support if this persists.
           </p>
         </div>
       </div>
@@ -138,9 +117,8 @@ export const RoleBasedRoute = () => {
   }
 
   console.log('Routing user with profile:', profile);
-  console.log('Dashboard data loaded:', !!dashboardData.stats);
 
-  switch (profile.role || profile.profile?.role) {
+  switch (profile.role) {
     case 'student':
       return <StudentDashboard />;
     case 'trainer':
@@ -151,6 +129,6 @@ export const RoleBasedRoute = () => {
       return <AdminDashboard />;
     default:
       console.log('Unknown role, defaulting to student dashboard:', profile.role);
-      return <StudentDashboard />;
+      return <StudentDashboard />; // Default fallback
   }
 };

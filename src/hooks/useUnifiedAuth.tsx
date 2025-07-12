@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/hooks/useAuth';
 import { useMongoAuth } from '@/hooks/useMongoAuth';
 import { isMongoDBAuth } from '@/config/auth';
@@ -11,17 +10,9 @@ export function useUnifiedAuth() {
   // Only call the auth hook for the configured provider to avoid errors
   if (isMongoDBAuth()) {
     const mongoAuth = useMongoAuth();
-    return {
-      ...mongoAuth,
-      isOnline: mongoAuth.isOnline ?? navigator.onLine,
-      retryConnection: mongoAuth.retryConnection ?? (() => Promise.resolve()),
-    };
+    return mongoAuth;
   } else {
     const supabaseAuth = useAuth();
-    return {
-      ...supabaseAuth,
-      isOnline: navigator.onLine,
-      retryConnection: () => Promise.resolve(),
-    };
+    return supabaseAuth;
   }
 }

@@ -1,12 +1,8 @@
-
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/database');
-const corsConfig = require('./config/cors');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -29,13 +25,20 @@ app.use(helmet({
   },
 }));
 
-// CORS configuration with dynamic origins
-app.use(cors(corsConfig));
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-domain.com'] 
+    : ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: (process.env.API_RATE_WINDOW || 15) * 60 * 1000,
-  max: process.env.API_RATE_LIMIT || 100,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
   message: {
     success: false,
     message: 'Too many requests from this IP, please try again later.'
@@ -50,9 +53,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging middleware
 app.use((req, res, next) => {
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  }
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 

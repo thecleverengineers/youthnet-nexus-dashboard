@@ -1,12 +1,12 @@
-
-
 // Auth provider configuration
 type AuthProvider = 'supabase' | 'mongodb';
 
 export const authConfig = {
   provider: 'mongodb' as AuthProvider,
   mongodb: {
-    apiUrl: 'http://143.244.171.76:5000/api', // Production DigitalOcean droplet IP and port
+    apiUrl: process.env.NODE_ENV === 'production' 
+      ? 'https://your-api-domain.com/api' 
+      : 'http://localhost:5000/api',
   },
   supabase: {
     url: "https://rstdujkrsfecrfmclnwu.supabase.co",

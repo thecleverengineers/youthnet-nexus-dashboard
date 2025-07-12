@@ -13,7 +13,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   profile: any;
   refreshProfile: () => Promise<void>;
-  
+  createDemoAccounts: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -173,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Handle specific error cases
         if (error.message.includes('Email not confirmed')) {
-          toast.error('Please check your email and confirm your account.');
+          toast.error('Please check your email and confirm your account, or use the demo accounts.');
         } else if (error.message.includes('Invalid login credentials')) {
           toast.error('Invalid email or password. Please check your credentials.');
         } else {
@@ -235,6 +235,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const createDemoAccounts = async (): Promise<boolean> => {
+    const demoUsers = [
+      { email: 'admin@youthnet.in', password: 'admin123', role: 'admin', name: 'Admin User' },
+      { email: 'staff@youthnet.in', password: 'staff123', role: 'staff', name: 'Staff User' },
+      { email: 'trainer@youthnet.in', password: 'trainer123', role: 'trainer', name: 'Trainer User' },
+      { email: 'student@youthnet.in', password: 'student123', role: 'student', name: 'Student User' },
+    ];
+
+    try {
+      setLoading(true);
+      toast.info('Creating demo accounts...');
+      
+      let successCount = 0;
+      
+      for (const user of demoUsers) {
+        console.log('AuthProvider: Creating demo account for:', user.email);
+        
+        const { data, error } = await supabase.auth.signUp({
+          email: user.email,
+          password: user.password,
+          options: {
+            data: {
+              full_name: user.name,
+              role: user.role,
+            },
+          },
+        });
+
+        if (error) {
+          if (error.message.includes('User already registered')) {
+            console.log('AuthProvider: Demo account already exists:', user.email);
+            successCount++;
+          } else {
+            console.error('AuthProvider: Error creating demo account:', user.email, error);
+            toast.error(`Failed to create ${user.role} account: ${error.message}`);
+          }
+        } else {
+          console.log('AuthProvider: Demo account created successfully:', user.email);
+          successCount++;
+        }
+        
+        // Add delay between account creations to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      setLoading(false);
+      
+      if (successCount === demoUsers.length) {
+        toast.success('All demo accounts are ready! You can now use the demo login buttons.');
+        return true;
+      } else if (successCount > 0) {
+        toast.success(`${successCount} demo accounts are ready! You can now use the demo login buttons.`);
+        return true;
+      } else {
+        toast.error('Failed to create demo accounts');
+        return false;
+      }
+    } catch (error) {
+      console.error('AuthProvider: Error in createDemoAccounts:', error);
+      toast.error('Failed to create demo accounts');
+      setLoading(false);
+      return false;
+    }
+  };
 
   const signOut = async (): Promise<void> => {
     try {
@@ -263,7 +327,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
     profile,
     refreshProfile,
-    
+    createDemoAccounts,
   };
 
   console.log('AuthProvider: Providing context with state:', { 

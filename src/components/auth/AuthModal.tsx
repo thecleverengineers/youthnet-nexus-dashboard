@@ -18,9 +18,9 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   console.log('AuthModal: Component rendering, isOpen:', isOpen);
   
-  const { signIn, signUp, loading } = useUnifiedAuth();
+  const { signIn, signUp, createDemoAccounts, loading } = useUnifiedAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [creatingDemo, setCreatingDemo] = useState(false);
   
   // Sign In Form
   const [signInEmail, setSignInEmail] = useState('');
@@ -42,7 +42,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     console.log('AuthModal: Attempting to sign in with:', signInEmail);
     
     try {
-      setConnectionError(null); // Clear any previous errors
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
         console.log('AuthModal: Sign in successful, closing modal');
@@ -59,14 +58,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       }
     } catch (error) {
       console.error('AuthModal: Sign in error:', error);
-      
-      // Check for network errors and set connection error
-      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
-        setConnectionError('Cannot connect to server. Please ensure the MongoDB backend server is running on port 5000.');
-      } else {
-        setConnectionError(null);
-      }
-      
       toast.error('Failed to sign in. Please try again.');
     }
   };
@@ -96,6 +87,51 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
+  // Demo users with credentials
+  const demoUsers = [
+    { email: 'admin@youthnet.in', password: 'admin123', role: 'Admin', color: 'red' },
+    { email: 'staff@youthnet.in', password: 'staff123', role: 'Staff', color: 'blue' },
+    { email: 'trainer@youthnet.in', password: 'trainer123', role: 'Trainer', color: 'purple' },
+    { email: 'student@youthnet.in', password: 'student123', role: 'Student', color: 'green' },
+  ];
+
+  const handleDemoLogin = async (email: string, password: string) => {
+    console.log('AuthModal: Demo login attempt for:', email);
+    
+    try {
+      const success = await signIn(email, password);
+      if (success) {
+        console.log('AuthModal: Demo login successful for:', email);
+        toast.success(`Demo ${email.split('@')[0]} login successful!`, {
+          description: 'Redirecting to your dashboard...',
+          duration: 2000,
+        });
+        // Close modal and redirect after showing toast
+        setTimeout(() => {
+          onClose();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('AuthModal: Demo login error:', error);
+      toast.error('Demo account login failed. Please try creating demo accounts first.');
+    }
+  };
+
+  const handleCreateDemoAccounts = async () => {
+    console.log('AuthModal: Creating demo accounts...');
+    setCreatingDemo(true);
+    try {
+      const success = await createDemoAccounts();
+      if (success) {
+        toast.success('Demo accounts are ready! You can now use the role buttons below.');
+      }
+    } catch (error) {
+      console.error('AuthModal: Error creating demo accounts:', error);
+      toast.error('Failed to create demo accounts. Please try again.');
+    } finally {
+      setCreatingDemo(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -120,16 +156,51 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
-              {/* Connection Error Alert */}
-              {connectionError && (
-                <Alert variant="destructive">
+              {/* Demo Login Options */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-muted-foreground text-center">Quick Demo Access</h3>
+                
+                <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-xs">
-                    {connectionError}
+                    Use these demo accounts to explore different user roles instantly.
                   </AlertDescription>
                 </Alert>
-              )}
-              
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCreateDemoAccounts}
+                  disabled={loading || creatingDemo}
+                  className="w-full text-xs border-primary/30 hover:bg-primary/10"
+                >
+                  {creatingDemo ? 'Setting up Demo Accounts...' : 'Setup Demo Accounts'}
+                </Button>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  {demoUsers.map((user) => (
+                    <Button
+                      key={user.email}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDemoLogin(user.email, user.password)}
+                      disabled={loading}
+                      className="text-xs hover:bg-primary/10 border-primary/30 transition-colors"
+                    >
+                      {user.role}
+                    </Button>
+                  ))}
+                </div>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-muted" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or sign in manually</span>
+                  </div>
+                </div>
+              </div>
 
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -177,7 +248,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-xs">
-                  Create your account to get started with YouthNet.
+                  New accounts require email confirmation. For instant access, use the demo accounts on the Sign In tab.
                 </AlertDescription>
               </Alert>
               
