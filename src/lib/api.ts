@@ -1,8 +1,9 @@
+
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // API Configuration - Updated with your DigitalOcean droplet IP
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'http://64.227.152.214/api' // Updated with your DigitalOcean droplet IP
+  ? 'http://64.227.152.214:5000/api' // Updated with your DigitalOcean droplet IP and port
   : 'http://localhost:5000/api';
 
 // Create axios instance
