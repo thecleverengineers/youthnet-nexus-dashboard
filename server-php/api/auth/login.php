@@ -4,10 +4,16 @@ require_once '../../config/cors.php';
 require_once '../../config/database.php';
 require_once '../../models/User.php';
 require_once '../../auth/JWTHandler.php';
+require_once '../../middleware/auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(array("success" => false, "message" => "Method not allowed"));
+    exit();
+}
+
+// Validate API secret first
+if (!validateApiSecretOnly()) {
     exit();
 }
 

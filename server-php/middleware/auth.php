@@ -4,7 +4,31 @@ require_once '../auth/JWTHandler.php';
 require_once '../models/User.php';
 require_once '../config/database.php';
 
+// Define the API secret (10-digit numerical)
+define('API_SECRET', '1234567890'); // Change this to your desired 10-digit secret
+
+function validateApiSecret() {
+    $headers = getallheaders();
+    $apiSecret = isset($headers['X-API-Secret']) ? $headers['X-API-Secret'] : 
+                (isset($headers['x-api-secret']) ? $headers['x-api-secret'] : '');
+
+    if (empty($apiSecret) || $apiSecret !== API_SECRET) {
+        http_response_code(401);
+        echo json_encode(array(
+            "success" => false,
+            "message" => "Invalid or missing API secret"
+        ));
+        return false;
+    }
+    return true;
+}
+
 function authenticate() {
+    // First validate API secret
+    if (!validateApiSecret()) {
+        return false;
+    }
+
     $headers = getallheaders();
     $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : 
                  (isset($headers['authorization']) ? $headers['authorization'] : '');
@@ -74,5 +98,10 @@ function authorize($roles = []) {
     }
 
     return $user;
+}
+
+// Function for endpoints that only need API secret (like registration/login)
+function validateApiSecretOnly() {
+    return validateApiSecret();
 }
 ?>

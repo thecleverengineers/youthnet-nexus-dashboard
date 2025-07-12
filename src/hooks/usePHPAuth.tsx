@@ -3,6 +3,9 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { toast } from 'sonner';
 import { authConfig } from '@/config/auth';
 
+// 10-digit numerical API secret
+const API_SECRET = '1234567890'; // Change this to match your backend secret
+
 interface User {
   _id: string;
   id: string; // For compatibility with Supabase auth
@@ -48,6 +51,7 @@ export function PHPAuthProvider({ children }: { children: ReactNode }) {
     const defaultOptions: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        'X-API-Secret': API_SECRET, // Include API secret in all requests
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     };
