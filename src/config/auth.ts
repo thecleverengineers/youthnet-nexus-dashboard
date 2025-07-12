@@ -7,7 +7,7 @@ export const authConfig = {
   php: {
     apiUrl: process.env.NODE_ENV === 'production' 
       ? 'http://143.244.171.76' 
-      : 'http://localhost/youthnet-api',
+      : 'http://localhost',
   },
   mongodb: {
     apiUrl: process.env.NODE_ENV === 'production' 

@@ -48,7 +48,9 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
     setError('');
 
     try {
-      const response = await fetch(`${authConfig.php.apiUrl}/api/install/validate`, {
+      console.log('Validating API Secret with URL:', `${authConfig.php.apiUrl}/youthnet-api/api/install/validate`);
+      
+      const response = await fetch(`${authConfig.php.apiUrl}/youthnet-api/api/install/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +72,13 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
       }
     } catch (error) {
       console.error('API Secret validation error:', error);
-      setError('Failed to validate API Secret. Please check your connection and try again.');
+      
+      // More user-friendly error messages
+      if (error.message === 'Failed to fetch') {
+        setError('Cannot connect to the server. Please ensure the PHP backend is running and accessible.');
+      } else {
+        setError('Failed to validate API Secret. Please check your connection and try again.');
+      }
     } finally {
       setIsValidating(false);
     }
@@ -86,7 +94,7 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
     setError('');
 
     try {
-      const response = await fetch(`${authConfig.php.apiUrl}/api/install/database`, {
+      const response = await fetch(`${authConfig.php.apiUrl}/youthnet-api/api/install/database`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,6 +195,9 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
                   className="text-center font-mono"
                   disabled={isValidating}
                 />
+                <p className="text-sm text-muted-foreground text-center">
+                  Use: <span className="font-mono bg-gray-100 px-2 py-1 rounded">7492836150</span>
+                </p>
               </div>
 
               <Button
@@ -291,7 +302,7 @@ export function AppInstaller({ onInstallComplete }: AppInstallerProps) {
             {currentStep === 'api-secret' ? (
               <>
                 <p>Step 1 of 2: API Validation</p>
-                <p>Contact your administrator if you need assistance.</p>
+                <p>The permanent API secret is: <span className="font-mono font-semibold">7492836150</span></p>
               </>
             ) : (
               <>
