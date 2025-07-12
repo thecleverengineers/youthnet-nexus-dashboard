@@ -35,11 +35,11 @@ cd /var/www
 
 # Clone repository
 echo "📥 Cloning YouthNet backend..."
-sudo git clone https://github.com/thecleverengineers/youthnet-backend.git
+sudo git clone https://github.com/thecleverengineers/youthnet-nexus-dashboard.git
 
 # Set permissions
-sudo chown -R $USER:$USER /var/www/youthnet-backend
-cd youthnet-backend
+sudo chown -R $USER:$USER /var/www/youthnet-nexus-dashboard
+cd youthnet-nexus-dashboard
 
 # Install dependencies
 echo "📦 Installing dependencies..."
@@ -103,7 +103,7 @@ sudo systemctl restart nginx
 echo "📄 Creating update deployment script..."
 cat > /var/www/update-deploy.sh << 'EOF'
 #!/bin/bash
-cd /var/www/youthnet-backend
+cd /var/www/youthnet-nexus-dashboard
 git pull origin main
 npm install --production
 pm2 restart youthnet-api

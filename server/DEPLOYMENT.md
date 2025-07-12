@@ -4,7 +4,7 @@
 ## Quick Start - Upload to GitHub from Lovable
 
 ### Prerequisites
-- GitHub repository: `https://github.com/thecleverengineers/youthnet-backend`
+- GitHub repository: `https://github.com/thecleverengineers/youthnet-nexus-dashboard`
 - Git configured in your Lovable environment
 
 ### Step 1: Run Deployment Script
@@ -23,7 +23,7 @@ This script will:
 - Push to GitHub repository
 
 ### Step 2: Verify Upload
-Visit https://github.com/thecleverengineers/youthnet-backend to confirm your code is uploaded.
+Visit https://github.com/thecleverengineers/youthnet-nexus-dashboard to confirm your code is uploaded.
 
 ## DigitalOcean Droplet Deployment
 
@@ -38,14 +38,14 @@ Visit https://github.com/thecleverengineers/youthnet-backend to confirm your cod
 SSH into your droplet and run:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/thecleverengineers/youthnet-backend/main/deploy-droplet.sh | bash
+curl -sSL https://raw.githubusercontent.com/thecleverengineers/youthnet-nexus-dashboard/main/deploy-droplet.sh | bash
 ```
 
 Or manually:
 
 ```bash
 ssh root@your_droplet_ip
-wget https://raw.githubusercontent.com/thecleverengineers/youthnet-backend/main/deploy-droplet.sh
+wget https://raw.githubusercontent.com/thecleverengineers/youthnet-nexus-dashboard/main/deploy-droplet.sh
 chmod +x deploy-droplet.sh
 ./deploy-droplet.sh
 ```

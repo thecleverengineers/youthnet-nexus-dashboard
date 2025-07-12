@@ -1,6 +1,6 @@
 
 {
-  "name": "youthnet-backend",
+  "name": "youthnet-nexus-dashboard",
   "version": "1.0.0",
   "description": "YouthNet Backend API with MongoDB",
   "main": "app.js",

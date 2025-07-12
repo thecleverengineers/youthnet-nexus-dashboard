@@ -35,8 +35,8 @@ A comprehensive backend API for the YouthNet platform built with Node.js, Expres
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd youthnet/server
+git clone https://github.com/thecleverengineers/youthnet-nexus-dashboard.git
+cd youthnet-nexus-dashboard/server
 ```
 
 2. Install dependencies:
@@ -85,12 +85,12 @@ The API will be available at `http://localhost:5000`
 
 1. Build the Docker image:
 ```bash
-docker build -t youthnet-backend .
+docker build -t youthnet-nexus-dashboard .
 ```
 
 2. Run the container:
 ```bash
-docker run -p 5000:5000 --env-file .env.production youthnet-backend
+docker run -p 5000:5000 --env-file .env.production youthnet-nexus-dashboard
 ```
 
 ### Using DigitalOcean App Platform

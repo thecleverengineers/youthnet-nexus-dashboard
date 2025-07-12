@@ -84,7 +84,7 @@ Features:
 - Comprehensive API documentation"
 
 echo "🔗 Adding GitHub remote repository..."
-git remote add origin https://github.com/thecleverengineers/youthnet-backend.git
+git remote add origin https://github.com/thecleverengineers/youthnet-nexus-dashboard.git
 
 echo "⬆️ Pushing to GitHub..."
 git branch -M main
@@ -93,9 +93,9 @@ git push -u origin main
 echo "✅ Backend uploaded to GitHub successfully!"
 echo ""
 echo "📋 Next Steps:"
-echo "1. Visit: https://github.com/thecleverengineers/youthnet-backend"
+echo "1. Visit: https://github.com/thecleverengineers/youthnet-nexus-dashboard"
 echo "2. Verify your code is uploaded correctly"
 echo "3. Create your DigitalOcean Droplet"
 echo "4. Run the droplet deployment script"
 echo ""
-echo "🌐 Repository URL: https://github.com/thecleverengineers/youthnet-backend"
+echo "🌐 Repository URL: https://github.com/thecleverengineers/youthnet-nexus-dashboard"
