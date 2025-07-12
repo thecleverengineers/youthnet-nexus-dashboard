@@ -34,7 +34,7 @@ class EnhancedApiClient {
   constructor() {
     // Use environment-appropriate base URL
     this.baseURL = process.env.NODE_ENV === 'production' 
-      ? 'http://64.227.152.214' // Updated with your DigitalOcean droplet IP
+      ? 'http://64.227.152.214:5000' // Updated with your DigitalOcean droplet IP and port
       : 'http://localhost:5000'; // Local development
     
     this.client = axios.create({
