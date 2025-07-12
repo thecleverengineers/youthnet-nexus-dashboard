@@ -1,18 +1,15 @@
-
 <?php
 require_once '../auth/JWTHandler.php';
 require_once '../models/User.php';
 require_once '../config/database.php';
-
-// Define the API secret (10-digit numerical)
-define('API_SECRET', '1234567890'); // Change this to your desired 10-digit secret
+require_once '../config/api.php';
 
 function validateApiSecret() {
     $headers = getallheaders();
     $apiSecret = isset($headers['X-API-Secret']) ? $headers['X-API-Secret'] : 
                 (isset($headers['x-api-secret']) ? $headers['x-api-secret'] : '');
 
-    if (empty($apiSecret) || $apiSecret !== API_SECRET) {
+    if (empty($apiSecret) || !APIConfig::validateApiSecret($apiSecret)) {
         http_response_code(401);
         echo json_encode(array(
             "success" => false,
