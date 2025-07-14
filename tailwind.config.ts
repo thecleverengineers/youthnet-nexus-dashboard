@@ -21,6 +21,8 @@ export default {
     extend: {
       fontFamily: {
         'inter': ['Inter', 'sans-serif'],
+        'mono': ['JetBrains Mono', 'monospace'],
+        'display': ['Poppins', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -65,6 +67,16 @@ export default {
           'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))'
+        },
+        // Neon Color Palette
+        neon: {
+          pink: 'hsl(var(--neon-pink))',
+          cyan: 'hsl(var(--neon-cyan))',
+          purple: 'hsl(var(--neon-purple))',
+          green: 'hsl(var(--neon-green))',
+          yellow: 'hsl(var(--neon-yellow))',
+          orange: 'hsl(var(--neon-orange))',
+          blue: 'hsl(var(--neon-blue))',
         }
       },
       borderRadius: {
@@ -118,6 +130,20 @@ export default {
             opacity: '1',
             transform: 'translateX(0)'
           }
+        },
+        'neon-pulse': {
+          '0%, 100%': {
+            boxShadow: '0 0 5px hsl(322 100% 65% / 0.5), 0 0 10px hsl(322 100% 65% / 0.5), 0 0 15px hsl(322 100% 65% / 0.5)'
+          },
+          '50%': {
+            boxShadow: '0 0 10px hsl(322 100% 65% / 0.8), 0 0 20px hsl(322 100% 65% / 0.8), 0 0 30px hsl(322 100% 65% / 0.8)'
+          }
+        },
+        'gradient-shift': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '25%': { backgroundPosition: '100% 50%' },
+          '50%': { backgroundPosition: '50% 100%' },
+          '75%': { backgroundPosition: '100% 0%' }
         }
       },
       animation: {
@@ -125,7 +151,12 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.3s ease-out',
         'slide-in-from-left': 'slide-in-from-left 0.3s ease-out',
-        'slide-in-from-right': 'slide-in-from-right 0.3s ease-out'
+        'slide-in-from-right': 'slide-in-from-right 0.3s ease-out',
+        'neon-pulse': 'neon-pulse 2s ease-in-out infinite',
+        'gradient-shift': 'gradient-shift 4s ease-in-out infinite'
+      },
+      backdropBlur: {
+        xs: '2px',
       }
     }
   },
