@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,7 +41,6 @@ import {
   Layers,
   History,
   Timer,
-  Backup,
   Server,
   FileText,
   Folder,
@@ -545,7 +543,7 @@ export const BackupRestore = () => {
                           <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
                             {getLocationIcon(backup.location)}
                           </div>
-                          {backup.quantumBackup && (
+                          {backup.type === 'quantum' && (
                             <div className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 rounded-full animate-pulse"></div>
                           )}
                         </div>
