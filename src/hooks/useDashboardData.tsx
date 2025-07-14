@@ -1,114 +1,157 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
 
 export function useDashboardData() {
-  const studentsQuery = useQuery({
-    queryKey: ['students-count'],
+  const { user, profile } = useAuth();
+
+  // General statistics query
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const { count } = await supabase
-        .from('students')
-        .select('*', { count: 'exact', head: true });
-      return count || 0;
+      const [
+        studentsRes,
+        employeesRes,
+        programsRes,
+        jobsRes,
+        projectsRes,
+        inventoryRes
+      ] = await Promise.all([
+        supabase.from('students').select('*', { count: 'exact', head: true }),
+        supabase.from('employees').select('*', { count: 'exact', head: true }),
+        supabase.from('training_programs').select('*', { count: 'exact', head: true }),
+        supabase.from('job_postings').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+        supabase.from('incubation_projects').select('*', { count: 'exact', head: true }),
+        supabase.from('inventory_items').select('*', { count: 'exact', head: true })
+      ]);
+
+      return {
+        totalStudents: studentsRes.count || 0,
+        totalEmployees: employeesRes.count || 0,
+        totalPrograms: programsRes.count || 0,
+        activeJobs: jobsRes.count || 0,
+        totalProjects: projectsRes.count || 0,
+        totalAssets: inventoryRes.count || 0
+      };
     },
+    enabled: !!user
   });
 
-  const trainersQuery = useQuery({
-    queryKey: ['trainers-count'],
+  // User-specific data based on role
+  const { data: userSpecificData, isLoading: userDataLoading } = useQuery({
+    queryKey: ['user-specific-data', profile?.role, user?.id],
     queryFn: async () => {
-      const { count } = await supabase
-        .from('trainers')
-        .select('*', { count: 'exact', head: true });
-      return count || 0;
+      if (!user || !profile) return null;
+
+      switch (profile.role) {
+        case 'student':
+          const { data: studentData } = await supabase
+            .from('students')
+            .select(`
+              *,
+              student_enrollments(
+                *,
+                training_programs(name)
+              ),
+              certifications(*),
+              job_applications(*)
+            `)
+            .eq('user_id', user.id)
+            .single();
+          return studentData;
+
+        case 'trainer':
+          const { data: trainerData } = await supabase
+            .from('trainers')
+            .select(`
+              *,
+              training_programs(*)
+            `)
+            .eq('user_id', user.id)
+            .single();
+          return trainerData;
+
+        case 'staff':
+        case 'admin':
+          const { data: employeeData } = await supabase
+            .from('employees')
+            .select(`
+              *,
+              employee_tasks(*),
+              attendance_records(*)
+            `)
+            .eq('user_id', user.id)
+            .single();
+          return employeeData;
+
+        default:
+          return null;
+      }
     },
+    enabled: !!user && !!profile
   });
 
-  const jobApplicationsQuery = useQuery({
-    queryKey: ['job-applications-count'],
+  // Recent activities
+  const { data: recentActivities, isLoading: activitiesLoading } = useQuery({
+    queryKey: ['recent-activities'],
     queryFn: async () => {
-      const { count } = await supabase
+      const activities = [];
+
+      // Get recent job applications
+      const { data: jobApps } = await supabase
         .from('job_applications')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'selected');
-      return count || 0;
-    },
-  });
+        .select(`
+          *,
+          job_postings(title, company),
+          students!inner(user_id, profiles!inner(full_name))
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-  const incubationProjectsQuery = useQuery({
-    queryKey: ['incubation-projects-count'],
-    queryFn: async () => {
-      const { count } = await supabase
-        .from('incubation_projects')
-        .select('*', { count: 'exact', head: true })
-        .in('status', ['development', 'testing', 'launched']);
-      return count || 0;
-    },
-  });
+      if (jobApps) {
+        activities.push(...jobApps.map(app => ({
+          id: app.id,
+          type: 'job_application',
+          title: `Job Application: ${app.job_postings?.title}`,
+          description: `${app.students?.profiles?.full_name} applied to ${app.job_postings?.company}`,
+          timestamp: app.created_at
+        })));
+      }
 
-  const departmentStatsQuery = useQuery({
-    queryKey: ['department-stats'],
-    queryFn: async () => {
-      // Get student counts by enrollment status
+      // Get recent enrollments
       const { data: enrollments } = await supabase
         .from('student_enrollments')
         .select(`
-          status,
-          program_id,
-          training_programs(name)
-        `);
-
-      // Process data for department performance chart
-      const departmentData = [
-        { name: 'Education', students: 0, completion: 85 },
-        { name: 'Skill Dev', students: 0, completion: 92 },
-        { name: 'Job Centre', students: 0, completion: 78 },
-        { name: 'Career Dev', students: 0, completion: 88 },
-        { name: 'Incubation', students: 0, completion: 95 },
-      ];
+          *,
+          training_programs(name),
+          students!inner(user_id, profiles!inner(full_name))
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
 
       if (enrollments) {
-        // Count students by department (simplified)
-        departmentData[0].students = enrollments.filter(e => e.status === 'active').length;
-        departmentData[1].students = Math.floor(departmentData[0].students * 0.7);
-        departmentData[2].students = Math.floor(departmentData[0].students * 0.5);
-        departmentData[3].students = Math.floor(departmentData[0].students * 0.3);
-        departmentData[4].students = Math.floor(departmentData[0].students * 0.1);
+        activities.push(...enrollments.map(enrollment => ({
+          id: enrollment.id,
+          type: 'enrollment',
+          title: `New Enrollment: ${enrollment.training_programs?.name}`,
+          description: `${enrollment.students?.profiles?.full_name} enrolled in program`,
+          timestamp: enrollment.created_at
+        })));
       }
 
-      return departmentData;
+      return activities
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 10);
     },
-  });
-
-  const placementDataQuery = useQuery({
-    queryKey: ['placement-data'],
-    queryFn: async () => {
-      // Get job applications with job details
-      const { data: applications } = await supabase
-        .from('job_applications')
-        .select(`
-          status,
-          job_postings(company, title)
-        `)
-        .eq('status', 'selected');
-
-      // Mock placement distribution data
-      return [
-        { name: 'IT/Software', value: 35, color: '#8884d8' },
-        { name: 'Banking', value: 25, color: '#82ca9d' },
-        { name: 'Retail', value: 20, color: '#ffc658' },
-        { name: 'Manufacturing', value: 15, color: '#ff7c7c' },
-        { name: 'Others', value: 5, color: '#8dd1e1' },
-      ];
-    },
+    enabled: !!user
   });
 
   return {
-    studentsCount: studentsQuery.data || 0,
-    trainersCount: trainersQuery.data || 0,
-    jobPlacements: jobApplicationsQuery.data || 0,
-    incubationProjects: incubationProjectsQuery.data || 0,
-    departmentData: departmentStatsQuery.data || [],
-    placementData: placementDataQuery.data || [],
-    loading: studentsQuery.isLoading || trainersQuery.isLoading || jobApplicationsQuery.isLoading || incubationProjectsQuery.isLoading,
+    stats,
+    userSpecificData,
+    recentActivities,
+    isLoading: statsLoading || userDataLoading || activitiesLoading,
+    profile
   };
 }

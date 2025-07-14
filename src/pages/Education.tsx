@@ -2,21 +2,16 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Users, 
   GraduationCap, 
-  Calendar, 
-  TrendingUp, 
-  Plus,
-  Search,
-  Filter,
-  Download,
   BookOpen,
   Award,
-  Clock
+  Plus,
+  Download,
+  TrendingUp
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,23 +23,43 @@ import { PerformanceAnalytics } from '@/components/education/PerformanceAnalytic
 export function Education() {
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Fetch education statistics
+  // Fetch real education statistics
   const { data: stats, isLoading } = useQuery({
     queryKey: ['education-stats'],
     queryFn: async () => {
-      const [studentsRes, programsRes, enrollmentsRes, completionsRes] = await Promise.all([
+      const [studentsRes, coursesRes, enrollmentsRes, completionsRes, certificationsRes] = await Promise.all([
         supabase.from('students').select('*', { count: 'exact', head: true }),
-        supabase.from('training_programs').select('*', { count: 'exact', head: true }),
-        supabase.from('student_enrollments').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-        supabase.from('student_enrollments').select('*', { count: 'exact', head: true }).eq('status', 'completed')
+        supabase.from('education_courses').select('*', { count: 'exact', head: true }),
+        supabase.from('course_enrollments').select('*', { count: 'exact', head: true }).eq('status', 'enrolled'),
+        supabase.from('course_enrollments').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
+        supabase.from('certifications').select('*', { count: 'exact', head: true }).eq('status', 'completed')
       ]);
 
       return {
         totalStudents: studentsRes.count || 0,
-        totalPrograms: programsRes.count || 0,
+        totalCourses: coursesRes.count || 0,
         activeEnrollments: enrollmentsRes.count || 0,
-        completions: completionsRes.count || 0
+        completions: completionsRes.count || 0,
+        certifications: certificationsRes.count || 0
       };
+    }
+  });
+
+  // Fetch recent activities
+  const { data: recentEnrollments } = useQuery({
+    queryKey: ['recent-enrollments'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('course_enrollments')
+        .select(`
+          *,
+          education_courses(course_name, course_code),
+          students!inner(student_id, profiles!inner(full_name))
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      return data || [];
     }
   });
 
@@ -62,6 +77,10 @@ export function Education() {
       </div>
     );
   }
+
+  const completionRate = stats?.activeEnrollments 
+    ? Math.round((stats.completions / (stats.completions + stats.activeEnrollments)) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -84,7 +103,7 @@ export function Education() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>
@@ -93,20 +112,20 @@ export function Education() {
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalStudents || 0}</div>
             <p className="text-xs text-muted-foreground">
-              +12% from last month
+              Registered students
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Training Programs</CardTitle>
+            <CardTitle className="text-sm font-medium">Courses</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalPrograms || 0}</div>
+            <div className="text-2xl font-bold">{stats?.totalCourses || 0}</div>
             <p className="text-xs text-muted-foreground">
-              3 new this month
+              Available courses
             </p>
           </CardContent>
         </Card>
@@ -119,7 +138,7 @@ export function Education() {
           <CardContent>
             <div className="text-2xl font-bold">{stats?.activeEnrollments || 0}</div>
             <p className="text-xs text-muted-foreground">
-              85% capacity
+              Current enrollments
             </p>
           </CardContent>
         </Card>
@@ -132,11 +151,59 @@ export function Education() {
           <CardContent>
             <div className="text-2xl font-bold">{stats?.completions || 0}</div>
             <p className="text-xs text-muted-foreground">
-              92% success rate
+              Course completions
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{completionRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              Completion rate
             </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Activities */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Enrollments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {recentEnrollments?.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">No recent enrollments</p>
+            ) : (
+              recentEnrollments?.map((enrollment) => (
+                <div key={enrollment.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div>
+                    <p className="font-medium">
+                      {enrollment.students?.profiles?.full_name || 'Unknown Student'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Enrolled in {enrollment.education_courses?.course_name} ({enrollment.education_courses?.course_code})
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant="secondary" className="capitalize">
+                      {enrollment.status}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(enrollment.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
