@@ -28,17 +28,23 @@ const upcomingEvents = [
   { title: 'Quarterly Review Meeting', date: '2024-01-25', type: 'meeting', priority: 'low' },
 ];
 
+// Mock data for charts until we have dynamic data
+const departmentData = [
+  { name: 'IT', students: 120 },
+  { name: 'Business', students: 95 },
+  { name: 'Design', students: 80 },
+  { name: 'Marketing', students: 65 },
+];
+
+const placementData = [
+  { name: 'IT Jobs', value: 45, color: '#3B82F6' },
+  { name: 'Business', value: 30, color: '#8B5CF6' },
+  { name: 'Design', value: 15, color: '#06D6A0' },
+  { name: 'Others', value: 10, color: '#F59E0B' },
+];
+
 export const Dashboard = () => {
-  const { 
-    studentsCount, 
-    trainersCount, 
-    jobPlacements, 
-    incubationProjects, 
-    departmentData, 
-    placementData, 
-    loading 
-  } = useDashboardData();
-  
+  const { stats, isLoading } = useDashboardData();
   const { signOut, profile, user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -70,14 +76,14 @@ export const Dashboard = () => {
     );
   }
 
-  const stats = [
-    { title: 'Total Students', value: studentsCount.toString(), change: '+12% from last month', changeType: 'positive' as const, icon: Users },
-    { title: 'Active Trainers', value: trainersCount.toString(), change: '+3 new this week', changeType: 'positive' as const, icon: GraduationCap },
-    { title: 'Job Placements', value: jobPlacements.toString(), change: '+8% this quarter', changeType: 'positive' as const, icon: Briefcase },
-    { title: 'Incubation Projects', value: incubationProjects.toString(), change: '5 new startups', changeType: 'positive' as const, icon: Building2 },
+  const dashboardStats = [
+    { title: 'Total Students', value: stats?.totalStudents?.toString() || '0', change: '+12% from last month', changeType: 'positive' as const, icon: Users },
+    { title: 'Active Trainers', value: stats?.totalEmployees?.toString() || '0', change: '+3 new this week', changeType: 'positive' as const, icon: GraduationCap },
+    { title: 'Job Placements', value: stats?.activeJobs?.toString() || '0', change: '+8% this quarter', changeType: 'positive' as const, icon: Briefcase },
+    { title: 'Incubation Projects', value: stats?.totalProjects?.toString() || '0', change: '5 new startups', changeType: 'positive' as const, icon: Building2 },
   ];
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-6 fade-in">
         <div className="flex justify-between items-center">
@@ -126,7 +132,7 @@ export const Dashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
+        {dashboardStats.map((stat, index) => (
           <div key={stat.title} className="slide-up" style={{ animationDelay: `${index * 100}ms` }}>
             <StatsCard {...stat} />
           </div>

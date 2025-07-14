@@ -22,7 +22,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 export const StudentDashboard = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { userSpecificData, isLoading } = useDashboardData();
 
   // Fetch student's current enrollments
@@ -118,7 +118,7 @@ export const StudentDashboard = () => {
         {/* Welcome Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, {userSpecificData?.profiles?.full_name || 'Student'}!</h1>
+            <h1 className="text-3xl font-bold">Welcome back, {profile?.full_name || 'Student'}!</h1>
             <p className="text-muted-foreground">Continue your learning journey</p>
           </div>
           <div className="flex gap-2">
