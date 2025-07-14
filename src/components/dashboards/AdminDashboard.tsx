@@ -13,11 +13,11 @@ import {
   LogOut,
   Activity
 } from 'lucide-react';
-import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
 
 export const AdminDashboard = () => {
-  const { profile, signOut } = useUnifiedAuth();
+  const { profile, signOut } = useAuth();
 
   const adminModules = [
     { name: 'HR & Admin', href: '/hr-admin', icon: Users, color: 'blue' },

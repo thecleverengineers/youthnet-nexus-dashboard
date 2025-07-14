@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { StudentDashboard } from '@/components/dashboards/StudentDashboard';
 import { TrainerDashboard } from '@/components/dashboards/TrainerDashboard';
 import { StaffDashboard } from '@/components/dashboards/StaffDashboard';
@@ -8,10 +8,10 @@ import { AdminDashboard } from '@/components/dashboards/AdminDashboard';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { RefreshCw, LogIn } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 export const RoleBasedRoute = () => {
-  const { profile, loading, user, refreshProfile } = useUnifiedAuth();
+  const { profile, loading, user, refreshProfile } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -48,25 +48,15 @@ export const RoleBasedRoute = () => {
             <h2 className="text-3xl font-bold text-white mb-2">Welcome to YouthNet</h2>
             <p className="text-muted-foreground mb-4">Management Information System</p>
             
-            <Alert className="text-left">
-              <LogIn className="h-4 w-4" />
+            <Alert>
               <AlertDescription>
-                Please sign in to access your personalized dashboard. Use the demo accounts for instant access to explore different user roles.
+                Please sign in to access your personalized dashboard. Use the demo accounts for testing.
               </AlertDescription>
             </Alert>
             
-            <Button onClick={() => setShowAuthModal(true)} className="px-8 py-2" size="lg">
-              <LogIn className="h-4 w-4 mr-2" />
-              Access Dashboard
+            <Button onClick={() => setShowAuthModal(true)} className="px-8 py-2">
+              Sign In / Sign Up
             </Button>
-            
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>Demo Credentials:</p>
-              <p>Admin: admin@youthnet.in / admin123</p>
-              <p>Staff: staff@youthnet.in / staff123</p>
-              <p>Trainer: trainer@youthnet.in / trainer123</p>
-              <p>Student: student@youthnet.in / student123</p>
-            </div>
           </div>
         </div>
         <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
@@ -84,7 +74,7 @@ export const RoleBasedRoute = () => {
           
           <Alert className="text-left">
             <AlertDescription>
-              Your profile is being created automatically. If this takes longer than expected, try refreshing your profile.
+              If this takes longer than expected, try refreshing your profile or signing out and back in.
             </AlertDescription>
           </Alert>
           

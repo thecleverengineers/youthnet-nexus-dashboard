@@ -1,21 +1,15 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
-import { MongoAuthProvider } from '@/hooks/useMongoAuth';
-import { PHPAuthProvider } from '@/hooks/usePHPAuth';
-import { isMongoDBAuth, isSupabaseAuth, isPHPAuth } from '@/config/auth';
-import { useInstallation } from '@/hooks/useInstallation';
-import { AppInstaller } from '@/components/installer/AppInstaller';
 
 const queryClient = new QueryClient();
 
 import { Layout } from '@/components/layout/Layout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { AuthGuard } from '@/components/auth/AuthGuard';
+import { RoleBasedRoute } from '@/components/auth/RoleBasedRoute';
 import { Dashboard } from '@/pages/Dashboard';
 import Index from '@/pages/Index';
 import { Education } from '@/pages/Education';
@@ -32,42 +26,15 @@ import { ReportsPage } from '@/pages/ReportsPage';
 import { Settings } from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
 
-function AppContent() {
-  const { isInstalled, isLoading, markAsInstalled } = useInstallation();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading application...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isInstalled) {
-    return <AppInstaller onInstallComplete={markAsInstalled} />;
-  }
-
-  // Select the appropriate auth provider based on configuration
-  let AuthProviderComponent;
-  if (isPHPAuth()) {
-    AuthProviderComponent = PHPAuthProvider;
-  } else if (isMongoDBAuth()) {
-    AuthProviderComponent = MongoAuthProvider;
-  } else {
-    AuthProviderComponent = AuthProvider;
-  }
-
+function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="youthnet-theme">
       <QueryClientProvider client={queryClient}>
-        <AuthProviderComponent>
+        <AuthProvider>
           <Toaster />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<AuthGuard />} />
+              <Route path="/" element={<RoleBasedRoute />} />
               <Route path="/education" element={
                 <ProtectedRoute>
                   <Layout>
@@ -156,16 +123,10 @@ function AppContent() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </AuthProviderComponent>
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );
-}
-
-function App() {
-  console.log('App: Component rendering');
-  
-  return <AppContent />;
 }
 
 export default App;

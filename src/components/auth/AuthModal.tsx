@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -5,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
-import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -16,11 +17,8 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  console.log('AuthModal: Component rendering, isOpen:', isOpen);
-  
-  const { signIn, signUp, createDemoAccounts, loading } = useUnifiedAuth();
+  const { signIn, signUp, createDemoAccounts, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [creatingDemo, setCreatingDemo] = useState(false);
   
   // Sign In Form
   const [signInEmail, setSignInEmail] = useState('');
@@ -39,25 +37,17 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
-    console.log('AuthModal: Attempting to sign in with:', signInEmail);
+    console.log('Attempting to sign in with:', signInEmail);
     
     try {
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
-        console.log('AuthModal: Sign in successful, closing modal');
-        toast.success('Login successful! Welcome to YouthNet', {
-          description: 'Redirecting to your dashboard...',
-          duration: 2000,
-        });
-        // Close modal and redirect after showing toast
-        setTimeout(() => {
-          onClose();
-        }, 1000);
+        onClose();
         setSignInEmail('');
         setSignInPassword('');
       }
     } catch (error) {
-      console.error('AuthModal: Sign in error:', error);
+      console.error('Sign in error:', error);
       toast.error('Failed to sign in. Please try again.');
     }
   };
@@ -69,12 +59,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
-    console.log('AuthModal: Attempting to sign up:', signUpEmail, 'with role:', role);
+    console.log('Attempting to sign up:', signUpEmail, 'with role:', role);
     
     try {
       const success = await signUp(signUpEmail, signUpPassword, fullName, role);
       if (success) {
-        console.log('AuthModal: Sign up successful, closing modal');
         onClose();
         setSignUpEmail('');
         setSignUpPassword('');
@@ -82,7 +71,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setRole('student');
       }
     } catch (error) {
-      console.error('AuthModal: Sign up error:', error);
+      console.error('Sign up error:', error);
       toast.error('Failed to create account. Please try again.');
     }
   };
@@ -96,40 +85,30 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   ];
 
   const handleDemoLogin = async (email: string, password: string) => {
-    console.log('AuthModal: Demo login attempt for:', email);
+    console.log('Demo login attempt for:', email);
+    setSignInEmail(email);
+    setSignInPassword(password);
     
     try {
       const success = await signIn(email, password);
       if (success) {
-        console.log('AuthModal: Demo login successful for:', email);
-        toast.success(`Demo ${email.split('@')[0]} login successful!`, {
-          description: 'Redirecting to your dashboard...',
-          duration: 2000,
-        });
-        // Close modal and redirect after showing toast
-        setTimeout(() => {
-          onClose();
-        }, 1000);
+        onClose();
+        toast.success('Demo login successful!');
+        setSignInEmail('');
+        setSignInPassword('');
+      } else {
+        toast.error('Demo account not found. Please create demo accounts first.');
       }
     } catch (error) {
-      console.error('AuthModal: Demo login error:', error);
-      toast.error('Demo account login failed. Please try creating demo accounts first.');
+      console.error('Demo login error:', error);
+      toast.error('Demo account not found. Please create demo accounts first.');
     }
   };
 
   const handleCreateDemoAccounts = async () => {
-    console.log('AuthModal: Creating demo accounts...');
-    setCreatingDemo(true);
-    try {
-      const success = await createDemoAccounts();
-      if (success) {
-        toast.success('Demo accounts are ready! You can now use the role buttons below.');
-      }
-    } catch (error) {
-      console.error('AuthModal: Error creating demo accounts:', error);
-      toast.error('Failed to create demo accounts. Please try again.');
-    } finally {
-      setCreatingDemo(false);
+    const success = await createDemoAccounts();
+    if (success) {
+      toast.success('Demo accounts created! You can now use the demo login buttons.');
     }
   };
 
@@ -158,12 +137,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <TabsContent value="signin" className="space-y-4">
               {/* Demo Login Options */}
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground text-center">Quick Demo Access</h3>
+                <h3 className="text-sm font-medium text-muted-foreground text-center">Demo Login</h3>
                 
                 <Alert>
-                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-xs">
-                    Use these demo accounts to explore different user roles instantly.
+                    Click "Create Demo Accounts" first, then use the role buttons below to login instantly.
                   </AlertDescription>
                 </Alert>
                 
@@ -171,10 +149,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   variant="outline"
                   size="sm"
                   onClick={handleCreateDemoAccounts}
-                  disabled={loading || creatingDemo}
+                  disabled={loading}
                   className="w-full text-xs border-primary/30 hover:bg-primary/10"
                 >
-                  {creatingDemo ? 'Setting up Demo Accounts...' : 'Setup Demo Accounts'}
+                  {loading ? 'Creating Accounts...' : 'Create Demo Accounts'}
                 </Button>
                 
                 <div className="grid grid-cols-2 gap-2">
@@ -245,13 +223,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-xs">
-                  New accounts require email confirmation. For instant access, use the demo accounts on the Sign In tab.
-                </AlertDescription>
-              </Alert>
-              
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullname" className="text-sm font-medium">Full Name</Label>
