@@ -201,6 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const createDemoAccounts = async (): Promise<boolean> => {
     const demoUsers = [
+      { email: 'superadmin@youthnet.in', password: 'superadmin123', role: 'super_admin', name: 'Super Admin User' },
       { email: 'admin@youthnet.in', password: 'admin123', role: 'admin', name: 'Admin User' },
       { email: 'staff@youthnet.in', password: 'staff123', role: 'staff', name: 'Staff User' },
       { email: 'trainer@youthnet.in', password: 'trainer123', role: 'trainer', name: 'Trainer User' },
