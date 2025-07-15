@@ -2,7 +2,7 @@
 import React from 'react';
 import {
   Box,
-  Grid,
+  Grid2,
   Typography,
   Card,
   CardContent,
@@ -58,16 +58,16 @@ export const StudentDashboard = () => {
         </Typography>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid2 container spacing={3} sx={{ mb: 4 }}>
         {studentStats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid2 xs={12} sm={6} md={3} key={index}>
             <StatsCard {...stat} />
-          </Grid>
+          </Grid2>
         ))}
-      </Grid>
+      </Grid2>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} lg={8}>
+      <Grid2 container spacing={3}>
+        <Grid2 xs={12} lg={8}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 3, color: 'primary.main' }}>
@@ -111,9 +111,9 @@ export const StudentDashboard = () => {
               </List>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
         
-        <Grid item xs={12} lg={4}>
+        <Grid2 xs={12} lg={4}>
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
@@ -187,8 +187,8 @@ export const StudentDashboard = () => {
               </List>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Layout>
   );
 };

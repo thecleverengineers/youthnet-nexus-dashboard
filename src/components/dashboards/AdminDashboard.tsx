@@ -2,7 +2,7 @@
 import React from 'react';
 import {
   Box,
-  Grid,
+  Grid2,
   Typography,
   Card,
   CardContent,
@@ -53,8 +53,8 @@ export const AdminDashboard = () => {
         </Typography>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid2 container spacing={3} sx={{ mb: 4 }}>
+        <Grid2 xs={12} sm={6} md={3}>
           <StatsCard
             title="Total Students"
             value={stats.totalStudents.toString()}
@@ -62,8 +62,8 @@ export const AdminDashboard = () => {
             changeType="positive"
             icon={PeopleIcon}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </Grid2>
+        <Grid2 xs={12} sm={6} md={3}>
           <StatsCard
             title="Active Programs"
             value={stats.totalPrograms.toString()}
@@ -71,8 +71,8 @@ export const AdminDashboard = () => {
             changeType="positive"
             icon={SchoolIcon}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </Grid2>
+        <Grid2 xs={12} sm={6} md={3}>
           <StatsCard
             title="Job Placements"
             value={stats.activeJobs.toString()}
@@ -80,8 +80,8 @@ export const AdminDashboard = () => {
             changeType="positive"
             icon={TrendingUpIcon}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </Grid2>
+        <Grid2 xs={12} sm={6} md={3}>
           <StatsCard
             title="Incubation Projects"
             value={stats.totalProjects.toString()}
@@ -89,11 +89,11 @@ export const AdminDashboard = () => {
             changeType="positive"
             icon={BusinessIcon}
           />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} lg={8}>
+      <Grid2 container spacing={3}>
+        <Grid2 xs={12} lg={8}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
@@ -106,9 +106,9 @@ export const AdminDashboard = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
         
-        <Grid item xs={12} lg={4}>
+        <Grid2 xs={12} lg={4}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
@@ -142,8 +142,8 @@ export const AdminDashboard = () => {
               </List>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Layout>
   );
 };
