@@ -116,7 +116,6 @@ export const RoleBasedRoute = () => {
     case 'staff':
       return <StaffDashboard />;
     case 'admin':
-    case 'super_admin':
       return <AdminDashboard />;
     default:
       console.log('Unknown role, defaulting to student dashboard:', profile.role);
