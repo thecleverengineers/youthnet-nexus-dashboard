@@ -23,6 +23,16 @@ export function useDashboardData() {
     },
   });
 
+  const employeesQuery = useQuery({
+    queryKey: ['employees-count'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('employees')
+        .select('*', { count: 'exact', head: true });
+      return count || 0;
+    },
+  });
+
   const jobApplicationsQuery = useQuery({
     queryKey: ['job-applications-count'],
     queryFn: async () => {
@@ -48,7 +58,7 @@ export function useDashboardData() {
   const departmentStatsQuery = useQuery({
     queryKey: ['department-stats'],
     queryFn: async () => {
-      // Get student counts by enrollment status
+      // Get real enrollment data
       const { data: enrollments } = await supabase
         .from('student_enrollments')
         .select(`
@@ -57,23 +67,39 @@ export function useDashboardData() {
           training_programs(name)
         `);
 
+      // Get course enrollments
+      const { data: courseEnrollments } = await supabase
+        .from('course_enrollments')
+        .select('status');
+
       // Process data for department performance chart
       const departmentData = [
-        { name: 'Education', students: 0, completion: 85 },
-        { name: 'Skill Dev', students: 0, completion: 92 },
-        { name: 'Job Centre', students: 0, completion: 78 },
-        { name: 'Career Dev', students: 0, completion: 88 },
-        { name: 'Incubation', students: 0, completion: 95 },
+        { 
+          name: 'Education', 
+          students: courseEnrollments?.filter(e => e.status === 'enrolled').length || 0, 
+          completion: 85 
+        },
+        { 
+          name: 'Skill Dev', 
+          students: enrollments?.filter(e => e.status === 'active').length || 0, 
+          completion: 92 
+        },
+        { 
+          name: 'Job Centre', 
+          students: Math.floor((enrollments?.length || 0) * 0.5), 
+          completion: 78 
+        },
+        { 
+          name: 'Career Dev', 
+          students: Math.floor((enrollments?.length || 0) * 0.3), 
+          completion: 88 
+        },
+        { 
+          name: 'Incubation', 
+          students: Math.floor((enrollments?.length || 0) * 0.1), 
+          completion: 95 
+        },
       ];
-
-      if (enrollments) {
-        // Count students by department (simplified)
-        departmentData[0].students = enrollments.filter(e => e.status === 'active').length;
-        departmentData[1].students = Math.floor(departmentData[0].students * 0.7);
-        departmentData[2].students = Math.floor(departmentData[0].students * 0.5);
-        departmentData[3].students = Math.floor(departmentData[0].students * 0.3);
-        departmentData[4].students = Math.floor(departmentData[0].students * 0.1);
-      }
 
       return departmentData;
     },
@@ -91,20 +117,38 @@ export function useDashboardData() {
         `)
         .eq('status', 'selected');
 
-      // Mock placement distribution data
-      return [
-        { name: 'IT/Software', value: 35, color: '#8884d8' },
-        { name: 'Banking', value: 25, color: '#82ca9d' },
-        { name: 'Retail', value: 20, color: '#ffc658' },
-        { name: 'Manufacturing', value: 15, color: '#ff7c7c' },
-        { name: 'Others', value: 5, color: '#8dd1e1' },
-      ];
+      // Process placement distribution data
+      const companyTypes = applications?.reduce((acc: any, app: any) => {
+        const company = app.job_postings?.company || 'Others';
+        // Simple categorization based on company name
+        let category = 'Others';
+        if (company.toLowerCase().includes('tech') || company.toLowerCase().includes('software') || company.toLowerCase().includes('it')) {
+          category = 'IT/Software';
+        } else if (company.toLowerCase().includes('bank') || company.toLowerCase().includes('finance')) {
+          category = 'Banking';
+        } else if (company.toLowerCase().includes('retail') || company.toLowerCase().includes('shop')) {
+          category = 'Retail';
+        } else if (company.toLowerCase().includes('manufacturing') || company.toLowerCase().includes('factory')) {
+          category = 'Manufacturing';
+        }
+        
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      }, {}) || {};
+
+      const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
+      return Object.entries(companyTypes).map(([name, value], index) => ({
+        name,
+        value: value as number,
+        color: colors[index % colors.length]
+      }));
     },
   });
 
   return {
     studentsCount: studentsQuery.data || 0,
     trainersCount: trainersQuery.data || 0,
+    employeesCount: employeesQuery.data || 0,
     jobPlacements: jobApplicationsQuery.data || 0,
     incubationProjects: incubationProjectsQuery.data || 0,
     departmentData: departmentStatsQuery.data || [],

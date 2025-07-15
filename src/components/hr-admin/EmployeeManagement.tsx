@@ -1,14 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Users, 
   Building, 
   Clock, 
@@ -17,21 +16,20 @@ import {
   Upload,
   RefreshCw
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { employeeService, Employee } from '@/services/employeeService';
 import { EmployeeCard } from './EmployeeCard';
 import { EmployeeForm } from './EmployeeForm';
 import { EmployeeDetails } from './EmployeeDetails';
 
 export const EmployeeManagement = () => {
-  const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -42,35 +40,19 @@ export const EmployeeManagement = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('employees')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email,
-            phone
-          )
-        `);
-
-      if (error) throw error;
-
-      console.log('Fetched employees:', data);
-      setEmployees(data || []);
+      const data = await employeeService.fetchEmployees();
+      setEmployees(data);
       
       // Calculate stats
-      const stats = data?.reduce((acc, emp) => {
+      const stats = data.reduce((acc, emp) => {
         acc.total++;
         if (emp.employment_status === 'active') acc.active++;
         if (emp.employment_status === 'on_leave') acc.onLeave++;
         if (emp.employment_status === 'probation') acc.probation++;
         return acc;
-      }, { total: 0, active: 0, onLeave: 0, probation: 0 }) || { total: 0, active: 0, onLeave: 0, probation: 0 };
+      }, { total: 0, active: 0, onLeave: 0, probation: 0 });
       
       setStats(stats);
-    } catch (error: any) {
-      console.error('Error fetching employees:', error);
-      toast.error('Failed to fetch employees: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -78,24 +60,6 @@ export const EmployeeManagement = () => {
 
   useEffect(() => {
     fetchEmployees();
-    
-    // Set up real-time subscription for employees table
-    const channel = supabase
-      .channel('employees-changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'employees' }, () => {
-        fetchEmployees();
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'employees' }, () => {
-        fetchEmployees();
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'employees' }, () => {
-        fetchEmployees();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const filteredEmployees = employees.filter(employee => {
@@ -110,12 +74,12 @@ export const EmployeeManagement = () => {
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
-  const handleEdit = (employee) => {
+  const handleEdit = (employee: Employee) => {
     setSelectedEmployee(employee);
     setShowForm(true);
   };
 
-  const handleView = (employee) => {
+  const handleView = (employee: Employee) => {
     setSelectedEmployee(employee);
     setShowDetails(true);
   };
@@ -140,7 +104,7 @@ export const EmployeeManagement = () => {
                 Employee Management System
               </CardTitle>
               <CardDescription>
-                Manage your workforce with advanced AI-powered insights
+                Manage your workforce with real-time database integration
               </CardDescription>
             </div>
             <div className="flex gap-2">
@@ -314,20 +278,14 @@ export const EmployeeManagement = () => {
             <p className="text-muted-foreground mb-4">
               {searchTerm || statusFilter !== 'all' || departmentFilter !== 'all'
                 ? 'Try adjusting your filters'
-                : 'Get started by adding your first employee or importing staff data'
+                : 'Get started by adding your first employee'
               }
             </p>
             {!searchTerm && statusFilter === 'all' && departmentFilter === 'all' && (
-              <div className="flex gap-2 justify-center">
-                <Button onClick={() => setShowForm(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Employee
-                </Button>
-                <Button variant="outline" onClick={() => window.location.href = '#import'}>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Import Staff
-                </Button>
-              </div>
+              <Button onClick={() => setShowForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Employee
+              </Button>
             )}
           </CardContent>
         </Card>

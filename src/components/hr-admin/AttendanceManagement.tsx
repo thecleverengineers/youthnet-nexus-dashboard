@@ -3,50 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Clock, 
   LogIn, 
   LogOut, 
-  Calendar as CalendarIcon,
   TrendingUp,
-  MapPin,
   User,
-  Timer,
-  Coffee,
   AlertTriangle,
-  Award,
   BarChart3,
   Users,
-  Target,
-  Zap
+  Target
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { attendanceService, AttendanceRecord } from '@/services/attendanceService';
 import { format } from 'date-fns';
-
-interface AttendanceRecord {
-  id: string;
-  employee_id: string;
-  date: string;
-  check_in?: string;
-  check_out?: string;
-  status: 'present' | 'absent' | 'late' | 'half_day' | 'sick_leave' | 'vacation';
-  notes?: string;
-  employees?: {
-    employee_id: string;
-    profiles?: {
-      full_name: string;
-    };
-  };
-}
 
 export const AttendanceManagement = () => {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentEmployee, setCurrentEmployee] = useState<any>(null);
   const [todayAttendance, setTodayAttendance] = useState<AttendanceRecord | null>(null);
   const [stats, setStats] = useState({
@@ -70,164 +42,66 @@ export const AttendanceManagement = () => {
     // Load employee session
     const session = localStorage.getItem('employee_session');
     if (session) {
-      setCurrentEmployee(JSON.parse(session));
+      const empData = JSON.parse(session);
+      setCurrentEmployee(empData);
+      loadTodayAttendance(empData.id);
     }
 
-    fetchTodayAttendance();
     fetchAttendanceRecords();
     fetchStats();
 
     return () => clearInterval(timer);
   }, []);
 
-  const fetchTodayAttendance = async () => {
-    const session = localStorage.getItem('employee_session');
-    if (!session) return;
-
-    const employee = JSON.parse(session);
-    const today = format(new Date(), 'yyyy-MM-dd');
-
-    // Mock today's attendance data since table doesn't exist
-    const mockAttendance: AttendanceRecord = {
-      id: '1',
-      employee_id: employee.id,
-      date: today,
-      check_in: '09:00:00',
-      status: 'present'
-    };
-
-    setTodayAttendance(mockAttendance);
-    setIsCheckedIn(mockAttendance.check_in && !mockAttendance.check_out);
+  const loadTodayAttendance = async (employeeId: string) => {
+    const attendance = await attendanceService.getTodayAttendance(employeeId);
+    setTodayAttendance(attendance);
+    setIsCheckedIn(attendance?.check_in && !attendance?.check_out);
   };
 
   const fetchAttendanceRecords = async () => {
     setLoading(true);
-    try {
-      // Use mock data since attendance_records table doesn't exist
-      const mockRecords: AttendanceRecord[] = [
-        {
-          id: '1',
-          employee_id: 'emp-1',
-          date: format(new Date(), 'yyyy-MM-dd'),
-          check_in: '09:00:00',
-          check_out: '17:30:00',
-          status: 'present',
-          notes: 'On time',
-          employees: {
-            employee_id: 'EMP001',
-            profiles: {
-              full_name: 'John Doe'
-            }
-          }
-        },
-        {
-          id: '2',
-          employee_id: 'emp-2',
-          date: format(new Date(Date.now() - 86400000), 'yyyy-MM-dd'),
-          check_in: '09:15:00',
-          check_out: '17:45:00',
-          status: 'late',
-          notes: 'Traffic delay',
-          employees: {
-            employee_id: 'EMP002',
-            profiles: {
-              full_name: 'Jane Smith'
-            }
-          }
-        },
-        {
-          id: '3',
-          employee_id: 'emp-3',
-          date: format(new Date(Date.now() - 172800000), 'yyyy-MM-dd'),
-          status: 'absent',
-          notes: 'Sick leave',
-          employees: {
-            employee_id: 'EMP003',
-            profiles: {
-              full_name: 'Mike Johnson'
-            }
-          }
-        }
-      ];
-
-      setAttendanceRecords(mockRecords);
-    } catch (error: any) {
-      toast.error('Failed to fetch attendance records');
-    } finally {
-      setLoading(false);
-    }
+    const records = await attendanceService.fetchAttendanceRecords();
+    setAttendanceRecords(records);
+    setLoading(false);
   };
 
   const fetchStats = async () => {
-    try {
-      // Mock stats data
-      const mockStats = {
-        present: 25,
-        absent: 3,
-        late: 2,
-        onTime: 23,
-        totalHours: 200,
-        overtime: 15
-      };
+    const records = await attendanceService.fetchAttendanceRecords();
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todayRecords = records.filter(r => r.date === today);
+    
+    const stats = {
+      present: todayRecords.filter(r => r.status === 'present').length,
+      absent: todayRecords.filter(r => r.status === 'absent').length,
+      late: todayRecords.filter(r => r.status === 'late').length,
+      onTime: todayRecords.filter(r => r.status === 'present').length,
+      totalHours: 200,
+      overtime: 15
+    };
 
-      setStats(mockStats);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
+    setStats(stats);
   };
 
   const handleCheckIn = async () => {
-    const session = localStorage.getItem('employee_session');
-    if (!session) {
-      toast.error('Please login first');
-      return;
-    }
-
-    const employee = JSON.parse(session);
-    const now = new Date();
-    const today = format(now, 'yyyy-MM-dd');
+    if (!currentEmployee) return;
     
-    try {
-      const checkInTime = now.toISOString();
-      const isLate = now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 15);
-      
-      // Mock check-in since table doesn't exist
-      const mockAttendance: AttendanceRecord = {
-        id: Date.now().toString(),
-        employee_id: employee.id,
-        date: today,
-        check_in: checkInTime,
-        status: isLate ? 'late' : 'present'
-      };
-
-      setTodayAttendance(mockAttendance);
+    const result = await attendanceService.checkIn(currentEmployee.id);
+    if (result) {
+      setTodayAttendance(result);
       setIsCheckedIn(true);
-      toast.success(`Checked in at ${format(now, 'HH:mm')}${isLate ? ' (Late)' : ''}`);
       fetchStats();
-    } catch (error: any) {
-      toast.error('Check-in failed: ' + error.message);
     }
   };
 
   const handleCheckOut = async () => {
-    const session = localStorage.getItem('employee_session');
-    if (!session || !todayAttendance) return;
-
-    const now = new Date();
+    if (!currentEmployee) return;
     
-    try {
-      // Mock check-out since table doesn't exist
-      const updatedAttendance = {
-        ...todayAttendance,
-        check_out: now.toISOString()
-      };
-
-      setTodayAttendance(updatedAttendance);
+    const result = await attendanceService.checkOut(currentEmployee.id);
+    if (result) {
+      setTodayAttendance(result);
       setIsCheckedIn(false);
-      toast.success(`Checked out at ${format(now, 'HH:mm')}`);
       fetchStats();
-    } catch (error: any) {
-      toast.error('Check-out failed: ' + error.message);
     }
   };
 
@@ -255,7 +129,7 @@ export const AttendanceManagement = () => {
                 Advanced Attendance System
               </CardTitle>
               <p className="text-muted-foreground">
-                Biometric-enabled workforce management
+                Real-time workforce management
               </p>
             </div>
             <div className="text-right">
@@ -408,7 +282,7 @@ export const AttendanceManagement = () => {
             </div>
           ) : attendanceRecords.length > 0 ? (
             <div className="space-y-3">
-              {attendanceRecords.map((record) => (
+              {attendanceRecords.slice(0, 10).map((record) => (
                 <div key={record.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 hover:bg-gray-800/70 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
