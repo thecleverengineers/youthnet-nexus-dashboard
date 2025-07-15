@@ -9,7 +9,7 @@ export interface AttendanceRecord {
   date: string;
   check_in?: string;
   check_out?: string;
-  status: 'present' | 'absent' | 'late' | 'half_day' | 'sick_leave' | 'vacation';
+  status: string; // Changed from literal union to string to match database
   notes?: string;
   employees?: {
     employee_id: string;
@@ -20,7 +20,7 @@ export interface AttendanceRecord {
 }
 
 export const attendanceService = {
-  async fetchAttendanceRecords(startDate?: string, endDate?: string) {
+  async fetchAttendanceRecords(startDate?: string, endDate?: string): Promise<AttendanceRecord[]> {
     let query = supabase
       .from('attendance_records')
       .select(`
@@ -49,10 +49,10 @@ export const attendanceService = {
       return [];
     }
 
-    return data || [];
+    return (data || []) as AttendanceRecord[];
   },
 
-  async checkIn(employeeId: string) {
+  async checkIn(employeeId: string): Promise<AttendanceRecord | null> {
     const today = format(new Date(), 'yyyy-MM-dd');
     const now = new Date().toISOString();
 
@@ -89,10 +89,10 @@ export const attendanceService = {
     }
 
     toast.success(`Checked in at ${format(new Date(), 'HH:mm')}${isLate ? ' (Late)' : ''}`);
-    return data;
+    return data as AttendanceRecord;
   },
 
-  async checkOut(employeeId: string) {
+  async checkOut(employeeId: string): Promise<AttendanceRecord | null> {
     const today = format(new Date(), 'yyyy-MM-dd');
     const now = new Date().toISOString();
 
@@ -111,10 +111,10 @@ export const attendanceService = {
     }
 
     toast.success(`Checked out at ${format(new Date(), 'HH:mm')}`);
-    return data;
+    return data as AttendanceRecord;
   },
 
-  async getTodayAttendance(employeeId: string) {
+  async getTodayAttendance(employeeId: string): Promise<AttendanceRecord | null> {
     const today = format(new Date(), 'yyyy-MM-dd');
     
     const { data, error } = await supabase
@@ -129,6 +129,6 @@ export const attendanceService = {
       return null;
     }
 
-    return data;
+    return data as AttendanceRecord;
   }
 };

@@ -56,7 +56,7 @@ export const AttendanceManagement = () => {
   const loadTodayAttendance = async (employeeId: string) => {
     const attendance = await attendanceService.getTodayAttendance(employeeId);
     setTodayAttendance(attendance);
-    setIsCheckedIn(attendance?.check_in && !attendance?.check_out);
+    setIsCheckedIn(!!(attendance?.check_in && !attendance?.check_out));
   };
 
   const fetchAttendanceRecords = async () => {

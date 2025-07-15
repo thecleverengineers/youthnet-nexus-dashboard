@@ -20,7 +20,7 @@ export interface Employee {
 }
 
 export const employeeService = {
-  async fetchEmployees() {
+  async fetchEmployees(): Promise<Employee[]> {
     const { data, error } = await supabase
       .from('employees')
       .select(`
@@ -39,65 +39,75 @@ export const employeeService = {
       return [];
     }
 
-    return data || [];
+    return (data || []) as Employee[];
   },
 
-  async createEmployee(employeeData: any) {
-    // First create the profile if it doesn't exist
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        full_name: employeeData.full_name,
-        email: employeeData.email,
-        phone: employeeData.phone,
-        role: 'staff'
-      })
-      .select()
-      .single();
+  async createEmployee(employeeData: any): Promise<Employee | null> {
+    try {
+      // Generate a unique ID for the profile
+      const profileId = crypto.randomUUID();
+      
+      // First create the profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: profileId,
+          full_name: employeeData.full_name,
+          email: employeeData.email,
+          phone: employeeData.phone,
+          role: 'staff'
+        })
+        .select()
+        .single();
 
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
-      toast.error('Failed to create employee profile');
-      return null;
-    }
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        toast.error('Failed to create employee profile');
+        return null;
+      }
 
-    // Then create the employee record
-    const { data: employee, error: employeeError } = await supabase
-      .from('employees')
-      .insert({
-        employee_id: employeeData.employee_id,
-        user_id: profile.id,
-        department: employeeData.department,
-        position: employeeData.position,
-        employment_status: employeeData.employment_status || 'active',
-        employment_type: employeeData.employment_type || 'full_time',
-        hire_date: employeeData.hire_date,
-        salary: employeeData.salary,
-        gender: employeeData.gender,
-        emergency_contact_name: employeeData.emergency_contact_name,
-        emergency_contact_phone: employeeData.emergency_contact_phone
-      })
-      .select(`
-        *,
-        profiles (
-          full_name,
-          email,
-          phone
-        )
-      `)
-      .single();
+      // Then create the employee record
+      const { data: employee, error: employeeError } = await supabase
+        .from('employees')
+        .insert({
+          employee_id: employeeData.employee_id,
+          user_id: profile.id,
+          department: employeeData.department,
+          position: employeeData.position,
+          employment_status: employeeData.employment_status || 'active',
+          employment_type: employeeData.employment_type || 'full_time',
+          hire_date: employeeData.hire_date,
+          salary: employeeData.salary,
+          gender: employeeData.gender,
+          emergency_contact_name: employeeData.emergency_contact_name,
+          emergency_contact_phone: employeeData.emergency_contact_phone
+        })
+        .select(`
+          *,
+          profiles (
+            full_name,
+            email,
+            phone
+          )
+        `)
+        .single();
 
-    if (employeeError) {
-      console.error('Error creating employee:', employeeError);
+      if (employeeError) {
+        console.error('Error creating employee:', employeeError);
+        toast.error('Failed to create employee');
+        return null;
+      }
+
+      toast.success('Employee created successfully');
+      return employee as Employee;
+    } catch (error) {
+      console.error('Error in createEmployee:', error);
       toast.error('Failed to create employee');
       return null;
     }
-
-    toast.success('Employee created successfully');
-    return employee;
   },
 
-  async updateEmployee(id: string, updates: any) {
+  async updateEmployee(id: string, updates: any): Promise<Employee | null> {
     const { data, error } = await supabase
       .from('employees')
       .update(updates)
@@ -119,10 +129,10 @@ export const employeeService = {
     }
 
     toast.success('Employee updated successfully');
-    return data;
+    return data as Employee;
   },
 
-  async deleteEmployee(id: string) {
+  async deleteEmployee(id: string): Promise<boolean> {
     const { error } = await supabase
       .from('employees')
       .delete()
