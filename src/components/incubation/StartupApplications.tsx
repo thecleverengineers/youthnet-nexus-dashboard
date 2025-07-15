@@ -9,6 +9,9 @@ import { Plus, Eye, Check, X, Lightbulb } from 'lucide-react';
 import { StartupForm } from './StartupForm';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+
+type ApplicationStatus = Database['public']['Enums']['application_status'];
 
 export const StartupApplications = () => {
   const [showForm, setShowForm] = useState(false);
@@ -27,7 +30,7 @@ export const StartupApplications = () => {
     }
   });
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: ApplicationStatus) => {
     try {
       const { error } = await supabase
         .from('startup_applications')
@@ -58,6 +61,9 @@ export const StartupApplications = () => {
       case 'approved': return 'bg-green-100 text-green-800';
       case 'rejected': return 'bg-red-100 text-red-800';
       case 'under_review': return 'bg-blue-100 text-blue-800';
+      case 'shortlisted': return 'bg-purple-100 text-purple-800';
+      case 'interviewed': return 'bg-orange-100 text-orange-800';
+      case 'selected': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -111,11 +117,11 @@ export const StartupApplications = () => {
                   <TableCell>{application.team_size}</TableCell>
                   <TableCell>${application.funding_required}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(application.application_status)}>
+                    <Badge className={getStatusColor(application.application_status || 'pending')}>
                       {application.application_status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{new Date(application.submitted_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{application.submitted_at ? new Date(application.submitted_at).toLocaleDateString() : 'N/A'}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm">
@@ -123,7 +129,7 @@ export const StartupApplications = () => {
                       </Button>
                       {application.application_status === 'pending' && (
                         <>
-                          <Button variant="outline" size="sm" onClick={() => updateStatus(application.id, 'approved')}>
+                          <Button variant="outline" size="sm" onClick={() => updateStatus(application.id, 'selected')}>
                             <Check className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="sm" onClick={() => updateStatus(application.id, 'rejected')}>
