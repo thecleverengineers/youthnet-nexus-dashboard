@@ -7,14 +7,14 @@ import {
   Box,
   LinearProgress,
 } from '@mui/material';
-import { SvgIconComponent } from '@mui/icons-material';
+import { LucideIcon } from 'lucide-react';
 
 interface StatsCardProps {
   title: string;
   value: string;
   change: string;
   changeType: 'positive' | 'negative' | 'neutral';
-  icon: SvgIconComponent;
+  icon: LucideIcon;
 }
 
 export const StatsCard = ({ 
@@ -58,7 +58,7 @@ export const StatsCard = ({
               justifyContent: 'center',
             }}
           >
-            <Icon sx={{ color: 'primary.main', fontSize: 20 }} />
+            <Icon size={20} style={{ color: '#1976d2' }} />
           </Box>
         </Box>
 
