@@ -9,7 +9,7 @@ export interface AttendanceRecord {
   date: string;
   check_in?: string;
   check_out?: string;
-  status: string; // Changed from literal union to string to match database
+  status: string;
   notes?: string;
   employees?: {
     employee_id: string;
