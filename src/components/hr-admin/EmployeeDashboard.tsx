@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,31 +19,14 @@ import {
   Settings,
   BarChart3
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-  due_date: string;
-}
-
-interface AttendanceRecord {
-  id: string;
-  employee_id: string;
-  date: string;
-  check_in?: string;
-  check_out?: string;
-  status: string;
-}
 
 export const EmployeeDashboard = () => {
-  const [employee, setEmployee] = useState<any>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [attendance, setAttendance] = useState<AttendanceRecord | null>(null);
+  const [employee, setEmployee] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [attendance, setAttendance] = useState(null);
   const [stats, setStats] = useState({
     tasksCompleted: 0,
     tasksTotal: 0,
@@ -66,30 +50,18 @@ export const EmployeeDashboard = () => {
     setEmployee(empData);
 
     try {
-      // Fetch today's attendance from the now-existing attendance_records table
+      // Fetch today's attendance using existing attendance_records table
       const today = format(new Date(), 'yyyy-MM-dd');
       const { data: attendanceData } = await supabase
         .from('attendance_records')
         .select('*')
         .eq('employee_id', empData.id)
         .eq('date', today)
-        .maybeSingle();
+        .single();
 
-      if (attendanceData) {
-        setAttendance(attendanceData);
-      } else {
-        // Create a mock attendance record if none exists
-        const mockAttendance: AttendanceRecord = {
-          id: '1',
-          employee_id: empData.id,
-          date: today,
-          check_in: '09:00:00',
-          status: 'present'
-        };
-        setAttendance(mockAttendance);
-      }
+      setAttendance(attendanceData);
 
-      // Fetch employee tasks from the now-existing employee_tasks table
+      // Fetch real employee tasks from new table
       const { data: tasksData, error: tasksError } = await supabase
         .from('employee_tasks')
         .select('*')
@@ -98,22 +70,32 @@ export const EmployeeDashboard = () => {
         .limit(5);
 
       if (tasksError) {
-        console.error('Error fetching tasks:', tasksError);
-        // Use mock data as fallback
-        const mockTasks: Task[] = [
+        console.log('Tasks table not accessible, using mock data');
+        // Mock tasks data as fallback
+        const mockTasks = [
           {
             id: '1',
             title: 'Complete Monthly Report',
             description: 'Prepare and submit monthly performance report',
             status: 'in_progress',
-            due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
+            due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
           },
           {
             id: '2',
             title: 'Team Meeting Preparation',
             description: 'Prepare agenda for weekly team meeting',
             status: 'completed',
-            due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
+            due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
+          },
+          {
+            id: '3',
+            title: 'Client Presentation',
+            description: 'Create presentation for client meeting',
+            status: 'pending',
+            due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
           }
         ];
         setTasks(mockTasks);
@@ -121,7 +103,7 @@ export const EmployeeDashboard = () => {
         setTasks(tasksData || []);
       }
 
-      // Calculate stats from actual data
+      // Calculate stats from tasks data
       const tasksToUse = tasksData || [];
       const completed = tasksToUse.filter(t => t.status === 'completed').length;
       const total = tasksToUse.length;
@@ -129,8 +111,8 @@ export const EmployeeDashboard = () => {
       setStats({
         tasksCompleted: completed,
         tasksTotal: total,
-        attendanceRate: 95,
-        hoursThisWeek: 32.5
+        attendanceRate: 95, // Mock data
+        hoursThisWeek: 32.5 // Mock data
       });
 
     } catch (error) {
@@ -382,7 +364,6 @@ export const EmployeeDashboard = () => {
                         className={
                           task.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
                           task.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                          task.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
                           'bg-gray-500/20 text-gray-400 border-gray-500/30'
                         }
                       >

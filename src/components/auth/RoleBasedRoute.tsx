@@ -8,18 +8,10 @@ import { AdminDashboard } from '@/components/dashboards/AdminDashboard';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { RefreshCw } from 'lucide-react';
 
 export const RoleBasedRoute = () => {
-  const { profile, loading, user, refreshProfile } = useAuth();
+  const { profile, loading, user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const handleRefreshProfile = async () => {
-    setIsRefreshing(true);
-    await refreshProfile();
-    setIsRefreshing(false);
-  };
 
   if (loading) {
     return (
@@ -67,40 +59,11 @@ export const RoleBasedRoute = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md p-6">
+        <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin mx-auto"></div>
           <h2 className="text-xl font-semibold text-white mb-2">Setting up your profile...</h2>
-          <p className="text-muted-foreground mb-4">This may take a moment for new accounts.</p>
-          
-          <Alert className="text-left">
-            <AlertDescription>
-              If this takes longer than expected, try refreshing your profile or signing out and back in.
-            </AlertDescription>
-          </Alert>
-          
-          <div className="flex flex-col gap-3">
-            <Button 
-              variant="outline" 
-              onClick={handleRefreshProfile}
-              disabled={isRefreshing}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh Profile'}
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              onClick={() => window.location.reload()}
-              className="text-sm"
-            >
-              Refresh Page
-            </Button>
-          </div>
-          
-          <p className="text-xs text-muted-foreground">
-            Profile loading issue? Contact support if this persists.
-          </p>
+          <p className="text-muted-foreground">This may take a moment for new accounts.</p>
+          <p className="text-xs text-muted-foreground">Creating your role-based dashboard...</p>
         </div>
       </div>
     );
@@ -116,7 +79,6 @@ export const RoleBasedRoute = () => {
     case 'staff':
       return <StaffDashboard />;
     case 'admin':
-    case 'super_admin':
       return <AdminDashboard />;
     default:
       console.log('Unknown role, defaulting to student dashboard:', profile.role);

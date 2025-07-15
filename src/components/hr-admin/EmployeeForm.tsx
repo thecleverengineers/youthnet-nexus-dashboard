@@ -83,14 +83,10 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
 
         toast.success('Employee updated successfully!');
       } else {
-        // Create new employee - generate a temporary user_id for now
-        // In a real application, this would be linked to a proper user account
-        const tempUserId = crypto.randomUUID();
-        
+        // Create new employee
         const { error } = await supabase
           .from('employees')
-          .insert({
-            user_id: tempUserId,
+          .insert([{
             employee_id: formData.employee_id,
             position: formData.position,
             department: formData.department,
@@ -104,7 +100,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
             emergency_contact_phone: formData.emergency_contact_phone,
             bank_account: formData.bank_account,
             tax_id: formData.tax_id,
-          });
+          }]);
 
         if (error) throw error;
         toast.success('Employee created successfully!');
@@ -225,7 +221,8 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
                     <SelectItem value="full_time">Full Time</SelectItem>
                     <SelectItem value="part_time">Part Time</SelectItem>
                     <SelectItem value="contract">Contract</SelectItem>
-                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="intern">Intern</SelectItem>
+                    <SelectItem value="consultant">Consultant</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

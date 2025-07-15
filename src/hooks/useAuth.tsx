@@ -40,58 +40,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error('Error fetching profile:', error);
-        
-        // Try to create profile if it doesn't exist
-        if (error.code === 'PGRST116') {
-          console.log('Profile not found, attempting to create...');
+        // Wait a moment and try again - the trigger might still be processing
+        setTimeout(async () => {
+          const { data: retryData, error: retryError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
           
-          // Wait a bit and try again - the trigger might be processing
-          setTimeout(async () => {
-            const { data: retryData, error: retryError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', user.id)
-              .single();
-            
-            if (!retryError && retryData) {
-              console.log('Profile found on retry:', retryData);
-              setProfile(retryData);
-            } else {
-              console.error('Profile still not found after retry. Creating manually...');
-              
-              // Try to create profile manually if trigger failed
-              const userMetadata = user.user_metadata || {};
-              const role = userMetadata.role || 'student';
-              
-              const { data: createdProfile, error: createError } = await supabase
-                .from('profiles')
-                .insert({
-                  id: user.id,
-                  email: user.email,
-                  full_name: userMetadata.full_name || user.email,
-                  role: role
-                })
-                .select()
-                .single();
-              
-              if (!createError && createdProfile) {
-                console.log('Profile created manually:', createdProfile);
-                setProfile(createdProfile);
-                toast.success('Profile created successfully!');
-              } else {
-                console.error('Failed to create profile manually:', createError);
-                toast.error('Failed to create profile. Please try signing in again.');
-              }
-            }
-          }, 3000);
-        }
+          if (!retryError && retryData) {
+            console.log('Profile found on retry:', retryData);
+            setProfile(retryData);
+          } else {
+            console.error('Profile still not found after retry:', retryError);
+          }
+        }, 2000);
       } else {
         console.log('Profile loaded:', data);
         setProfile(data);
       }
     } catch (error) {
       console.error('Error in refreshProfile:', error);
-      toast.error('Error loading profile. Please refresh the page.');
     }
   };
 
@@ -102,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
+      console.log('Auth state changed:', event, session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -120,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Then get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.id);
+      console.log('Initial session:', session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -153,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      console.log('Sign in successful:', data.user?.id);
+      console.log('Sign in successful:', data);
       toast.success('Signed in successfully!');
       return true;
     } catch (error) {
@@ -187,7 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      console.log('Sign up successful:', data.user?.id);
+      console.log('Sign up successful:', data);
       toast.success('Account created successfully!');
       setLoading(false);
       return true;
@@ -201,7 +170,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const createDemoAccounts = async (): Promise<boolean> => {
     const demoUsers = [
-      { email: 'superadmin@youthnet.in', password: 'superadmin123', role: 'super_admin', name: 'Super Admin User' },
       { email: 'admin@youthnet.in', password: 'admin123', role: 'admin', name: 'Admin User' },
       { email: 'staff@youthnet.in', password: 'staff123', role: 'staff', name: 'Staff User' },
       { email: 'trainer@youthnet.in', password: 'trainer123', role: 'trainer', name: 'Trainer User' },
