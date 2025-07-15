@@ -2,7 +2,6 @@
 import React from 'react';
 import {
   Box,
-  Grid2,
   Typography,
   Card,
   CardContent,
@@ -58,63 +57,81 @@ export const StudentDashboard = () => {
         </Typography>
       </Box>
 
-      <Grid2 container spacing={3} sx={{ mb: 4 }}>
+      {/* Stats Cards Grid */}
+      <Box 
+        sx={{ 
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(4, 1fr)'
+          },
+          gap: 3,
+          mb: 4
+        }}
+      >
         {studentStats.map((stat, index) => (
-          <Grid2 xs={12} sm={6} md={3} key={index}>
-            <StatsCard {...stat} />
-          </Grid2>
+          <StatsCard key={index} {...stat} />
         ))}
-      </Grid2>
+      </Box>
 
-      <Grid2 container spacing={3}>
-        <Grid2 xs={12} lg={8}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 3, color: 'primary.main' }}>
-                Today's Schedule
-              </Typography>
-              <List>
-                {upcomingClasses.map((class_, index) => (
-                  <ListItem key={index} sx={{ mb: 2, border: '1px solid rgba(0, 245, 255, 0.2)', borderRadius: 2 }}>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="h6">{class_.name}</Typography>
-                          <Chip label={class_.time} color="primary" size="small" />
+      {/* Main Content Grid */}
+      <Box 
+        sx={{ 
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            lg: '2fr 1fr'
+          },
+          gap: 3
+        }}
+      >
+        <Card>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 3, color: 'primary.main' }}>
+              Today's Schedule
+            </Typography>
+            <List>
+              {upcomingClasses.map((class_, index) => (
+                <ListItem key={index} sx={{ mb: 2, border: '1px solid rgba(0, 245, 255, 0.2)', borderRadius: 2 }}>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="h6">{class_.name}</Typography>
+                        <Chip label={class_.time} color="primary" size="small" />
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          Instructor: {class_.instructor}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Typography variant="caption">Progress: {class_.progress}%</Typography>
+                          <LinearProgress
+                            variant="determinate"
+                            value={class_.progress}
+                            sx={{
+                              flexGrow: 1,
+                              height: 6,
+                              borderRadius: 3,
+                              '& .MuiLinearProgress-bar': {
+                                background: 'linear-gradient(45deg, #00f5ff, #ff1493)',
+                              },
+                            }}
+                          />
                         </Box>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            Instructor: {class_.instructor}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Typography variant="caption">Progress: {class_.progress}%</Typography>
-                            <LinearProgress
-                              variant="determinate"
-                              value={class_.progress}
-                              sx={{
-                                flexGrow: 1,
-                                height: 6,
-                                borderRadius: 3,
-                                '& .MuiLinearProgress-bar': {
-                                  background: 'linear-gradient(45deg, #00f5ff, #ff1493)',
-                                },
-                              }}
-                            />
-                          </Box>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid2>
+                      </Box>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
         
-        <Grid2 xs={12} lg={4}>
-          <Card sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
                 Quick Actions
@@ -187,8 +204,8 @@ export const StudentDashboard = () => {
               </List>
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Box>
+      </Box>
     </Layout>
   );
 };

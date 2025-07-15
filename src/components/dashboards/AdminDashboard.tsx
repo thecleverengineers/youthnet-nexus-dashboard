@@ -2,7 +2,6 @@
 import React from 'react';
 import {
   Box,
-  Grid2,
   Typography,
   Card,
   CardContent,
@@ -53,97 +52,107 @@ export const AdminDashboard = () => {
         </Typography>
       </Box>
 
-      <Grid2 container spacing={3} sx={{ mb: 4 }}>
-        <Grid2 xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Total Students"
-            value={stats.totalStudents.toString()}
-            change="+12% from last month"
-            changeType="positive"
-            icon={PeopleIcon}
-          />
-        </Grid2>
-        <Grid2 xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Active Programs"
-            value={stats.totalPrograms.toString()}
-            change="+5% from last month"
-            changeType="positive"
-            icon={SchoolIcon}
-          />
-        </Grid2>
-        <Grid2 xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Job Placements"
-            value={stats.activeJobs.toString()}
-            change="+25% from last month"
-            changeType="positive"
-            icon={TrendingUpIcon}
-          />
-        </Grid2>
-        <Grid2 xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Incubation Projects"
-            value={stats.totalProjects.toString()}
-            change="+8% from last month"
-            changeType="positive"
-            icon={BusinessIcon}
-          />
-        </Grid2>
-      </Grid2>
+      {/* Stats Cards Grid */}
+      <Box 
+        sx={{ 
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(4, 1fr)'
+          },
+          gap: 3,
+          mb: 4
+        }}
+      >
+        <StatsCard
+          title="Total Students"
+          value={stats.totalStudents.toString()}
+          change="+12% from last month"
+          changeType="positive"
+          icon={PeopleIcon}
+        />
+        <StatsCard
+          title="Active Programs"
+          value={stats.totalPrograms.toString()}
+          change="+5% from last month"
+          changeType="positive"
+          icon={SchoolIcon}
+        />
+        <StatsCard
+          title="Job Placements"
+          value={stats.activeJobs.toString()}
+          change="+25% from last month"
+          changeType="positive"
+          icon={TrendingUpIcon}
+        />
+        <StatsCard
+          title="Incubation Projects"
+          value={stats.totalProjects.toString()}
+          change="+8% from last month"
+          changeType="positive"
+          icon={BusinessIcon}
+        />
+      </Box>
 
-      <Grid2 container spacing={3}>
-        <Grid2 xs={12} lg={8}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
-                System Performance
+      {/* Main Content Grid */}
+      <Box 
+        sx={{ 
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            lg: '2fr 1fr'
+          },
+          gap: 3
+        }}
+      >
+        <Card>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+              System Performance
+            </Typography>
+            <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Typography color="text.secondary">
+                Analytics charts will be displayed here
               </Typography>
-              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography color="text.secondary">
-                  Analytics charts will be displayed here
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid2>
+            </Box>
+          </CardContent>
+        </Card>
         
-        <Grid2 xs={12} lg={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
-                Recent Activities
-              </Typography>
-              <List>
-                {recentActivities.slice(0, 5).map((activity, index) => (
-                  <ListItem key={index} sx={{ px: 0 }}>
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2">
-                          {activity.description || 'System activity'}
+        <Card>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
+              Recent Activities
+            </Typography>
+            <List>
+              {recentActivities.slice(0, 5).map((activity, index) => (
+                <ListItem key={index} sx={{ px: 0 }}>
+                  <ListItemText
+                    primary={
+                      <Typography variant="body2">
+                        {activity.description || 'System activity'}
+                      </Typography>
+                    }
+                    secondary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                        <Chip 
+                          label={activity.type || 'general'} 
+                          size="small" 
+                          color="primary" 
+                          variant="outlined" 
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date().toLocaleDateString()}
                         </Typography>
-                      }
-                      secondary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                          <Chip 
-                            label={activity.type || 'general'} 
-                            size="small" 
-                            color="primary" 
-                            variant="outlined" 
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            {new Date().toLocaleDateString()}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid2>
-      </Grid2>
+                      </Box>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
+      </Box>
     </Layout>
   );
 };

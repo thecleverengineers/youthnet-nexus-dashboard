@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Grid2, Typography, Box } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 import {
   People as PeopleIcon,
   School as SchoolIcon,
@@ -50,136 +50,140 @@ export const BerryDashboard = () => {
         </Typography>
       </Box>
 
-      {/* Analytics Cards */}
-      <Grid2 container spacing={3} sx={{ mb: 4 }}>
-        <Grid2 xs={12} sm={6} lg={3}>
-          <BerryAnalyticsCard
-            title="Total Students"
-            count={stats.totalStudents?.toString() || '0'}
-            percentage={12}
-            color="primary"
-            icon={<PeopleIcon />}
-            extra="Active enrollments"
-          />
-        </Grid2>
-        <Grid2 xs={12} sm={6} lg={3}>
-          <BerryAnalyticsCard
-            title="Active Programs"
-            count={stats.totalPrograms?.toString() || '0'}
-            percentage={5}
-            color="secondary"
-            icon={<SchoolIcon />}
-            extra="Running courses"
-          />
-        </Grid2>
-        <Grid2 xs={12} sm={6} lg={3}>
-          <BerryAnalyticsCard
-            title="Job Placements"
-            count={stats.activeJobs?.toString() || '0'}
-            percentage={25}
-            color="success"
-            icon={<TrendingUpIcon />}
-            extra="This quarter"
-          />
-        </Grid2>
-        <Grid2 xs={12} sm={6} lg={3}>
-          <BerryAnalyticsCard
-            title="Incubation Projects"
-            count={stats.totalProjects?.toString() || '0'}
-            percentage={8}
-            color="warning"
-            icon={<BusinessIcon />}
-            extra="Active startups"
-          />
-        </Grid2>
-      </Grid2>
+      {/* Analytics Cards Grid */}
+      <Box 
+        sx={{ 
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            lg: 'repeat(4, 1fr)'
+          },
+          gap: 3,
+          mb: 4
+        }}
+      >
+        <BerryAnalyticsCard
+          title="Total Students"
+          count={stats.totalStudents?.toString() || '0'}
+          percentage={12}
+          color="primary"
+          icon={<PeopleIcon />}
+          extra="Active enrollments"
+        />
+        <BerryAnalyticsCard
+          title="Active Programs"
+          count={stats.totalPrograms?.toString() || '0'}
+          percentage={5}
+          color="secondary"
+          icon={<SchoolIcon />}
+          extra="Running courses"
+        />
+        <BerryAnalyticsCard
+          title="Job Placements"
+          count={stats.activeJobs?.toString() || '0'}
+          percentage={25}
+          color="success"
+          icon={<TrendingUpIcon />}
+          extra="This quarter"
+        />
+        <BerryAnalyticsCard
+          title="Incubation Projects"
+          count={stats.totalProjects?.toString() || '0'}
+          percentage={8}
+          color="warning"
+          icon={<BusinessIcon />}
+          extra="Active startups"
+        />
+      </Box>
 
-      {/* Main Content */}
-      <Grid2 container spacing={3}>
-        <Grid2 xs={12} lg={8}>
-          <BerryMainCard title="Performance Analytics" darkTitle>
-            <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Typography color="text.secondary" variant="h6">
-                Advanced analytics charts will be displayed here
-              </Typography>
-            </Box>
-          </BerryMainCard>
-        </Grid2>
+      {/* Main Content Grid */}
+      <Box 
+        sx={{ 
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            lg: '2fr 1fr'
+          },
+          gap: 3
+        }}
+      >
+        <BerryMainCard title="Performance Analytics" darkTitle>
+          <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography color="text.secondary" variant="h6">
+              Advanced analytics charts will be displayed here
+            </Typography>
+          </Box>
+        </BerryMainCard>
         
-        <Grid2 xs={12} lg={4}>
-          <Grid2 container spacing={3}>
-            <Grid2 xs={12}>
-              <BerrySubCard title="Quick Actions" darkTitle>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {[
-                    { icon: <PeopleIcon />, title: 'Manage Students', desc: 'View and edit student records' },
-                    { icon: <SchoolIcon />, title: 'Course Management', desc: 'Create and manage courses' },
-                    { icon: <AssignmentIcon />, title: 'Generate Reports', desc: 'Export system reports' },
-                    { icon: <EventIcon />, title: 'Schedule Events', desc: 'Plan upcoming activities' },
-                  ].map((action, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        p: 2,
-                        borderRadius: 1,
-                        background: 'rgba(0, 245, 255, 0.05)',
-                        border: '1px solid rgba(0, 245, 255, 0.1)',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          background: 'rgba(0, 245, 255, 0.1)',
-                          transform: 'translateX(4px)',
-                        },
-                      }}
-                    >
-                      <Box sx={{ color: 'primary.main' }}>
-                        {action.icon}
-                      </Box>
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          {action.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {action.desc}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <BerrySubCard title="Quick Actions" darkTitle>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {[
+                { icon: <PeopleIcon />, title: 'Manage Students', desc: 'View and edit student records' },
+                { icon: <SchoolIcon />, title: 'Course Management', desc: 'Create and manage courses' },
+                { icon: <AssignmentIcon />, title: 'Generate Reports', desc: 'Export system reports' },
+                { icon: <EventIcon />, title: 'Schedule Events', desc: 'Plan upcoming activities' },
+              ].map((action, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    p: 2,
+                    borderRadius: 1,
+                    background: 'rgba(0, 245, 255, 0.05)',
+                    border: '1px solid rgba(0, 245, 255, 0.1)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      background: 'rgba(0, 245, 255, 0.1)',
+                      transform: 'translateX(4px)',
+                    },
+                  }}
+                >
+                  <Box sx={{ color: 'primary.main' }}>
+                    {action.icon}
+                  </Box>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                      {action.title}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {action.desc}
+                    </Typography>
+                  </Box>
                 </Box>
-              </BerrySubCard>
-            </Grid2>
-            
-            <Grid2 xs={12}>
-              <BerrySubCard title="System Status" darkTitle>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {[
-                    { label: 'Server Status', value: 'Online', color: 'success' },
-                    { label: 'Database', value: 'Connected', color: 'success' },
-                    { label: 'API Response', value: '125ms', color: 'warning' },
-                    { label: 'Active Users', value: '1,247', color: 'info' },
-                  ].map((item, index) => (
-                    <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Typography variant="body2">{item.label}</Typography>
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          fontWeight: 600,
-                          color: `${item.color}.main`,
-                        }}
-                      >
-                        {item.value}
-                      </Typography>
-                    </Box>
-                  ))}
+              ))}
+            </Box>
+          </BerrySubCard>
+          
+          <BerrySubCard title="System Status" darkTitle>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {[
+                { label: 'Server Status', value: 'Online', color: 'success' },
+                { label: 'Database', value: 'Connected', color: 'success' },
+                { label: 'API Response', value: '125ms', color: 'warning' },
+                { label: 'Active Users', value: '1,247', color: 'info' },
+              ].map((item, index) => (
+                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2">{item.label}</Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: `${item.color}.main`,
+                    }}
+                  >
+                    {item.value}
+                  </Typography>
                 </Box>
-              </BerrySubCard>
-            </Grid2>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+              ))}
+            </Box>
+          </BerrySubCard>
+        </Box>
+      </Box>
     </BerryLayout>
   );
 };

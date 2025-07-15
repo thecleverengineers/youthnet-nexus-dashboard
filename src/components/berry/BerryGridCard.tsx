@@ -1,15 +1,15 @@
 
 import React from 'react';
-import { Grid2, Grid2Props } from '@mui/material';
+import { Box, BoxProps } from '@mui/material';
 
-interface BerryGridCardProps extends Grid2Props {
+interface BerryGridCardProps extends BoxProps {
   children: React.ReactNode;
 }
 
 export const BerryGridCard: React.FC<BerryGridCardProps> = ({ children, ...props }) => {
   return (
-    <Grid2 {...props}>
+    <Box {...props}>
       {children}
-    </Grid2>
+    </Box>
   );
 };

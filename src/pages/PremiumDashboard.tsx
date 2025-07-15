@@ -1,12 +1,10 @@
 
 import React, { useState } from 'react';
 import {
-  Grid,
   Card,
   CardContent,
   Typography,
   Box,
-  Paper,
   Avatar,
   IconButton,
   Chip,
@@ -167,153 +165,176 @@ export const PremiumDashboard = () => {
           </Typography>
         </Box>
 
-        {/* Stats Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Stats Cards Grid */}
+        <Box 
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(4, 1fr)'
+            },
+            gap: 3,
+            mb: 4
+          }}
+        >
           {stats.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <StatCard {...stat} />
-            </Grid>
+            <StatCard key={index} {...stat} />
           ))}
-        </Grid>
+        </Box>
 
-        {/* Charts and Content */}
-        <Grid container spacing={3}>
+        {/* Charts and Content Grid */}
+        <Box 
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              lg: '2fr 1fr'
+            },
+            gap: 3,
+            mb: 3
+          }}
+        >
           {/* User Growth Chart */}
-          <Grid item xs={12} lg={8}>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                    <Typography variant="h6" fontWeight={600}>
-                      User Growth
-                    </Typography>
-                    <IconButton size="small">
-                      <MoreVert />
-                    </IconButton>
-                  </Box>
-                  <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography color="text.secondary">
-                      Chart component will be rendered here
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                  <Typography variant="h6" fontWeight={600}>
+                    User Growth
+                  </Typography>
+                  <IconButton size="small">
+                    <MoreVert />
+                  </IconButton>
+                </Box>
+                <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Typography color="text.secondary">
+                    Chart component will be rendered here
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Recent Activity */}
-          <Grid item xs={12} lg={4}>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                    Recent Activity
-                  </Typography>
-                  <List>
-                    {recentActivities.map((activity) => (
-                      <ListItem key={activity.id} sx={{ px: 0 }}>
-                        <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: 'primary.main' }}>
-                            {activity.avatar}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={activity.user}
-                          secondary={
-                            <Box>
-                              <Typography variant="body2" color="text.secondary">
-                                {activity.action}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {activity.time}
-                              </Typography>
-                            </Box>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <Card>
+              <CardContent>
+                <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                  Recent Activity
+                </Typography>
+                <List>
+                  {recentActivities.map((activity) => (
+                    <ListItem key={activity.id} sx={{ px: 0 }}>
+                      <ListItemAvatar>
+                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                          {activity.avatar}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={activity.user}
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              {activity.action}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {activity.time}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Box>
 
+        {/* Bottom Section Grid */}
+        <Box 
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              md: 'repeat(2, 1fr)'
+            },
+            gap: 3
+          }}
+        >
           {/* Project Timeline */}
-          <Grid item xs={12} md={6}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                    Project Timeline
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {[
-                      { name: 'Website Redesign', progress: 75, status: 'In Progress' },
-                      { name: 'Mobile App', progress: 45, status: 'Development' },
-                      { name: 'API Integration', progress: 90, status: 'Testing' },
-                    ].map((project, index) => (
-                      <Box key={index}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="body2" fontWeight={500}>
-                            {project.name}
-                          </Typography>
-                          <Chip
-                            label={project.status}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                          />
-                        </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={project.progress}
-                          sx={{ height: 6, borderRadius: 3 }}
-                        />
-                        <Typography variant="caption" color="text.secondary">
-                          {project.progress}% Complete
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card>
+              <CardContent>
+                <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                  Project Timeline
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {[
+                    { name: 'Website Redesign', progress: 75, status: 'In Progress' },
+                    { name: 'Mobile App', progress: 45, status: 'Development' },
+                    { name: 'API Integration', progress: 90, status: 'Testing' },
+                  ].map((project, index) => (
+                    <Box key={index}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" fontWeight={500}>
+                          {project.name}
                         </Typography>
+                        <Chip
+                          label={project.status}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                        />
                       </Box>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
+                      <LinearProgress
+                        variant="determinate"
+                        value={project.progress}
+                        sx={{ height: 6, borderRadius: 3 }}
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {project.progress}% Complete
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Traffic Channels */}
-          <Grid item xs={12} md={6}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                    Traffic Channels
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card>
+              <CardContent>
+                <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                  Traffic Channels
+                </Typography>
+                <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Typography color="text.secondary">
+                    Pie chart component will be rendered here
                   </Typography>
-                  <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography color="text.secondary">
-                      Pie chart component will be rendered here
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
-        </Grid>
+                </Box>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Box>
       </PremiumLayout>
     </ThemeProvider>
   );
