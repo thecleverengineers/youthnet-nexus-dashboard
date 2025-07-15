@@ -1,68 +1,133 @@
 
-import React, { Suspense } from 'react';
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import React, { useState } from 'react';
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  Typography,
+  Drawer,
+  IconButton,
+  Container,
+  Avatar,
+  useTheme,
+} from '@mui/material';
+import { Menu as MenuIcon } from '@mui/icons-material';
 import { AppSidebar } from './AppSidebar';
 import { TopNavbar } from './TopNavbar';
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-const LoadingSkeleton = () => (
-  <div className="flex-1 p-8 space-y-8">
-    <div className="space-y-4">
-      <Skeleton className="h-10 w-1/3 neon-card" />
-      <Skeleton className="h-6 w-1/2 neon-card" />
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <Skeleton className="h-40 neon-card neon-glow-pink" />
-      <Skeleton className="h-40 neon-card neon-glow-cyan" />
-      <Skeleton className="h-40 neon-card neon-glow-purple" />
-      <Skeleton className="h-40 neon-card neon-glow-green" />
-    </div>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Skeleton className="h-80 neon-card neon-glow-pink" />
-      <Skeleton className="h-80 neon-card neon-glow-cyan" />
-    </div>
-  </div>
-);
-
 export const Layout = ({ children }: LayoutProps) => {
-  return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Neon Header */}
-          <header className="h-16 flex items-center justify-between px-6 neon-card border-b border-border/30">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="hover:neon-glow-pink transition-all duration-200 p-2 rounded-lg text-foreground hover:text-neon-pink" />
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-neon-pink to-neon-purple flex items-center justify-center shadow-lg neon-glow-pink">
-                  <span className="text-white font-bold text-sm">Y</span>
-                </div>
-                <div className="flex flex-col">
-                  <h1 className="text-xl font-bold text-gradient">YouthNet</h1>
-                  <span className="text-xs text-muted-foreground font-medium">AI-Powered Management System</span>
-                </div>
-              </div>
-            </div>
-            
-            <TopNavbar />
-          </header>
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const theme = useTheme();
 
-          {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto">
-            <Suspense fallback={<LoadingSkeleton />}>
-              <div className="p-8 max-w-7xl mx-auto">
-                {children}
-              </div>
-            </Suspense>
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  return (
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <AppBar 
+        position="fixed" 
+        sx={{ 
+          zIndex: theme.zIndex.drawer + 1,
+          boxShadow: '0 0 20px rgba(0, 245, 255, 0.3)',
+        }}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="toggle sidebar"
+            onClick={toggleSidebar}
+            edge="start"
+            sx={{ 
+              mr: 2,
+              '&:hover': {
+                boxShadow: '0 0 15px rgba(255, 20, 147, 0.5)',
+              },
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                mr: 2,
+                background: 'linear-gradient(45deg, #ff1493, #8b5cf6)',
+                boxShadow: '0 0 15px rgba(255, 20, 147, 0.5)',
+              }}
+            >
+              Y
+            </Avatar>
+            <Box>
+              <Typography 
+                variant="h6" 
+                component="div" 
+                sx={{ 
+                  fontWeight: 700,
+                  background: 'linear-gradient(45deg, #00f5ff, #ff1493)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                YouthNet
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: 'text.secondary',
+                  fontSize: '0.7rem',
+                }}
+              >
+                AI-Powered Management System
+              </Typography>
+            </Box>
+          </Box>
+          
+          <TopNavbar />
+        </Toolbar>
+      </AppBar>
+
+      <Drawer
+        variant="persistent"
+        anchor="left"
+        open={sidebarOpen}
+        sx={{
+          width: sidebarOpen ? 280 : 0,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: 280,
+            boxSizing: 'border-box',
+            mt: '64px',
+            height: 'calc(100vh - 64px)',
+          },
+        }}
+      >
+        <AppSidebar />
+      </Drawer>
+
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          ml: sidebarOpen ? '280px' : 0,
+          mt: '64px',
+          transition: theme.transitions.create(['margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
+        }}
+      >
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          {children}
+        </Container>
+      </Box>
+    </Box>
   );
 };
