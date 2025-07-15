@@ -40,11 +40,15 @@ const testimonials = [
 // ───────────────────────── Animations ──────────────────────────
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
-  visible: (i = 1) => ({
+  visible: {
     opacity: 1,
     y: 0,
-    transition: { delay: 0.15 * i, duration: 0.7, ease: "easeOut" }
-  })
+    transition: { 
+      delay: 0.15, 
+      duration: 0.7, 
+      ease: [0.4, 0, 0.2, 1] 
+    }
+  }
 };
 
 export const ProfessionalHomePage = () => {
@@ -62,18 +66,17 @@ export const ProfessionalHomePage = () => {
 
         <motion.h1
           className="relative z-10 text-5xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70"
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0, duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
         >
           Accelerate Your Workflow
         </motion.h1>
         <motion.p
           className="relative z-10 max-w-2xl mt-6 text-lg md:text-xl backdrop-blur-sm"
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          custom={2}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
         >
           Unlock the full potential of your data with our AI‑powered, real‑time dashboard platform.
         </motion.p>
@@ -81,10 +84,9 @@ export const ProfessionalHomePage = () => {
           className="relative z-10 mt-10"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          custom={3}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
         >
           <Button size="lg" className="px-8 py-4 text-lg font-bold">
             Get Started Free
@@ -100,6 +102,7 @@ export const ProfessionalHomePage = () => {
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
+            viewport={{ once: true }}
           >
             Powerful Features
           </motion.h2>
@@ -110,10 +113,14 @@ export const ProfessionalHomePage = () => {
                 key={f.id}
                 className="p-6 bg-gray-50 rounded-2xl shadow-lg cursor-pointer hover:shadow-xl"
                 whileHover={{ y: -6 }}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                custom={i}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  delay: i * 0.15, 
+                  duration: 0.7, 
+                  ease: [0.4, 0, 0.2, 1] 
+                }}
+                viewport={{ once: true }}
               >
                 <div className="text-4xl mb-4">{f.icon}</div>
                 <h3 className="mb-2 text-xl font-semibold">{f.title}</h3>
@@ -132,6 +139,7 @@ export const ProfessionalHomePage = () => {
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
+            viewport={{ once: true }}
           >
             Loved by Teams Worldwide
           </motion.h2>
@@ -142,10 +150,14 @@ export const ProfessionalHomePage = () => {
                 key={t.id}
                 className="p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl"
                 whileHover={{ scale: 1.02 }}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                custom={i}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  delay: i * 0.15, 
+                  duration: 0.7, 
+                  ease: [0.4, 0, 0.2, 1] 
+                }}
+                viewport={{ once: true }}
               >
                 <div className="flex items-center mb-4 gap-1">
                   {Array.from({ length: 5 }).map((_, idx) => (
@@ -169,6 +181,7 @@ export const ProfessionalHomePage = () => {
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
+            viewport={{ once: true }}
           >
             Ready to Transform Your Data?
           </motion.h2>
@@ -182,17 +195,28 @@ export const ProfessionalHomePage = () => {
               <motion.li
                 key={item}
                 className="flex items-center gap-2"
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                custom={i}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  delay: i * 0.15, 
+                  duration: 0.7, 
+                  ease: [0.4, 0, 0.2, 1] 
+                }}
+                viewport={{ once: true }}
               >
                 <Check className="w-5 h-5" /> {item}
               </motion.li>
             ))}
           </ul>
 
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+          <motion.div 
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.97 }}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
+            viewport={{ once: true }}
+          >
             <Button size="lg" variant="secondary" className="text-indigo-700 bg-white px-10 py-4 text-lg font-bold">
               Start Your Free Trial
             </Button>
