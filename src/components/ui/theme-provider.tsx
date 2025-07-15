@@ -1,4 +1,8 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react"
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { premiumLightTheme, premiumDarkTheme } from '@/theme/premiumTheme'
+import { muiTheme } from '@/theme/muiTheme'
 
 type Theme = "dark" | "light" | "system"
 
@@ -11,11 +15,17 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
+  muiTheme: any
+  isPremiumTheme: boolean
+  setIsPremiumTheme: (isPremium: boolean) => void
 }
 
 const initialState: ThemeProviderState = {
   theme: "light",
   setTheme: () => null,
+  muiTheme: muiTheme,
+  isPremiumTheme: false,
+  setIsPremiumTheme: () => null,
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
@@ -28,6 +38,9 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  )
+  const [isPremiumTheme, setIsPremiumTheme] = useState<boolean>(
+    () => localStorage.getItem("youthnet-premium-theme") === "true"
   )
 
   useEffect(() => {
@@ -48,17 +61,34 @@ export function ThemeProvider({
     root.classList.add(theme)
   }, [theme])
 
+  const getCurrentMuiTheme = () => {
+    if (isPremiumTheme) {
+      return theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ? premiumDarkTheme
+        : premiumLightTheme
+    }
+    return muiTheme
+  }
+
   const value = {
     theme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme)
       setTheme(theme)
     },
+    muiTheme: getCurrentMuiTheme(),
+    isPremiumTheme,
+    setIsPremiumTheme: (isPremium: boolean) => {
+      localStorage.setItem("youthnet-premium-theme", isPremium.toString())
+      setIsPremiumTheme(isPremium)
+    },
   }
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
-      {children}
+      <MuiThemeProvider theme={value.muiTheme}>
+        {children}
+      </MuiThemeProvider>
     </ThemeProviderContext.Provider>
   )
 }

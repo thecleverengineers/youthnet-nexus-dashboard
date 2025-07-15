@@ -9,7 +9,7 @@ import {
   IconButton,
   Container,
   Avatar,
-  useTheme,
+  useTheme as useMuiTheme,
   useMediaQuery,
   Badge,
   Menu,
@@ -79,7 +79,7 @@ const menuGroups = [
 ];
 
 export const PremiumLayout = ({ children, darkMode = false, onThemeToggle }: PremiumLayoutProps) => {
-  const theme = useTheme();
+  const theme = useMuiTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
   const { signOut, profile } = useAuth();
   

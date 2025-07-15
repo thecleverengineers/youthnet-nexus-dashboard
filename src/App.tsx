@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { muiTheme } from './theme/muiTheme';
+import { ThemeProvider } from './components/ui/theme-provider';
 import { AuthProvider } from './hooks/useAuth';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { RoleBasedRoute } from './components/auth/RoleBasedRoute';
@@ -13,7 +12,7 @@ import { Toaster } from './components/ui/sonner';
 
 function App() {
   return (
-    <ThemeProvider theme={muiTheme}>
+    <ThemeProvider>
       <CssBaseline />
       <AuthProvider>
         <Router>
