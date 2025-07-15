@@ -19,6 +19,9 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, fullName: string, role: string) => Promise<boolean>;
+  createDemoAccounts: () => Promise<boolean>;
   signOut: () => Promise<void>;
 }
 
@@ -81,6 +84,135 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error in fetchProfile:', error);
       return null;
+    }
+  };
+
+  const signIn = async (email: string, password: string): Promise<boolean> => {
+    try {
+      console.log('Attempting sign in for:', email);
+      setLoading(true);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Sign in error:', error);
+        toast.error(error.message);
+        return false;
+      }
+
+      if (data.user) {
+        console.log('Sign in successful:', data.user.id);
+        toast.success('Signed in successfully!');
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Sign in error:', error);
+      toast.error('Failed to sign in');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUp = async (email: string, password: string, fullName: string, role: string): Promise<boolean> => {
+    try {
+      console.log('Attempting sign up for:', email, 'with role:', role);
+      setLoading(true);
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: role,
+          },
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) {
+        console.error('Sign up error:', error);
+        toast.error(error.message);
+        return false;
+      }
+
+      if (data.user) {
+        console.log('Sign up successful:', data.user.id);
+        toast.success('Account created successfully!');
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Sign up error:', error);
+      toast.error('Failed to create account');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createDemoAccounts = async (): Promise<boolean> => {
+    try {
+      console.log('Creating demo accounts...');
+      setLoading(true);
+
+      const demoUsers = [
+        { email: 'admin@youthnet.in', password: 'admin123', fullName: 'Admin User', role: 'admin' },
+        { email: 'staff@youthnet.in', password: 'staff123', fullName: 'Staff Member', role: 'staff' },
+        { email: 'trainer@youthnet.in', password: 'trainer123', fullName: 'Trainer User', role: 'trainer' },
+        { email: 'student@youthnet.in', password: 'student123', fullName: 'Student User', role: 'student' },
+      ];
+
+      let successCount = 0;
+      
+      for (const demoUser of demoUsers) {
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email: demoUser.email,
+            password: demoUser.password,
+            options: {
+              data: {
+                full_name: demoUser.fullName,
+                role: demoUser.role,
+              },
+              emailRedirectTo: `${window.location.origin}/`
+            }
+          });
+
+          if (!error) {
+            successCount++;
+            console.log(`Demo user created: ${demoUser.email}`);
+          } else if (error.message.includes('already registered')) {
+            console.log(`Demo user already exists: ${demoUser.email}`);
+            successCount++;
+          } else {
+            console.error(`Error creating ${demoUser.email}:`, error);
+          }
+        } catch (err) {
+          console.error(`Error creating ${demoUser.email}:`, err);
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Demo accounts ready! (${successCount}/${demoUsers.length})`);
+        return true;
+      } else {
+        toast.error('Failed to create demo accounts');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error creating demo accounts:', error);
+      toast.error('Failed to create demo accounts');
+      return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -160,6 +292,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     profile,
     loading,
+    signIn,
+    signUp,
+    createDemoAccounts,
     signOut,
   };
 

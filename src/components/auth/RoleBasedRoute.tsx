@@ -19,7 +19,7 @@ export const RoleBasedRoute = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+          <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
           <p className="text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
@@ -38,7 +38,7 @@ export const RoleBasedRoute = () => {
                 className="h-20 w-auto object-contain"
               />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-2">Welcome to YouthNet</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Welcome to YouthNet</h2>
             <p className="text-muted-foreground mb-4">Management Information System</p>
             
             <Alert>
@@ -57,15 +57,15 @@ export const RoleBasedRoute = () => {
     );
   }
 
-  // If we have a user but no profile, show error and retry option
+  // If we have a user but no profile, show loading with retry option
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4 p-6 max-w-md">
-          <div className="w-16 h-16 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin mx-auto"></div>
-          <h2 className="text-xl font-semibold text-white mb-2">Profile Setup Issue</h2>
+          <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Setting up your profile...</h2>
           <p className="text-muted-foreground mb-4">
-            We're having trouble setting up your profile. This usually resolves automatically.
+            Please wait while we prepare your dashboard.
           </p>
           <Button 
             onClick={() => window.location.reload()} 
