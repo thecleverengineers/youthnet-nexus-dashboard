@@ -7,6 +7,7 @@ import { muiTheme } from './theme/muiTheme';
 import { AuthProvider } from './hooks/useAuth';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { RoleBasedRoute } from './components/auth/RoleBasedRoute';
+import { BerryDashboard } from './pages/BerryDashboard';
 import { Toaster } from './components/ui/sonner';
 
 function App() {
@@ -18,6 +19,11 @@ function App() {
           <div className="App">
             <Routes>
               <Route path="/" element={
+                <ProtectedRoute>
+                  <BerryDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/legacy" element={
                 <ProtectedRoute>
                   <RoleBasedRoute />
                 </ProtectedRoute>
