@@ -2,7 +2,7 @@
 import React from 'react';
 import {
   Box,
-  Grid2 as Grid,
+  Grid,
   Typography,
   Card,
   CardContent,
@@ -54,7 +54,7 @@ export const AdminDashboard = () => {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <StatsCard
             title="Total Students"
             value={stats.totalStudents.toString()}
@@ -63,7 +63,7 @@ export const AdminDashboard = () => {
             icon={PeopleIcon}
           />
         </Grid>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <StatsCard
             title="Active Programs"
             value={stats.totalPrograms.toString()}
@@ -72,7 +72,7 @@ export const AdminDashboard = () => {
             icon={SchoolIcon}
           />
         </Grid>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <StatsCard
             title="Job Placements"
             value={stats.activeJobs.toString()}
@@ -81,7 +81,7 @@ export const AdminDashboard = () => {
             icon={TrendingUpIcon}
           />
         </Grid>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <StatsCard
             title="Incubation Projects"
             value={stats.totalProjects.toString()}
@@ -93,7 +93,7 @@ export const AdminDashboard = () => {
       </Grid>
 
       <Grid container spacing={3}>
-        <Grid xs={12} lg={8}>
+        <Grid item xs={12} lg={8}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
@@ -108,7 +108,7 @@ export const AdminDashboard = () => {
           </Card>
         </Grid>
         
-        <Grid xs={12} lg={4}>
+        <Grid item xs={12} lg={4}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>

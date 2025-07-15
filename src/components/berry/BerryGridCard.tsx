@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Grid2 as Grid, Grid2Props } from '@mui/material';
+import { Grid, GridProps } from '@mui/material';
 
-interface BerryGridCardProps extends Grid2Props {
+interface BerryGridCardProps extends GridProps {
   children: React.ReactNode;
 }
 

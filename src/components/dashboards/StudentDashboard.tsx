@@ -2,7 +2,7 @@
 import React from 'react';
 import {
   Box,
-  Grid2 as Grid,
+  Grid,
   Typography,
   Card,
   CardContent,
@@ -60,14 +60,14 @@ export const StudentDashboard = () => {
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {studentStats.map((stat, index) => (
-          <Grid xs={12} sm={6} md={3} key={index}>
+          <Grid item xs={12} sm={6} md={3} key={index}>
             <StatsCard {...stat} />
           </Grid>
         ))}
       </Grid>
 
       <Grid container spacing={3}>
-        <Grid xs={12} lg={8}>
+        <Grid item xs={12} lg={8}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 3, color: 'primary.main' }}>
@@ -113,7 +113,7 @@ export const StudentDashboard = () => {
           </Card>
         </Grid>
         
-        <Grid xs={12} lg={4}>
+        <Grid item xs={12} lg={4}>
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
