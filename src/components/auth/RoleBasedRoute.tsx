@@ -13,6 +13,8 @@ export const RoleBasedRoute = () => {
   const { profile, loading, user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  console.log('RoleBasedRoute - Loading:', loading, 'User:', !!user, 'Profile:', profile);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -55,20 +57,29 @@ export const RoleBasedRoute = () => {
     );
   }
 
-  // If we have a user but no profile yet, show a brief loading state
+  // If we have a user but no profile, show error and retry option
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-green-500/30 border-t-green-500 rounded-full animate-spin mx-auto"></div>
-          <h2 className="text-xl font-semibold text-white mb-2">Preparing your dashboard...</h2>
-          <p className="text-muted-foreground">Just a moment...</p>
+        <div className="text-center space-y-4 p-6 max-w-md">
+          <div className="w-16 h-16 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin mx-auto"></div>
+          <h2 className="text-xl font-semibold text-white mb-2">Profile Setup Issue</h2>
+          <p className="text-muted-foreground mb-4">
+            We're having trouble setting up your profile. This usually resolves automatically.
+          </p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            variant="outline"
+            className="px-6 py-2"
+          >
+            Retry
+          </Button>
         </div>
       </div>
     );
   }
 
-  console.log('Routing user with profile:', profile);
+  console.log('Routing user with profile role:', profile.role);
 
   // Route based on role
   switch (profile.role) {
