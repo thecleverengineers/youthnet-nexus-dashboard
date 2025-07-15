@@ -15,17 +15,6 @@ export const RoleBasedRoute = () => {
 
   console.log('RoleBasedRoute - Loading:', loading, 'User:', !!user, 'Profile:', profile);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (!user) {
     return (
       <>
@@ -57,12 +46,23 @@ export const RoleBasedRoute = () => {
     );
   }
 
-  // If we have a user but no profile, show loading with retry option
+  // If we have a user but no profile and still loading, show minimal loading
+  if (!profile && loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
+          <p className="text-muted-foreground">Setting up your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If we have a user but no profile and not loading, show retry option
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4 p-6 max-w-md">
-          <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
           <h2 className="text-xl font-semibold text-foreground mb-2">Setting up your profile...</h2>
           <p className="text-muted-foreground mb-4">
             Please wait while we prepare your dashboard.
@@ -81,7 +81,7 @@ export const RoleBasedRoute = () => {
 
   console.log('Routing user with profile role:', profile.role);
 
-  // Route based on role
+  // Route based on role - display dashboard directly
   switch (profile.role) {
     case 'student':
       return <StudentDashboard />;
