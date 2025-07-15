@@ -11,11 +11,11 @@ import {
   Chip,
 } from '@mui/material';
 import {
-  People as PeopleIcon,
-  School as SchoolIcon,
-  TrendingUp as TrendingUpIcon,
-  Business as BusinessIcon,
-} from '@mui/icons-material';
+  Users,
+  GraduationCap,
+  TrendingUp,
+  Building2,
+} from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { StatsCard } from '@/components/ui/stats-card';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -70,28 +70,28 @@ export const AdminDashboard = () => {
           value={stats.totalStudents.toString()}
           change="+12% from last month"
           changeType="positive"
-          icon={PeopleIcon}
+          icon={Users}
         />
         <StatsCard
           title="Active Programs"
           value={stats.totalPrograms.toString()}
           change="+5% from last month"
           changeType="positive"
-          icon={SchoolIcon}
+          icon={GraduationCap}
         />
         <StatsCard
           title="Job Placements"
           value={stats.activeJobs.toString()}
           change="+25% from last month"
           changeType="positive"
-          icon={TrendingUpIcon}
+          icon={TrendingUp}
         />
         <StatsCard
           title="Incubation Projects"
           value={stats.totalProjects.toString()}
           change="+8% from last month"
           changeType="positive"
-          icon={BusinessIcon}
+          icon={Building2}
         />
       </Box>
 

@@ -13,11 +13,11 @@ import {
   LinearProgress,
 } from '@mui/material';
 import {
-  School as SchoolIcon,
-  Work as WorkIcon,
-  Assignment as AssignmentIcon,
-  Star as StarIcon,
-} from '@mui/icons-material';
+  GraduationCap,
+  Briefcase,
+  FileText,
+  Star,
+} from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { StatsCard } from '@/components/ui/stats-card';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,10 +26,10 @@ export const StudentDashboard = () => {
   const { profile } = useAuth();
 
   const studentStats = [
-    { title: 'Courses Enrolled', value: '5', change: '+2 this semester', changeType: 'positive' as const, icon: SchoolIcon },
-    { title: 'Assignments Due', value: '3', change: 'Due this week', changeType: 'neutral' as const, icon: AssignmentIcon },
-    { title: 'Job Applications', value: '8', change: '+3 this month', changeType: 'positive' as const, icon: WorkIcon },
-    { title: 'Average Grade', value: '85%', change: '+5% improvement', changeType: 'positive' as const, icon: StarIcon },
+    { title: 'Courses Enrolled', value: '5', change: '+2 this semester', changeType: 'positive' as const, icon: GraduationCap },
+    { title: 'Assignments Due', value: '3', change: 'Due this week', changeType: 'neutral' as const, icon: FileText },
+    { title: 'Job Applications', value: '8', change: '+3 this month', changeType: 'positive' as const, icon: Briefcase },
+    { title: 'Average Grade', value: '85%', change: '+5% improvement', changeType: 'positive' as const, icon: Star },
   ];
 
   const upcomingClasses = [
