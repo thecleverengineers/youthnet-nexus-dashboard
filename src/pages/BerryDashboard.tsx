@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Grid, Typography, Box } from '@mui/material';
+import { Grid2, Typography, Box } from '@mui/material';
 import {
   People as PeopleIcon,
   School as SchoolIcon,
@@ -51,8 +51,8 @@ export const BerryDashboard = () => {
       </Box>
 
       {/* Analytics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} lg={3}>
+      <Grid2 container spacing={3} sx={{ mb: 4 }}>
+        <Grid2 xs={12} sm={6} lg={3}>
           <BerryAnalyticsCard
             title="Total Students"
             count={stats.totalStudents?.toString() || '0'}
@@ -61,8 +61,8 @@ export const BerryDashboard = () => {
             icon={<PeopleIcon />}
             extra="Active enrollments"
           />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        </Grid2>
+        <Grid2 xs={12} sm={6} lg={3}>
           <BerryAnalyticsCard
             title="Active Programs"
             count={stats.totalPrograms?.toString() || '0'}
@@ -71,8 +71,8 @@ export const BerryDashboard = () => {
             icon={<SchoolIcon />}
             extra="Running courses"
           />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        </Grid2>
+        <Grid2 xs={12} sm={6} lg={3}>
           <BerryAnalyticsCard
             title="Job Placements"
             count={stats.activeJobs?.toString() || '0'}
@@ -81,8 +81,8 @@ export const BerryDashboard = () => {
             icon={<TrendingUpIcon />}
             extra="This quarter"
           />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        </Grid2>
+        <Grid2 xs={12} sm={6} lg={3}>
           <BerryAnalyticsCard
             title="Incubation Projects"
             count={stats.totalProjects?.toString() || '0'}
@@ -91,12 +91,12 @@ export const BerryDashboard = () => {
             icon={<BusinessIcon />}
             extra="Active startups"
           />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
 
       {/* Main Content */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} lg={8}>
+      <Grid2 container spacing={3}>
+        <Grid2 xs={12} lg={8}>
           <BerryMainCard title="Performance Analytics" darkTitle>
             <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Typography color="text.secondary" variant="h6">
@@ -104,11 +104,11 @@ export const BerryDashboard = () => {
               </Typography>
             </Box>
           </BerryMainCard>
-        </Grid>
+        </Grid2>
         
-        <Grid item xs={12} lg={4}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
+        <Grid2 xs={12} lg={4}>
+          <Grid2 container spacing={3}>
+            <Grid2 xs={12}>
               <BerrySubCard title="Quick Actions" darkTitle>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {[
@@ -150,9 +150,9 @@ export const BerryDashboard = () => {
                   ))}
                 </Box>
               </BerrySubCard>
-            </Grid>
+            </Grid2>
             
-            <Grid item xs={12}>
+            <Grid2 xs={12}>
               <BerrySubCard title="System Status" darkTitle>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {[
@@ -176,10 +176,10 @@ export const BerryDashboard = () => {
                   ))}
                 </Box>
               </BerrySubCard>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+            </Grid2>
+          </Grid2>
+        </Grid2>
+      </Grid2>
     </BerryLayout>
   );
 };
