@@ -19,7 +19,6 @@ export const RoleBasedRoute = () => {
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
           <p className="text-muted-foreground">Loading your dashboard...</p>
-          <p className="text-xs text-muted-foreground">Setting up your authentication...</p>
         </div>
       </div>
     );
@@ -56,14 +55,14 @@ export const RoleBasedRoute = () => {
     );
   }
 
+  // If we have a user but no profile yet, show a brief loading state
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin mx-auto"></div>
-          <h2 className="text-xl font-semibold text-white mb-2">Setting up your profile...</h2>
-          <p className="text-muted-foreground">This may take a moment for new accounts.</p>
-          <p className="text-xs text-muted-foreground">Creating your role-based dashboard...</p>
+          <div className="w-16 h-16 border-4 border-green-500/30 border-t-green-500 rounded-full animate-spin mx-auto"></div>
+          <h2 className="text-xl font-semibold text-white mb-2">Preparing your dashboard...</h2>
+          <p className="text-muted-foreground">Just a moment...</p>
         </div>
       </div>
     );
@@ -71,6 +70,7 @@ export const RoleBasedRoute = () => {
 
   console.log('Routing user with profile:', profile);
 
+  // Route based on role
   switch (profile.role) {
     case 'student':
       return <StudentDashboard />;
@@ -82,6 +82,6 @@ export const RoleBasedRoute = () => {
       return <AdminDashboard />;
     default:
       console.log('Unknown role, defaulting to student dashboard:', profile.role);
-      return <StudentDashboard />; // Default fallback
+      return <StudentDashboard />;
   }
 };

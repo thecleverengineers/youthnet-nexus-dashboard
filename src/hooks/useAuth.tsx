@@ -39,64 +39,102 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single();
       
       if (error) {
-        console.error('Error fetching profile:', error);
-        // Wait a moment and try again - the trigger might still be processing
-        setTimeout(async () => {
-          const { data: retryData, error: retryError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-          
-          if (!retryError && retryData) {
-            console.log('Profile found on retry:', retryData);
-            setProfile(retryData);
-          } else {
-            console.error('Profile still not found after retry:', retryError);
-          }
-        }, 2000);
+        console.error('Profile not found, creating from user metadata:', error);
+        // Create profile from user metadata if it doesn't exist
+        const userRole = user.user_metadata?.role || 'student';
+        const mockProfile = {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || user.email,
+          role: userRole,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        console.log('Using mock profile:', mockProfile);
+        setProfile(mockProfile);
       } else {
         console.log('Profile loaded:', data);
         setProfile(data);
       }
     } catch (error) {
       console.error('Error in refreshProfile:', error);
+      // Fallback to user metadata
+      if (user) {
+        const userRole = user.user_metadata?.role || 'student';
+        const fallbackProfile = {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || user.email,
+          role: userRole,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        console.log('Using fallback profile:', fallbackProfile);
+        setProfile(fallbackProfile);
+      }
     }
   };
 
   useEffect(() => {
     console.log('Setting up auth state listener...');
     
-    // Set up auth state listener first
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session);
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
       
-      // Refresh profile when user changes
       if (session?.user && event === 'SIGNED_IN') {
-        // Small delay to ensure the database trigger has completed
+        // Immediately set profile from user metadata to avoid delays
+        const userRole = session.user.user_metadata?.role || 'student';
+        const immediateProfile = {
+          id: session.user.id,
+          email: session.user.email,
+          full_name: session.user.user_metadata?.full_name || session.user.email,
+          role: userRole,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        console.log('Setting immediate profile:', immediateProfile);
+        setProfile(immediateProfile);
+        
+        // Then try to fetch from database in background
         setTimeout(() => {
           refreshProfile();
-        }, 1000);
-      } else {
+        }, 100);
+      } else if (!session?.user) {
         setProfile(null);
       }
+      
+      setLoading(false);
     });
 
-    // Then get initial session
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session:', session);
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
       
       if (session?.user) {
+        // Immediately set profile from user metadata
+        const userRole = session.user.user_metadata?.role || 'student';
+        const immediateProfile = {
+          id: session.user.id,
+          email: session.user.email,
+          full_name: session.user.user_metadata?.full_name || session.user.email,
+          role: userRole,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        console.log('Setting initial immediate profile:', immediateProfile);
+        setProfile(immediateProfile);
+        
+        // Then refresh from database
         refreshProfile();
       }
+      
+      setLoading(false);
     });
 
     return () => {
@@ -201,7 +239,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log('Demo account created successfully:', user.email);
         }
         
-        // Add delay between account creations to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 500));
       }
       
