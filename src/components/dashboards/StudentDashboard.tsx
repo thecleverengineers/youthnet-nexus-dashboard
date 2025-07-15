@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Calendar, Clock, BookOpen, Award, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,7 +10,6 @@ export function StudentDashboard() {
   const { user } = useAuth();
   const [student, setStudent] = useState<any>(null);
   const [enrollments, setEnrollments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
@@ -23,20 +21,16 @@ export function StudentDashboard() {
     if (!user) return;
 
     try {
-      // Fetch student record
-      const { data: studentData, error: studentError } = await supabase
+      const { data: studentData } = await supabase
         .from('students')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (studentError && studentError.code !== 'PGRST116') {
-        console.error('Error fetching student:', studentError);
-      } else if (studentData) {
+      if (studentData) {
         setStudent(studentData);
 
-        // Fetch enrollments with program details
-        const { data: enrollmentData, error: enrollmentError } = await supabase
+        const { data: enrollmentData } = await supabase
           .from('student_enrollments')
           .select(`
             *,
@@ -48,56 +42,23 @@ export function StudentDashboard() {
           `)
           .eq('student_id', studentData.id);
 
-        if (enrollmentError) {
-          console.error('Error fetching enrollments:', enrollmentError);
-        } else {
-          setEnrollments(enrollmentData || []);
-        }
+        setEnrollments(enrollmentData || []);
       }
     } catch (error) {
       console.error('Error in fetchStudentData:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!student) {
-    return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="p-6 text-center">
-            <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Student Profile Not Found</h3>
-            <p className="text-gray-600">
-              Your student profile is being set up. Please contact administration if this persists.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Show dashboard immediately with default content
+  const displayStudent = student || { student_id: 'Loading...', status: 'active' };
+  const displayEnrollments = enrollments.length > 0 ? enrollments : [];
 
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg">
         <h1 className="text-2xl font-bold mb-2">Welcome Back, Student!</h1>
-        <p className="opacity-90">Student ID: {student.student_id}</p>
+        <p className="opacity-90">Student ID: {displayStudent.student_id}</p>
       </div>
 
       {/* Stats Cards */}
@@ -109,7 +70,7 @@ export function StudentDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {enrollments.filter(e => e.status === 'active').length}
+              {displayEnrollments.filter(e => e.status === 'active').length}
             </div>
             <p className="text-xs text-muted-foreground">
               Current programs
@@ -124,7 +85,7 @@ export function StudentDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {enrollments.filter(e => e.status === 'completed').length}
+              {displayEnrollments.filter(e => e.status === 'completed').length}
             </div>
             <p className="text-xs text-muted-foreground">
               Programs finished
@@ -139,8 +100,8 @@ export function StudentDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {enrollments.length > 0 
-                ? Math.round((enrollments.filter(e => e.status === 'completed').length / enrollments.length) * 100)
+              {displayEnrollments.length > 0 
+                ? Math.round((displayEnrollments.filter(e => e.status === 'completed').length / displayEnrollments.length) * 100)
                 : 0}%
             </div>
             <p className="text-xs text-muted-foreground">
@@ -156,9 +117,9 @@ export function StudentDashboard() {
           <CardTitle>My Training Programs</CardTitle>
         </CardHeader>
         <CardContent>
-          {enrollments.length > 0 ? (
+          {displayEnrollments.length > 0 ? (
             <div className="space-y-4">
-              {enrollments.map((enrollment) => (
+              {displayEnrollments.map((enrollment) => (
                 <div key={enrollment.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-semibold">

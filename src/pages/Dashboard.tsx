@@ -35,14 +35,12 @@ export const Dashboard = () => {
     jobPlacements, 
     incubationProjects, 
     departmentData, 
-    placementData, 
-    loading 
+    placementData
   } = useDashboardData();
   
   const { signOut, profile, user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // If not authenticated, show landing page
   if (!user) {
     return (
       <>
@@ -77,27 +75,6 @@ export const Dashboard = () => {
     { title: 'Incubation Projects', value: incubationProjects.toString(), change: '5 new startups', changeType: 'positive' as const, icon: Building2 },
   ];
 
-  if (loading) {
-    return (
-      <div className="space-y-6 fade-in">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold text-gradient">Dashboard</h1>
-            <p className="text-muted-foreground flex items-center gap-2">
-              <Activity className="h-4 w-4 animate-pulse text-blue-400" />
-              Loading system data...
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 glass-effect rounded-2xl shimmer" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8 fade-in">
       {/* Header */}
@@ -110,7 +87,7 @@ export const Dashboard = () => {
             <Zap className="h-4 w-4 text-blue-400" />
             Welcome back, <span className="text-blue-400 font-medium">{profile?.full_name || 'User'}</span> 
             <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
-              {profile?.role}
+              {profile?.role || 'student'}
             </span>
           </p>
         </div>

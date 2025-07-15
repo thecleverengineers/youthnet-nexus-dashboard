@@ -31,15 +31,12 @@ export const AttendanceManagement = () => {
   });
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Update current time every second
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
-    // Load employee session
     const session = localStorage.getItem('employee_session');
     if (session) {
       const empData = JSON.parse(session);
@@ -60,10 +57,8 @@ export const AttendanceManagement = () => {
   };
 
   const fetchAttendanceRecords = async () => {
-    setLoading(true);
     const records = await attendanceService.fetchAttendanceRecords();
     setAttendanceRecords(records);
-    setLoading(false);
   };
 
   const fetchStats = async () => {
@@ -274,13 +269,7 @@ export const AttendanceManagement = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="animate-pulse bg-gray-800/50 rounded-lg h-16"></div>
-              ))}
-            </div>
-          ) : attendanceRecords.length > 0 ? (
+          {attendanceRecords.length > 0 ? (
             <div className="space-y-3">
               {attendanceRecords.slice(0, 10).map((record) => (
                 <div key={record.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 hover:bg-gray-800/70 transition-colors">

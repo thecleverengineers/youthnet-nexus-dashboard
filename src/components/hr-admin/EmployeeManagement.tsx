@@ -23,7 +23,6 @@ import { EmployeeDetails } from './EmployeeDetails';
 
 export const EmployeeManagement = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -39,11 +38,9 @@ export const EmployeeManagement = () => {
 
   const fetchEmployees = async () => {
     try {
-      setLoading(true);
       const data = await employeeService.fetchEmployees();
       setEmployees(data);
       
-      // Calculate stats
       const stats = data.reduce((acc, emp) => {
         acc.total++;
         if (emp.employment_status === 'active') acc.active++;
@@ -53,8 +50,8 @@ export const EmployeeManagement = () => {
       }, { total: 0, active: 0, onLeave: 0, probation: 0 });
       
       setStats(stats);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
     }
   };
 
@@ -111,10 +108,9 @@ export const EmployeeManagement = () => {
               <Button 
                 variant="outline" 
                 onClick={fetchEmployees}
-                disabled={loading}
                 className="hover:bg-blue-500/20"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
               <Button variant="outline" className="hover:bg-green-500/20">
@@ -245,21 +241,7 @@ export const EmployeeManagement = () => {
       </Card>
 
       {/* Employee Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="futuristic-card">
-              <CardContent className="p-6">
-                <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-                  <div className="h-4 bg-gray-700 rounded w-2/3"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : filteredEmployees.length > 0 ? (
+      {filteredEmployees.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEmployees.map((employee) => (
             <EmployeeCard

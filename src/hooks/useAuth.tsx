@@ -18,7 +18,6 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
-  loading: boolean;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, fullName: string, role: string) => Promise<boolean>;
   createDemoAccounts: () => Promise<boolean>;
@@ -31,7 +30,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -46,7 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (profileError) {
         console.log('Profile error:', profileError);
         
-        // If profile doesn't exist, create one
         if (profileError.code === 'PGRST116') {
           console.log('Creating new profile for user:', userId);
           
@@ -225,7 +222,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, session?.user?.id);
@@ -236,7 +232,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Fetch profile in the background without blocking UI
           setTimeout(async () => {
             if (mounted) {
               const profileData = await fetchProfile(session.user.id);
@@ -248,14 +243,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setProfile(null);
         }
-        
-        if (mounted) {
-          setLoading(false);
-        }
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!mounted) return;
 
@@ -265,7 +255,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        // Fetch profile in the background
         setTimeout(async () => {
           if (mounted) {
             const profileData = await fetchProfile(session.user.id);
@@ -274,10 +263,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         }, 0);
-      }
-      
-      if (mounted) {
-        setLoading(false);
       }
     });
 
@@ -291,7 +276,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     profile,
-    loading,
     signIn,
     signUp,
     createDemoAccounts,
