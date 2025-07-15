@@ -11,13 +11,15 @@ import {
   Shield,
   Database,
   LogOut,
-  Activity
+  Activity,
+  Crown
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
 
 export const AdminDashboard = () => {
   const { profile, signOut } = useAuth();
+  const isSuperAdmin = profile?.role === 'super_admin';
 
   const adminModules = [
     { name: 'HR & Admin', href: '/hr-admin', icon: Users, color: 'blue' },
@@ -37,14 +39,20 @@ export const AdminDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center">
-                  <Shield className="h-8 w-8 text-white" />
+                <div className={`w-16 h-16 ${isSuperAdmin ? 'bg-gradient-to-br from-red-500 to-orange-600' : 'bg-gradient-to-br from-blue-500 to-purple-600'} rounded-xl flex items-center justify-center`}>
+                  {isSuperAdmin ? (
+                    <Crown className="h-8 w-8 text-white" />
+                  ) : (
+                    <Shield className="h-8 w-8 text-white" />
+                  )}
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">Admin Control Panel</h1>
+                  <h1 className="text-2xl font-bold text-white">
+                    {isSuperAdmin ? 'Super Admin Control Panel' : 'Admin Control Panel'}
+                  </h1>
                   <p className="text-muted-foreground">Welcome, {profile?.full_name}</p>
-                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 mt-1">
-                    Administrator
+                  <Badge className={isSuperAdmin ? 'bg-red-500/20 text-red-400 border-red-500/30 mt-1' : 'bg-orange-500/20 text-orange-400 border-orange-500/30 mt-1'}>
+                    {isSuperAdmin ? 'Super Administrator' : 'Administrator'}
                   </Badge>
                 </div>
               </div>
@@ -106,6 +114,23 @@ export const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Super Admin Notice */}
+        {isSuperAdmin && (
+          <Card className="futuristic-card border-red-500/30">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <Crown className="h-8 w-8 text-red-400" />
+                <div>
+                  <h3 className="text-lg font-semibold text-red-400">Super Administrator Access</h3>
+                  <p className="text-muted-foreground">
+                    You have full system access including user management, role assignment, activity monitoring, and system configuration.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Admin Modules */}
         <Card className="futuristic-card">
