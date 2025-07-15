@@ -45,12 +45,12 @@ export const RoleBasedRoute = () => {
                 className="h-20 w-auto object-contain"
               />
             </div>
-            <h2 className="text-3xl font-bold text-foreground mb-2">Welcome to YouthNet</h2>
+            <h2 className="text-3xl font-bold text-white mb-2">Welcome to YouthNet</h2>
             <p className="text-muted-foreground mb-4">Management Information System</p>
             
             <Alert>
               <AlertDescription>
-                Please sign in to access your personalized dashboard and start your journey with YouthNet.
+                Please sign in to access your personalized dashboard. Use the demo accounts for testing.
               </AlertDescription>
             </Alert>
             
@@ -69,7 +69,7 @@ export const RoleBasedRoute = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-6 max-w-md p-6">
           <div className="w-16 h-16 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin mx-auto"></div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">Setting up your profile...</h2>
+          <h2 className="text-xl font-semibold text-white mb-2">Setting up your profile...</h2>
           <p className="text-muted-foreground mb-4">This may take a moment for new accounts.</p>
           
           <Alert className="text-left">
@@ -108,7 +108,6 @@ export const RoleBasedRoute = () => {
 
   console.log('Routing user with profile:', profile);
 
-  // Route based on actual user role from profile
   switch (profile.role) {
     case 'student':
       return <StudentDashboard />;
@@ -121,6 +120,6 @@ export const RoleBasedRoute = () => {
       return <AdminDashboard />;
     default:
       console.log('Unknown role, defaulting to student dashboard:', profile.role);
-      return <StudentDashboard />;
+      return <StudentDashboard />; // Default fallback
   }
 };

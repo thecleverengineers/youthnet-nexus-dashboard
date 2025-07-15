@@ -1,158 +1,168 @@
 
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemText,
-  Chip,
-} from '@mui/material';
-import {
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  User,
   Users,
-  GraduationCap,
-  TrendingUp,
-  Building2,
+  Settings,
+  BarChart3,
+  Shield,
+  Database,
+  LogOut,
+  Activity,
+  Crown
 } from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
-import { StatsCard } from '@/components/ui/stats-card';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 export const AdminDashboard = () => {
-  const { stats, recentActivities, isLoading } = useDashboardData();
+  const { profile, signOut } = useAuth();
+  const isSuperAdmin = profile?.role === 'super_admin';
 
-  if (isLoading) {
-    return (
-      <Layout>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <Typography>Loading dashboard...</Typography>
-        </Box>
-      </Layout>
-    );
-  }
+  const adminModules = [
+    { name: 'HR & Admin', href: '/hr-admin', icon: Users, color: 'blue' },
+    { name: 'Education Dept', href: '/education-department', icon: Users, color: 'green' },
+    { name: 'Skill Development', href: '/skill-development', icon: Activity, color: 'purple' },
+    { name: 'Job Centre', href: '/job-centre', icon: BarChart3, color: 'orange' },
+    { name: 'Inventory', href: '/inventory', icon: Database, color: 'cyan' },
+    { name: 'Reports', href: '/reports', icon: BarChart3, color: 'pink' },
+    { name: 'Settings', href: '/settings', icon: Settings, color: 'red' },
+  ];
 
   return (
-    <Layout>
-      <Box sx={{ mb: 4 }}>
-        <Typography 
-          variant="h3" 
-          component="h1" 
-          sx={{ 
-            fontWeight: 700,
-            mb: 1,
-            textShadow: '0 0 20px rgba(0, 245, 255, 0.5)',
-          }}
-        >
-          Admin Dashboard
-        </Typography>
-        <Typography variant="h6" color="text.secondary">
-          Comprehensive overview of YouthNet operations
-        </Typography>
-      </Box>
-
-      {/* Stats Cards Grid */}
-      <Box 
-        sx={{ 
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'repeat(2, 1fr)',
-            md: 'repeat(4, 1fr)'
-          },
-          gap: 3,
-          mb: 4
-        }}
-      >
-        <StatsCard
-          title="Total Students"
-          value={stats.totalStudents.toString()}
-          change="+12% from last month"
-          changeType="positive"
-          icon={Users}
-        />
-        <StatsCard
-          title="Active Programs"
-          value={stats.totalPrograms.toString()}
-          change="+5% from last month"
-          changeType="positive"
-          icon={GraduationCap}
-        />
-        <StatsCard
-          title="Job Placements"
-          value={stats.activeJobs.toString()}
-          change="+25% from last month"
-          changeType="positive"
-          icon={TrendingUp}
-        />
-        <StatsCard
-          title="Incubation Projects"
-          value={stats.totalProjects.toString()}
-          change="+8% from last month"
-          changeType="positive"
-          icon={Building2}
-        />
-      </Box>
-
-      {/* Main Content Grid */}
-      <Box 
-        sx={{ 
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            lg: '2fr 1fr'
-          },
-          gap: 3
-        }}
-      >
-        <Card>
-          <CardContent>
-            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
-              System Performance
-            </Typography>
-            <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Typography color="text.secondary">
-                Analytics charts will be displayed here
-              </Typography>
-            </Box>
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <Card className="futuristic-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`w-16 h-16 ${isSuperAdmin ? 'bg-gradient-to-br from-red-500 to-orange-600' : 'bg-gradient-to-br from-blue-500 to-purple-600'} rounded-xl flex items-center justify-center`}>
+                  {isSuperAdmin ? (
+                    <Crown className="h-8 w-8 text-white" />
+                  ) : (
+                    <Shield className="h-8 w-8 text-white" />
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">
+                    {isSuperAdmin ? 'Super Admin Control Panel' : 'Admin Control Panel'}
+                  </h1>
+                  <p className="text-muted-foreground">Welcome, {profile?.full_name}</p>
+                  <Badge className={isSuperAdmin ? 'bg-red-500/20 text-red-400 border-red-500/30 mt-1' : 'bg-orange-500/20 text-orange-400 border-orange-500/30 mt-1'}>
+                    {isSuperAdmin ? 'Super Administrator' : 'Administrator'}
+                  </Badge>
+                </div>
+              </div>
+              <Button variant="outline" onClick={signOut} className="hover:bg-red-500/20">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </CardContent>
         </Card>
-        
-        <Card>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Users</p>
+                  <p className="text-2xl font-bold text-white">1,247</p>
+                </div>
+                <Users className="h-8 w-8 text-blue-400" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Active Programs</p>
+                  <p className="text-2xl font-bold text-green-400">23</p>
+                </div>
+                <Activity className="h-8 w-8 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">System Health</p>
+                  <p className="text-2xl font-bold text-green-400">98%</p>
+                </div>
+                <Shield className="h-8 w-8 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Data Usage</p>
+                  <p className="text-2xl font-bold text-purple-400">67%</p>
+                </div>
+                <Database className="h-8 w-8 text-purple-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Super Admin Notice */}
+        {isSuperAdmin && (
+          <Card className="futuristic-card border-red-500/30">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <Crown className="h-8 w-8 text-red-400" />
+                <div>
+                  <h3 className="text-lg font-semibold text-red-400">Super Administrator Access</h3>
+                  <p className="text-muted-foreground">
+                    You have full system access including user management, role assignment, activity monitoring, and system configuration.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Admin Modules */}
+        <Card className="futuristic-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-red-400" />
+              Administration Modules
+            </CardTitle>
+          </CardHeader>
           <CardContent>
-            <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
-              Recent Activities
-            </Typography>
-            <List>
-              {recentActivities.slice(0, 5).map((activity, index) => (
-                <ListItem key={index} sx={{ px: 0 }}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="body2">
-                        {activity.description || 'System activity'}
-                      </Typography>
-                    }
-                    secondary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                        <Chip 
-                          label={activity.type || 'general'} 
-                          size="small" 
-                          color="primary" 
-                          variant="outlined" 
-                        />
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date().toLocaleDateString()}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </ListItem>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {adminModules.map((module) => (
+                <Link key={module.name} to={module.href}>
+                  <Card className="futuristic-card hover-lift cursor-pointer">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 bg-${module.color}-500/20 rounded-lg flex items-center justify-center`}>
+                          <module.icon className={`h-6 w-6 text-${module.color}-400`} />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-white">{module.name}</h3>
+                          <p className="text-sm text-muted-foreground">Manage {module.name.toLowerCase()}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
-            </List>
+            </div>
           </CardContent>
         </Card>
-      </Box>
-    </Layout>
+      </div>
+    </div>
   );
 };

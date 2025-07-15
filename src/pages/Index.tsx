@@ -1,8 +1,8 @@
 
-import { ProfessionalHomePage } from '@/components/home/ProfessionalHomePage';
+import { Dashboard } from './Dashboard';
 
 const Index = () => {
-  return <ProfessionalHomePage />;
+  return <Dashboard />;
 };
 
 export { Index };

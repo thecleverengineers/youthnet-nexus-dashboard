@@ -1,43 +1,130 @@
-
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider } from './components/ui/theme-provider';
-import { AuthProvider } from './hooks/useAuth';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { RoleBasedRoute } from './components/auth/RoleBasedRoute';
-import { BerryDashboard } from './pages/BerryDashboard';
-import { PremiumDashboard } from './pages/PremiumDashboard';
-import { Toaster } from './components/ui/sonner';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from "@/components/ui/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '@/hooks/useAuth';
+
+const queryClient = new QueryClient();
+
+import { Layout } from '@/components/layout/Layout';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { RoleBasedRoute } from '@/components/auth/RoleBasedRoute';
+import { Dashboard } from '@/pages/Dashboard';
+import Index from '@/pages/Index';
+import { Education } from '@/pages/Education';
+import { SkillDevelopment } from '@/pages/SkillDevelopment';
+import { JobCentre } from '@/pages/JobCentre';
+import { CareerCentre } from '@/pages/CareerCentre';
+import { EducationDepartment } from '@/pages/EducationDepartment';
+import { Incubation } from '@/pages/Incubation';
+import { MadeInNagaland } from '@/pages/MadeInNagaland';
+import { LivelihoodIncubator } from '@/pages/LivelihoodIncubator';
+import { HRAdmin } from '@/pages/HRAdmin';
+import { Inventory } from '@/pages/Inventory';
+import { ReportsPage } from '@/pages/ReportsPage';
+import { Settings } from '@/pages/Settings';
+import NotFound from '@/pages/NotFound';
 
 function App() {
   return (
-    <ThemeProvider>
-      <CssBaseline />
-      <AuthProvider>
-        <Router>
-          <div className="App">
+    <ThemeProvider defaultTheme="light" storageKey="youthnet-theme">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Toaster />
+          <BrowserRouter>
             <Routes>
-              <Route path="/" element={
+              <Route path="/" element={<RoleBasedRoute />} />
+              <Route path="/education" element={
                 <ProtectedRoute>
-                  <PremiumDashboard />
+                  <Layout>
+                    <Education />
+                  </Layout>
                 </ProtectedRoute>
               } />
-              <Route path="/berry" element={
+              <Route path="/education-department" element={
                 <ProtectedRoute>
-                  <BerryDashboard />
+                  <Layout>
+                    <EducationDepartment />
+                  </Layout>
                 </ProtectedRoute>
               } />
-              <Route path="/legacy" element={
+              <Route path="/skill-development" element={
                 <ProtectedRoute>
-                  <RoleBasedRoute />
+                  <Layout>
+                    <SkillDevelopment />
+                  </Layout>
                 </ProtectedRoute>
               } />
+              <Route path="/job-centre" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <JobCentre />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/career-centre" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <CareerCentre />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/incubation" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Incubation />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/made-in-nagaland" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MadeInNagaland />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/livelihood-incubator" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <LivelihoodIncubator />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/hr-admin" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <HRAdmin />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/inventory" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Inventory />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/reports" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ReportsPage />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Settings />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/index" element={<Index />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
-            <Toaster />
-          </div>
-        </Router>
-      </AuthProvider>
+          </BrowserRouter>
+        </AuthProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

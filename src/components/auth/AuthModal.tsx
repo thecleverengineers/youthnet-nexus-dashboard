@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,7 +17,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const { signIn, signUp, loading } = useAuth();
+  const { signIn, signUp, createDemoAccounts, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   
   // Sign In Form
@@ -75,6 +76,42 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
+  // Demo users with credentials
+  const demoUsers = [
+    { email: 'admin@youthnet.in', password: 'admin123', role: 'Admin', color: 'red' },
+    { email: 'staff@youthnet.in', password: 'staff123', role: 'Staff', color: 'blue' },
+    { email: 'trainer@youthnet.in', password: 'trainer123', role: 'Trainer', color: 'purple' },
+    { email: 'student@youthnet.in', password: 'student123', role: 'Student', color: 'green' },
+  ];
+
+  const handleDemoLogin = async (email: string, password: string) => {
+    console.log('Demo login attempt for:', email);
+    setSignInEmail(email);
+    setSignInPassword(password);
+    
+    try {
+      const success = await signIn(email, password);
+      if (success) {
+        onClose();
+        toast.success('Demo login successful!');
+        setSignInEmail('');
+        setSignInPassword('');
+      } else {
+        toast.error('Demo account not found. Please create demo accounts first.');
+      }
+    } catch (error) {
+      console.error('Demo login error:', error);
+      toast.error('Demo account not found. Please create demo accounts first.');
+    }
+  };
+
+  const handleCreateDemoAccounts = async () => {
+    const success = await createDemoAccounts();
+    if (success) {
+      toast.success('Demo accounts created! You can now use the demo login buttons.');
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-full max-w-md mx-auto p-0 bg-background border rounded-lg shadow-lg">
@@ -98,6 +135,51 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
+              {/* Demo Login Options */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-muted-foreground text-center">Demo Login</h3>
+                
+                <Alert>
+                  <AlertDescription className="text-xs">
+                    Click "Create Demo Accounts" first, then use the role buttons below to login instantly.
+                  </AlertDescription>
+                </Alert>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCreateDemoAccounts}
+                  disabled={loading}
+                  className="w-full text-xs border-primary/30 hover:bg-primary/10"
+                >
+                  {loading ? 'Creating Accounts...' : 'Create Demo Accounts'}
+                </Button>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  {demoUsers.map((user) => (
+                    <Button
+                      key={user.email}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDemoLogin(user.email, user.password)}
+                      disabled={loading}
+                      className="text-xs hover:bg-primary/10 border-primary/30 transition-colors"
+                    >
+                      {user.role}
+                    </Button>
+                  ))}
+                </div>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-muted" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or sign in manually</span>
+                  </div>
+                </div>
+              </div>
+
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email" className="text-sm font-medium">Email</Label>
