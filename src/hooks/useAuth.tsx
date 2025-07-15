@@ -90,7 +90,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
       console.log('Attempting sign in for:', email);
-      setLoading(true);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -114,15 +113,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Sign in error:', error);
       toast.error('Failed to sign in');
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, fullName: string, role: string): Promise<boolean> => {
     try {
       console.log('Attempting sign up for:', email, 'with role:', role);
-      setLoading(true);
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -153,15 +149,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Sign up error:', error);
       toast.error('Failed to create account');
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
   const createDemoAccounts = async (): Promise<boolean> => {
     try {
       console.log('Creating demo accounts...');
-      setLoading(true);
 
       const demoUsers = [
         { email: 'admin@youthnet.in', password: 'admin123', fullName: 'Admin User', role: 'admin' },
@@ -211,8 +204,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error creating demo accounts:', error);
       toast.error('Failed to create demo accounts');
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -245,11 +236,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Fetch profile when user is authenticated
-          const profileData = await fetchProfile(session.user.id);
-          if (mounted) {
-            setProfile(profileData);
-          }
+          // Fetch profile in the background without blocking UI
+          setTimeout(async () => {
+            if (mounted) {
+              const profileData = await fetchProfile(session.user.id);
+              if (mounted) {
+                setProfile(profileData);
+              }
+            }
+          }, 0);
         } else {
           setProfile(null);
         }
@@ -270,10 +265,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        const profileData = await fetchProfile(session.user.id);
-        if (mounted) {
-          setProfile(profileData);
-        }
+        // Fetch profile in the background
+        setTimeout(async () => {
+          if (mounted) {
+            const profileData = await fetchProfile(session.user.id);
+            if (mounted) {
+              setProfile(profileData);
+            }
+          }
+        }, 0);
       }
       
       if (mounted) {
