@@ -14,7 +14,8 @@ import {
   Settings,
   BarChart3,
   Package,
-  ChevronRight
+  ChevronRight,
+  UserCog
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +30,7 @@ const navigation = [
   { name: 'Made in Nagaland', href: '/made-in-nagaland', icon: ShoppingBag },
   { name: 'Livelihood Incubator', href: '/livelihood-incubator', icon: Building2 },
   { name: 'HR & Admin', href: '/hr-admin', icon: Users },
+  { name: 'User Management', href: '/user-management', icon: UserCog },
   { name: 'Inventory', href: '/inventory', icon: Package },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
