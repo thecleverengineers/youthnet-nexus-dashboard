@@ -1,63 +1,62 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, BookOpen, Clock, Award } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export function TrainerDashboard() {
-  const { user } = useAuth();
-  const [trainer, setTrainer] = useState<any>(null);
-  const [programs, setPrograms] = useState<any[]>([]);
+  const { user, profile } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchTrainerData();
-    }
-  }, [user]);
+  const { data: trainerData } = useQuery({
+    queryKey: ['trainer-data', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
 
-  const fetchTrainerData = async () => {
-    if (!user) return;
-
-    try {
-      const { data: trainerData } = await supabase
+      const { data: trainerRecord } = await supabase
         .from('trainers')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (trainerData) {
-        setTrainer(trainerData);
+      if (!trainerRecord) return null;
 
-        const { data: programData } = await supabase
-          .from('training_programs')
-          .select('*')
-          .eq('trainer_id', trainerData.id);
+      const { data: programs } = await supabase
+        .from('training_programs')
+        .select(`
+          *,
+          student_enrollments(count)
+        `)
+        .eq('trainer_id', trainerRecord.id);
 
-        setPrograms(programData || []);
-      }
-    } catch (error) {
-      console.error('Error in fetchTrainerData:', error);
-    }
-  };
+      return {
+        trainer: trainerRecord,
+        programs: programs || []
+      };
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  // Show dashboard immediately with default content
-  const displayTrainer = trainer || { 
-    trainer_id: 'Loading...', 
-    specialization: 'General Training',
-    experience_years: 0
-  };
-  const displayPrograms = programs.length > 0 ? programs : [];
+  const trainer = trainerData?.trainer;
+  const programs = trainerData?.programs || [];
+
+  const activePrograms = programs.filter(p => p.status === 'active').length;
+  const totalStudents = programs.reduce((sum, program) => {
+    return sum + (program.student_enrollments?.length || 0);
+  }, 0);
 
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-6 rounded-lg">
         <h1 className="text-2xl font-bold mb-2">Trainer Dashboard</h1>
-        <p className="opacity-90">Trainer ID: {displayTrainer.trainer_id}</p>
-        {displayTrainer.specialization && (
-          <p className="opacity-90">Specialization: {displayTrainer.specialization}</p>
+        <p className="opacity-90">Welcome, {profile?.full_name || 'Trainer'}</p>
+        <p className="opacity-90">Trainer ID: {trainer?.trainer_id || 'Loading...'}</p>
+        {trainer?.specialization && (
+          <p className="opacity-90">Specialization: {trainer.specialization}</p>
         )}
       </div>
 
@@ -69,7 +68,7 @@ export function TrainerDashboard() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{displayPrograms.length}</div>
+            <div className="text-2xl font-bold">{programs.length}</div>
             <p className="text-xs text-muted-foreground">
               Total assigned
             </p>
@@ -82,9 +81,7 @@ export function TrainerDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {displayPrograms.filter(p => p.status === 'active').length}
-            </div>
+            <div className="text-2xl font-bold">{activePrograms}</div>
             <p className="text-xs text-muted-foreground">
               Currently running
             </p>
@@ -98,7 +95,7 @@ export function TrainerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {displayTrainer.experience_years || 0}
+              {trainer?.experience_years || 0}
             </div>
             <p className="text-xs text-muted-foreground">
               Years of experience
@@ -113,9 +110,9 @@ export function TrainerDashboard() {
           <CardTitle>My Training Programs</CardTitle>
         </CardHeader>
         <CardContent>
-          {displayPrograms.length > 0 ? (
+          {programs.length > 0 ? (
             <div className="space-y-4">
-              {displayPrograms.map((program) => (
+              {programs.map((program) => (
                 <div key={program.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-semibold">{program.name}</h3>
@@ -135,7 +132,7 @@ export function TrainerDashboard() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
-                      Max {program.max_participants} participants
+                      {program.student_enrollments?.length || 0}/{program.max_participants} participants
                     </div>
                   </div>
                 </div>
@@ -146,7 +143,7 @@ export function TrainerDashboard() {
               <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No Programs Assigned</h3>
               <p className="text-gray-600">
-                You haven't been assigned any training programs yet.
+                You haven't been assigned any training programs yet. Contact your administrator for program assignments.
               </p>
             </div>
           )}

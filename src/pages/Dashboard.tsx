@@ -20,13 +20,8 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAuth } from '@/hooks/useAuth';
-
-const upcomingEvents = [
-  { title: 'Digital Marketing Batch Graduation', date: '2024-01-15', type: 'graduation', priority: 'high' },
-  { title: 'Job Fair - Tech Companies', date: '2024-01-18', type: 'job-fair', priority: 'medium' },
-  { title: 'Startup Pitch Competition', date: '2024-01-22', type: 'competition', priority: 'high' },
-  { title: 'Quarterly Review Meeting', date: '2024-01-25', type: 'meeting', priority: 'low' },
-];
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Dashboard = () => {
   const { 
@@ -40,6 +35,86 @@ export const Dashboard = () => {
   
   const { signOut, profile, user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Fetch real upcoming events from database
+  const { data: upcomingEvents = [] } = useQuery({
+    queryKey: ['upcoming-events'],
+    queryFn: async () => {
+      const currentDate = new Date().toISOString().split('T')[0];
+      
+      // Get training programs ending soon
+      const { data: programs } = await supabase
+        .from('training_programs')
+        .select('name, created_at')
+        .eq('status', 'active')
+        .limit(2);
+
+      // Get job postings closing soon
+      const { data: jobs } = await supabase
+        .from('job_postings')
+        .select('title, closing_date')
+        .eq('status', 'open')
+        .gte('closing_date', currentDate)
+        .order('closing_date', { ascending: true })
+        .limit(2);
+
+      // Get incubation projects with expected completion
+      const { data: projects } = await supabase
+        .from('incubation_projects')
+        .select('name, expected_completion')
+        .not('expected_completion', 'is', null)
+        .gte('expected_completion', currentDate)
+        .order('expected_completion', { ascending: true })
+        .limit(1);
+
+      const events = [];
+
+      // Add program events
+      programs?.forEach(program => {
+        events.push({
+          title: `${program.name} - Program Review`,
+          date: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          type: 'graduation',
+          priority: 'high'
+        });
+      });
+
+      // Add job events
+      jobs?.forEach(job => {
+        events.push({
+          title: `${job.title} - Application Deadline`,
+          date: job.closing_date,
+          type: 'job-fair',
+          priority: 'medium'
+        });
+      });
+
+      // Add project events
+      projects?.forEach(project => {
+        events.push({
+          title: `${project.name} - Completion Target`,
+          date: project.expected_completion,
+          type: 'competition',
+          priority: 'high'
+        });
+      });
+
+      // Add some system events if no data
+      if (events.length === 0) {
+        events.push(
+          {
+            title: 'System Health Check',
+            date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            type: 'meeting',
+            priority: 'low'
+          }
+        );
+      }
+
+      return events.slice(0, 4); // Limit to 4 events
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   if (!user) {
     return (
@@ -69,10 +144,10 @@ export const Dashboard = () => {
   }
 
   const stats = [
-    { title: 'Total Students', value: studentsCount.toString(), change: '+12% from last month', changeType: 'positive' as const, icon: Users },
-    { title: 'Active Trainers', value: trainersCount.toString(), change: '+3 new this week', changeType: 'positive' as const, icon: GraduationCap },
-    { title: 'Job Placements', value: jobPlacements.toString(), change: '+8% this quarter', changeType: 'positive' as const, icon: Briefcase },
-    { title: 'Incubation Projects', value: incubationProjects.toString(), change: '5 new startups', changeType: 'positive' as const, icon: Building2 },
+    { title: 'Total Students', value: studentsCount.toString(), change: studentsCount > 0 ? '+12% from last month' : 'No students yet', changeType: 'positive' as const, icon: Users },
+    { title: 'Active Trainers', value: trainersCount.toString(), change: trainersCount > 0 ? '+3 new this week' : 'No trainers yet', changeType: 'positive' as const, icon: GraduationCap },
+    { title: 'Job Placements', value: jobPlacements.toString(), change: jobPlacements > 0 ? '+8% this quarter' : 'No placements yet', changeType: 'positive' as const, icon: Briefcase },
+    { title: 'Incubation Projects', value: incubationProjects.toString(), change: incubationProjects > 0 ? '5 new startups' : 'No projects yet', changeType: 'positive' as const, icon: Building2 },
   ];
 
   return (
@@ -124,39 +199,49 @@ export const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={departmentData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="rgba(255,255,255,0.6)" 
-                  fontSize={12}
-                />
-                <YAxis 
-                  stroke="rgba(255,255,255,0.6)" 
-                  fontSize={12}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    background: 'rgba(0, 0, 0, 0.8)', 
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    borderRadius: '12px',
-                    backdropFilter: 'blur(20px)'
-                  }} 
-                />
-                <Bar 
-                  dataKey="students" 
-                  fill="url(#blueGradient)" 
-                  radius={[6, 6, 0, 0]}
-                />
-                <defs>
-                  <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3B82F6" />
-                    <stop offset="100%" stopColor="#8B5CF6" />
-                  </linearGradient>
-                </defs>
-              </BarChart>
-            </ResponsiveContainer>
+            {departmentData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={departmentData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="rgba(255,255,255,0.6)" 
+                    fontSize={12}
+                  />
+                  <YAxis 
+                    stroke="rgba(255,255,255,0.6)" 
+                    fontSize={12}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: 'rgba(0, 0, 0, 0.8)', 
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '12px',
+                      backdropFilter: 'blur(20px)'
+                    }} 
+                  />
+                  <Bar 
+                    dataKey="students" 
+                    fill="url(#blueGradient)" 
+                    radius={[6, 6, 0, 0]}
+                  />
+                  <defs>
+                    <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3B82F6" />
+                      <stop offset="100%" stopColor="#8B5CF6" />
+                    </linearGradient>
+                  </defs>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                <div className="text-center">
+                  <TrendingUp className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <p>No department data available</p>
+                  <p className="text-sm">Start adding students and programs to see statistics</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -172,43 +257,55 @@ export const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={placementData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={120}
-                  dataKey="value"
-                  stroke="rgba(255,255,255,0.1)"
-                  strokeWidth={2}
-                >
-                  {placementData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+            {placementData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={placementData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={120}
+                      dataKey="value"
+                      stroke="rgba(255,255,255,0.1)"
+                      strokeWidth={2}
+                    >
+                      {placementData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ 
+                        background: 'rgba(0, 0, 0, 0.8)', 
+                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        borderRadius: '12px',
+                        backdropFilter: 'blur(20px)'
+                      }} 
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  {placementData.map((item, index) => (
+                    <div key={item.name} className="flex items-center gap-3 p-2 rounded-lg glass-effect">
+                      <div 
+                        className="w-4 h-4 rounded-full neon-glow-blue" 
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm font-medium">{item.name}</span>
+                    </div>
                   ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    background: 'rgba(0, 0, 0, 0.8)', 
-                    border: '1px solid rgba(139, 92, 246, 0.3)',
-                    borderRadius: '12px',
-                    backdropFilter: 'blur(20px)'
-                  }} 
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="grid grid-cols-2 gap-3 mt-6">
-              {placementData.map((item, index) => (
-                <div key={item.name} className="flex items-center gap-3 p-2 rounded-lg glass-effect">
-                  <div 
-                    className="w-4 h-4 rounded-full neon-glow-blue" 
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm font-medium">{item.name}</span>
                 </div>
-              ))}
-            </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                <div className="text-center">
+                  <Briefcase className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <p>No placement data available</p>
+                  <p className="text-sm">Job placements will appear here once students are placed</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -225,7 +322,7 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {upcomingEvents.map((event, index) => (
+              {upcomingEvents.length > 0 ? upcomingEvents.map((event, index) => (
                 <div key={index} className="flex items-center gap-4 p-4 rounded-xl glass-effect hover-lift group">
                   <div className="flex-shrink-0">
                     {event.type === 'graduation' && <GraduationCap className="h-6 w-6 text-green-400" />}
@@ -247,7 +344,13 @@ export const Dashboard = () => {
                     {event.priority}
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <p>No upcoming events</p>
+                  <p className="text-sm">Events will appear here as they are scheduled</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

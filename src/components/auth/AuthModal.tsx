@@ -17,8 +17,9 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const { signIn, signUp, createDemoAccounts, loading } = useAuth();
+  const { signIn, signUp, createDemoAccounts } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Sign In Form
   const [signInEmail, setSignInEmail] = useState('');
@@ -37,6 +38,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
+    setIsLoading(true);
     console.log('Attempting to sign in with:', signInEmail);
     
     try {
@@ -49,6 +51,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     } catch (error) {
       console.error('Sign in error:', error);
       toast.error('Failed to sign in. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,6 +63,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
+    setIsLoading(true);
     console.log('Attempting to sign up:', signUpEmail, 'with role:', role);
     
     try {
@@ -73,6 +78,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     } catch (error) {
       console.error('Sign up error:', error);
       toast.error('Failed to create account. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,6 +96,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setSignInEmail(email);
     setSignInPassword(password);
     
+    setIsLoading(true);
     try {
       const success = await signIn(email, password);
       if (success) {
@@ -102,13 +110,20 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     } catch (error) {
       console.error('Demo login error:', error);
       toast.error('Demo account not found. Please create demo accounts first.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleCreateDemoAccounts = async () => {
-    const success = await createDemoAccounts();
-    if (success) {
-      toast.success('Demo accounts created! You can now use the demo login buttons.');
+    setIsLoading(true);
+    try {
+      const success = await createDemoAccounts();
+      if (success) {
+        toast.success('Demo accounts created! You can now use the demo login buttons.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -149,10 +164,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   variant="outline"
                   size="sm"
                   onClick={handleCreateDemoAccounts}
-                  disabled={loading}
+                  disabled={isLoading}
                   className="w-full text-xs border-primary/30 hover:bg-primary/10"
                 >
-                  {loading ? 'Creating Accounts...' : 'Create Demo Accounts'}
+                  {isLoading ? 'Creating Accounts...' : 'Create Demo Accounts'}
                 </Button>
                 
                 <div className="grid grid-cols-2 gap-2">
@@ -162,7 +177,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDemoLogin(user.email, user.password)}
-                      disabled={loading}
+                      disabled={isLoading}
                       className="text-xs hover:bg-primary/10 border-primary/30 transition-colors"
                     >
                       {user.role}
@@ -216,8 +231,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Signing In...' : 'Sign In'}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Signing In...' : 'Sign In'}
                 </Button>
               </form>
             </TabsContent>
@@ -284,8 +299,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Creating Account...' : 'Sign Up'}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Creating Account...' : 'Sign Up'}
                 </Button>
               </form>
             </TabsContent>
