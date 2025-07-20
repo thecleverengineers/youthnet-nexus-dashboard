@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,8 +7,13 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/auth/RoleBasedRoute";
 import { Layout } from "@/components/layout/Layout";
+import { DashboardRouter } from "@/components/dashboard/DashboardRouter";
 import Index from "./pages/Index";
 import { Dashboard } from "./pages/Dashboard";
+import { AdminDashboard } from "./pages/dashboard/AdminDashboard";
+import { StudentDashboard } from "./pages/dashboard/StudentDashboard";
+import { TrainerDashboard } from "./pages/dashboard/TrainerDashboard";
+import { StaffDashboard } from "./pages/dashboard/StaffDashboard";
 import { Education } from "./pages/Education";
 import { SkillDevelopment } from "./pages/SkillDevelopment";
 import { JobCentre } from "./pages/JobCentre";
@@ -42,8 +46,56 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Layout>
-                        <Dashboard />
+                        <DashboardRouter />
                       </Layout>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/dashboard/admin" 
+                  element={
+                    <ProtectedRoute>
+                      <RoleBasedRoute allowedRoles={['admin']}>
+                        <Layout>
+                          <AdminDashboard />
+                        </Layout>
+                      </RoleBasedRoute>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/dashboard/staff" 
+                  element={
+                    <ProtectedRoute>
+                      <RoleBasedRoute allowedRoles={['staff']}>
+                        <Layout>
+                          <StaffDashboard />
+                        </Layout>
+                      </RoleBasedRoute>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/dashboard/trainer" 
+                  element={
+                    <ProtectedRoute>
+                      <RoleBasedRoute allowedRoles={['trainer']}>
+                        <Layout>
+                          <TrainerDashboard />
+                        </Layout>
+                      </RoleBasedRoute>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/dashboard/student" 
+                  element={
+                    <ProtectedRoute>
+                      <RoleBasedRoute allowedRoles={['student']}>
+                        <Layout>
+                          <StudentDashboard />
+                        </Layout>
+                      </RoleBasedRoute>
                     </ProtectedRoute>
                   } 
                 />

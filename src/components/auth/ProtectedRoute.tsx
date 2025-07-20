@@ -1,16 +1,25 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { AuthModal } from './AuthModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { useRoleNavigation } from '@/hooks/useRoleNavigation';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const { redirectToDashboard } = useRoleNavigation();
+
+  useEffect(() => {
+    // Redirect to role-specific dashboard if user just logged in and is on index page
+    if (user && profile && window.location.pathname === '/') {
+      redirectToDashboard();
+    }
+  }, [user, profile, redirectToDashboard]);
 
   if (!user) {
     return (
