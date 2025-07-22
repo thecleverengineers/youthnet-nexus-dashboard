@@ -17,12 +17,12 @@ import {
   UserCog,
   UserPlus,
   Calendar,
-  FileText,
   Eye,
   TrendingUp,
   Crown,
   Zap,
-  Shield
+  Shield,
+  X
 } from 'lucide-react';
 import {
   Sidebar,
@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface NavigationItem {
   name: string;
@@ -198,7 +199,7 @@ const studentManagementItems = [
 export function AppSidebar() {
   const location = useLocation();
   const { profile } = useAuth();
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
   const allowedNavItems = navigationItems.filter(item => 
@@ -219,55 +220,61 @@ export function AppSidebar() {
 
   const isActive = (href: string) => location.pathname === href;
 
-  const renderNavSection = (title: string, items: NavigationItem[], gradient: string = 'primary') => {
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
+  const renderNavSection = (title: string, items: NavigationItem[], color: string = 'primary') => {
     if (items.length === 0) return null;
 
     return (
-      <SidebarGroup className="premium-card mb-6">
-        <SidebarGroupLabel className={`text-gradient-${gradient} font-semibold text-sm uppercase tracking-wider mb-4 flex items-center gap-2`}>
+      <SidebarGroup className="mb-6">
+        <SidebarGroupLabel className={`text-${color} font-medium text-xs uppercase tracking-wider mb-3 flex items-center gap-2`}>
           {!isCollapsed && (
             <>
-              <div className={`w-2 h-2 rounded-full gradient-bg-${gradient}`}></div>
+              <div className={`w-1.5 h-1.5 rounded-full bg-${color}`}></div>
               {title}
-              <Badge className={`gradient-bg-${gradient} text-white border-0 text-xs ml-auto`}>
+              <Badge variant="secondary" className="text-xs ml-auto">
                 {items.length}
               </Badge>
             </>
           )}
         </SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarMenu className="space-y-2">
+          <SidebarMenu className="space-y-1">
             {items.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive(item.href)}
-                  className={`premium-card hover-glow-blue group transition-all duration-300 ${
+                  className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'gradient-bg-primary text-white shadow-lg' 
-                      : 'hover:bg-white/5'
+                      ? 'bg-primary text-primary-foreground shadow-sm' 
+                      : 'hover:bg-accent hover:text-accent-foreground'
                   }`}
                 >
-                  <Link to={item.href} className="flex items-center gap-4 p-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                  <Link to={item.href} className="flex items-center gap-3 p-3" onClick={handleLinkClick}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-white/20' 
-                        : 'bg-white/5 group-hover:bg-white/10'
+                        ? 'bg-primary-foreground/20' 
+                        : 'bg-accent/50 group-hover:bg-accent'
                     }`}>
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-4 w-4" />
                     </div>
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium truncate">{item.name}</span>
+                          <span className="font-medium text-sm truncate">{item.name}</span>
                           {item.badge && (
-                            <Badge className="bg-white/10 text-white border-0 text-xs">
+                            <Badge variant="outline" className="text-xs border-current/20">
                               {item.badge}
                             </Badge>
                           )}
                         </div>
                         {item.description && (
-                          <span className="block text-xs text-white/70 truncate mt-1">
+                          <span className="block text-xs text-muted-foreground truncate mt-0.5">
                             {item.description}
                           </span>
                         )}
@@ -289,50 +296,50 @@ export function AppSidebar() {
     }
 
     return (
-      <SidebarGroup className="premium-card mb-6">
-        <SidebarGroupLabel className="text-gradient-secondary font-semibold text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+      <SidebarGroup className="mb-6">
+        <SidebarGroupLabel className="text-secondary-foreground font-medium text-xs uppercase tracking-wider mb-3 flex items-center gap-2">
           {!isCollapsed && (
             <>
-              <div className="w-2 h-2 rounded-full gradient-bg-secondary"></div>  
+              <div className="w-1.5 h-1.5 rounded-full bg-secondary-foreground"></div>  
               Student Hub
-              <Badge className="gradient-bg-secondary text-white border-0 text-xs ml-auto">
+              <Badge variant="secondary" className="text-xs ml-auto">
                 {studentManagementItems.length}
               </Badge>
             </>
           )}
         </SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarMenu className="space-y-2">
+          <SidebarMenu className="space-y-1">
             {studentManagementItems.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive(item.href)}
-                  className={`premium-card hover-glow-cyan group transition-all duration-300 ${
+                  className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'gradient-bg-secondary text-white shadow-lg' 
-                      : 'hover:bg-white/5'
+                      ? 'bg-secondary text-secondary-foreground shadow-sm' 
+                      : 'hover:bg-accent hover:text-accent-foreground'
                   }`}
                 >
-                  <Link to={item.href} className="flex items-center gap-4 p-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                  <Link to={item.href} className="flex items-center gap-3 p-3" onClick={handleLinkClick}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-white/20' 
-                        : 'bg-white/5 group-hover:bg-white/10'
+                        ? 'bg-secondary-foreground/20' 
+                        : 'bg-accent/50 group-hover:bg-accent'
                     }`}>
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-4 w-4" />
                     </div>
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium truncate">{item.name}</span>
+                          <span className="font-medium text-sm truncate">{item.name}</span>
                           {item.badge && (
-                            <Badge className="bg-white/10 text-white border-0 text-xs">
+                            <Badge variant="outline" className="text-xs border-current/20">
                               {item.badge}
                             </Badge>
                           )}
                         </div>
-                        <span className="block text-xs text-white/70 truncate mt-1">
+                        <span className="block text-xs text-muted-foreground truncate mt-0.5">
                           {item.description}
                         </span>
                       </div>
@@ -348,50 +355,61 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-white/10 glass-effect" collapsible="icon">
-      {/* Premium Header */}
-      <SidebarHeader className="border-b border-white/10 p-6">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <div className="w-12 h-12 rounded-2xl gradient-bg-primary flex items-center justify-center overflow-hidden">
-              <img 
-                src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
-                alt="YouthNet Logo" 
-                className="w-8 h-8 object-cover"
-              />
-              <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+    <Sidebar className="border-r border-border bg-card/30 backdrop-blur-sm" collapsible="icon">
+      {/* Premium Light Header */}
+      <SidebarHeader className="border-b border-border p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
+                  alt="YouthNet Logo" 
+                  className="w-6 h-6 object-cover"
+                />
+              </div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full gradient-bg-accent flex items-center justify-center">
+                <Crown className="h-2 w-2 text-white" />
+              </div>
             </div>
-            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full gradient-bg-accent flex items-center justify-center">
-              <Crown className="h-2.5 w-2.5 text-white" />
-            </div>
+            {!isCollapsed && (
+              <div>
+                <span className="text-lg font-bold text-gradient-primary">YouthNet</span>
+                <div className="text-xs text-gradient-secondary font-medium">Premium MIS</div>
+              </div>
+            )}
           </div>
-          {!isCollapsed && (
-            <div>
-              <span className="text-xl font-bold text-gradient-primary">YouthNet</span>
-              <div className="text-xs text-gradient-secondary font-medium">Premium MIS</div>
-            </div>
+          
+          {isMobile && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setOpenMobile(false)}
+              className="hover:bg-accent"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           )}
         </div>
       </SidebarHeader>
 
       {/* Premium User Info */}
       {profile && !isCollapsed && (
-        <div className="px-6 py-4 border-b border-white/10">
-          <div className="premium-card p-4">
+        <div className="px-4 py-3 border-b border-border">
+          <div className="premium-card p-3">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-2xl gradient-bg-accent flex items-center justify-center relative overflow-hidden">
-                <span className="text-white text-lg font-bold relative z-10">
+              <div className="w-10 h-10 rounded-xl gradient-bg-accent flex items-center justify-center relative overflow-hidden">
+                <span className="text-white text-sm font-bold relative z-10">
                   {profile.full_name?.charAt(0).toUpperCase() || 'U'}
                 </span>
-                <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {profile.full_name || 'User'}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge className="gradient-bg-primary text-white border-0 text-xs capitalize">
-                    <Shield className="h-2.5 w-2.5 mr-1" />
+                    <Shield className="h-2 w-2 mr-1" />
                     {profile.role}
                   </Badge>
                   <div className="status-indicator status-online"></div>
@@ -403,7 +421,7 @@ export function AppSidebar() {
       )}
 
       {/* Premium Navigation */}
-      <SidebarContent className="px-4 py-6 space-y-4 overflow-y-auto">
+      <SidebarContent className="px-2 py-4 space-y-2 overflow-y-auto">
         {renderNavSection('Core Modules', coreModules, 'primary')}
         {renderStudentManagementSection()}
         {renderNavSection('Services', serviceModules, 'secondary')}
@@ -411,15 +429,15 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Premium Footer */}
-      <SidebarFooter className="border-t border-white/10 p-6">
+      <SidebarFooter className="border-t border-border p-4">
         {!isCollapsed && (
-          <div className="premium-card p-4 text-center">
+          <div className="premium-card p-3 text-center">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="status-indicator status-online"></div>
               <span className="text-xs text-gradient-primary font-medium">System Online</span>
             </div>
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Zap className="h-3 w-3 text-blue-400" />
+              <Zap className="h-3 w-3 text-primary" />
               <span className="text-gradient-accent font-mono font-bold">v2.0.0</span>
             </div>
           </div>
