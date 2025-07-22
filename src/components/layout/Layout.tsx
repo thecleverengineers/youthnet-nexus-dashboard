@@ -12,48 +12,44 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Premium Header with mobile-friendly toggle */}
-          <header className="flex items-center justify-between h-16 px-4 lg:px-6 border-b border-border bg-card/50 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <SidebarTrigger className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200 rounded-lg p-2">
-                <Menu className="h-5 w-5" />
+          {/* Mobile-first Header */}
+          <header className="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 lg:px-6 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl shadow-sm">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <SidebarTrigger className="hover:bg-slate-100 hover:text-slate-700 transition-all duration-200 rounded-lg p-1.5 sm:p-2 -ml-1">
+                <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="sr-only">Toggle Sidebar</span>
               </SidebarTrigger>
               
-              <div className="hidden sm:flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg overflow-hidden shadow-sm">
                   <img 
                     src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
                     alt="YouthNet Logo" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="text-lg font-bold text-gradient-primary">YouthNet</span>
+                <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  YouthNet
+                </span>
               </div>
             </div>
             
-            {/* Mobile logo */}
-            <div className="sm:hidden flex items-center space-x-2">
-              <div className="w-6 h-6 rounded overflow-hidden">
-                <img 
-                  src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
-                  alt="YouthNet Logo" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="text-base font-bold text-gradient-primary">YouthNet</span>
+            {/* Status indicator */}
+            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span>Online</span>
             </div>
           </header>
 
           <TopNavbar />
           
-          {/* Main content with smooth transitions */}
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
-            <div className="max-w-7xl mx-auto">
+          {/* Main content with enhanced mobile experience */}
+          <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+            <div className="max-w-7xl mx-auto w-full">
               {children}
             </div>
           </main>

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,9 +9,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/auth/RoleBasedRoute";
 import { AdminInitializer } from "@/components/auth/AdminInitializer";
 import { Layout } from "@/components/layout/Layout";
-import { DashboardRouter } from "@/components/dashboard/DashboardRouter";
 import Index from "./pages/Index";
-import { Dashboard } from "./pages/Dashboard";
 import { AdminDashboard } from "./pages/dashboard/AdminDashboard";
 import { StudentDashboard } from "./pages/dashboard/StudentDashboard";
 import { TrainerDashboard } from "./pages/dashboard/TrainerDashboard";
@@ -36,23 +35,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <TooltipProvider>
             <Toaster />
             <AdminInitializer />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route 
-                  path="/dashboard" 
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <DashboardRouter />
-                      </Layout>
-                    </ProtectedRoute>
-                  } 
-                />
                 <Route 
                   path="/dashboard/admin" 
                   element={

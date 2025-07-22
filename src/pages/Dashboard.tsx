@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from '@/components/ui/stats-card';
-import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { 
   Users, 
@@ -12,10 +11,8 @@ import {
   TrendingUp,
   Calendar,
   CheckCircle,
-  LogOut,
-  Zap,
   Activity,
-  Cpu
+  Zap
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -33,7 +30,7 @@ export const Dashboard = () => {
     placementData
   } = useDashboardData();
   
-  const { signOut, profile, user } = useAuth();
+  const { profile, user } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Fetch real upcoming events from database
@@ -119,23 +116,26 @@ export const Dashboard = () => {
   if (!user) {
     return (
       <>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center space-y-4">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
+          <div className="text-center space-y-6 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-slate-200/50 max-w-md w-full">
             <div className="flex justify-center mb-6">
               <img 
                 src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
                 alt="YouthNet Logo" 
-                className="h-24 w-auto object-contain"
+                className="h-16 w-auto object-contain"
               />
             </div>
-            <h1 className="text-4xl font-bold text-white mb-2">Welcome to YouthNet</h1>
-            <p className="text-xl text-muted-foreground mb-6">Management Information System</p>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">Welcome to YouthNet</h1>
+            <p className="text-lg text-slate-600 mb-6">Management Information System</p>
+            <p className="text-slate-500 mb-8">
               Empowering youth through comprehensive skill development, job placement, and entrepreneurship support.
             </p>
-            <Button onClick={() => setShowAuthModal(true)} className="px-8 py-3 text-lg">
+            <button 
+              onClick={() => setShowAuthModal(true)} 
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
               Get Started
-            </Button>
+            </button>
           </div>
         </div>
         <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
@@ -151,50 +151,42 @@ export const Dashboard = () => {
   ];
 
   return (
-    <div className="space-y-8 fade-in">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold text-gradient mb-2">
-            Dashboard Control Center
-          </h1>
-          <p className="text-muted-foreground flex items-center gap-2">
-            <Zap className="h-4 w-4 text-blue-400" />
-            Welcome back, <span className="text-blue-400 font-medium">{profile?.full_name || 'User'}</span> 
-            <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
-              {profile?.role || 'student'}
-            </span>
-          </p>
-        </div>
-        <Button 
-          variant="outline" 
-          onClick={signOut} 
-          className="flex items-center gap-2 hover-glow rounded-xl border-white/20 hover:border-red-500/50"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign Out
-        </Button>
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-slate-200/50 shadow-sm">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+          Dashboard Control Center
+        </h1>
+        <p className="text-slate-600 flex items-center gap-2 text-sm sm:text-base">
+          <Zap className="h-4 w-4 text-blue-500" />
+          Welcome back, <span className="text-blue-600 font-medium">{profile?.full_name || 'User'}</span> 
+          <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600 border border-blue-200">
+            {profile?.role || 'student'}
+          </span>
+        </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat, index) => (
-          <div key={stat.title} className="slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <div key={stat.title} className="transform transition-all duration-300 hover:scale-105">
             <StatsCard {...stat} />
           </div>
         ))}
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Department Performance */}
-        <Card className="futuristic-card slide-in-from-left">
+        <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-gradient">
-              <TrendingUp className="h-6 w-6 text-blue-400" />
-              Department Performance
+            <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Department Performance</span>
               <div className="ml-auto">
-                <Cpu className="h-4 w-4 text-green-400 animate-pulse" />
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
               </div>
             </CardTitle>
           </CardHeader>
@@ -202,22 +194,23 @@ export const Dashboard = () => {
             {departmentData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={departmentData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgb(148 163 184 / 0.3)" />
                   <XAxis 
                     dataKey="name" 
-                    stroke="rgba(255,255,255,0.6)" 
+                    stroke="rgb(100 116 139)" 
                     fontSize={12}
                   />
                   <YAxis 
-                    stroke="rgba(255,255,255,0.6)" 
+                    stroke="rgb(100 116 139)" 
                     fontSize={12}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      background: 'rgba(0, 0, 0, 0.8)', 
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      background: 'rgba(255, 255, 255, 0.95)', 
+                      border: '1px solid rgb(226 232 240)',
                       borderRadius: '12px',
-                      backdropFilter: 'blur(20px)'
+                      backdropFilter: 'blur(20px)',
+                      boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1)'
                     }} 
                   />
                   <Bar 
@@ -227,17 +220,17 @@ export const Dashboard = () => {
                   />
                   <defs>
                     <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3B82F6" />
-                      <stop offset="100%" stopColor="#8B5CF6" />
+                      <stop offset="0%" stopColor="rgb(59 130 246)" />
+                      <stop offset="100%" stopColor="rgb(99 102 241)" />
                     </linearGradient>
                   </defs>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+              <div className="flex items-center justify-center h-[300px] text-slate-500">
                 <div className="text-center">
                   <TrendingUp className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                  <p>No department data available</p>
+                  <p className="font-medium">No department data available</p>
                   <p className="text-sm">Start adding students and programs to see statistics</p>
                 </div>
               </div>
@@ -246,13 +239,15 @@ export const Dashboard = () => {
         </Card>
 
         {/* Placement Distribution */}
-        <Card className="futuristic-card slide-in-from-right">
+        <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-gradient">
-              <Briefcase className="h-6 w-6 text-purple-400" />
-              Placement Distribution
+            <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                <Briefcase className="h-4 w-4 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Placement Distribution</span>
               <div className="ml-auto">
-                <Activity className="h-4 w-4 text-green-400 animate-pulse" />
+                <Activity className="h-4 w-4 text-emerald-500 animate-pulse" />
               </div>
             </CardTitle>
           </CardHeader>
@@ -268,7 +263,7 @@ export const Dashboard = () => {
                       innerRadius={70}
                       outerRadius={120}
                       dataKey="value"
-                      stroke="rgba(255,255,255,0.1)"
+                      stroke="rgba(255,255,255,0.8)"
                       strokeWidth={2}
                     >
                       {placementData.map((entry, index) => (
@@ -277,31 +272,32 @@ export const Dashboard = () => {
                     </Pie>
                     <Tooltip 
                       contentStyle={{ 
-                        background: 'rgba(0, 0, 0, 0.8)', 
-                        border: '1px solid rgba(139, 92, 246, 0.3)',
+                        background: 'rgba(255, 255, 255, 0.95)', 
+                        border: '1px solid rgb(226 232 240)',
                         borderRadius: '12px',
-                        backdropFilter: 'blur(20px)'
+                        backdropFilter: 'blur(20px)',
+                        boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1)'
                       }} 
                     />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="grid grid-cols-2 gap-3 mt-6">
                   {placementData.map((item, index) => (
-                    <div key={item.name} className="flex items-center gap-3 p-2 rounded-lg glass-effect">
+                    <div key={item.name} className="flex items-center gap-3 p-2 rounded-lg bg-slate-50 border border-slate-200">
                       <div 
-                        className="w-4 h-4 rounded-full neon-glow-blue" 
+                        className="w-4 h-4 rounded-full shadow-sm" 
                         style={{ backgroundColor: item.color }}
                       />
-                      <span className="text-sm font-medium">{item.name}</span>
+                      <span className="text-sm font-medium text-slate-700">{item.name}</span>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+              <div className="flex items-center justify-center h-[300px] text-slate-500">
                 <div className="text-center">
                   <Briefcase className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                  <p>No placement data available</p>
+                  <p className="font-medium">No placement data available</p>
                   <p className="text-sm">Job placements will appear here once students are placed</p>
                 </div>
               </div>
@@ -311,43 +307,45 @@ export const Dashboard = () => {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Upcoming Events */}
-        <Card className="lg:col-span-2 futuristic-card slide-up">
+        <Card className="lg:col-span-2 bg-white/70 backdrop-blur-sm border-slate-200/50 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-gradient">
-              <Calendar className="h-6 w-6 text-cyan-400" />
-              Mission Control - Upcoming Events
+            <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                <Calendar className="h-4 w-4 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Mission Control - Upcoming Events</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {upcomingEvents.length > 0 ? upcomingEvents.map((event, index) => (
-                <div key={index} className="flex items-center gap-4 p-4 rounded-xl glass-effect hover-lift group">
+                <div key={index} className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors group">
                   <div className="flex-shrink-0">
-                    {event.type === 'graduation' && <GraduationCap className="h-6 w-6 text-green-400" />}
-                    {event.type === 'job-fair' && <Briefcase className="h-6 w-6 text-blue-400" />}
-                    {event.type === 'competition' && <TrendingUp className="h-6 w-6 text-purple-400" />}
-                    {event.type === 'meeting' && <Users className="h-6 w-6 text-orange-400" />}
+                    {event.type === 'graduation' && <GraduationCap className="h-6 w-6 text-emerald-600" />}
+                    {event.type === 'job-fair' && <Briefcase className="h-6 w-6 text-blue-600" />}
+                    {event.type === 'competition' && <TrendingUp className="h-6 w-6 text-purple-600" />}
+                    {event.type === 'meeting' && <Users className="h-6 w-6 text-orange-600" />}
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-white group-hover:text-blue-400 transition-colors">
+                    <h4 className="font-semibold text-slate-700 group-hover:text-blue-600 transition-colors">
                       {event.title}
                     </h4>
-                    <p className="text-sm text-muted-foreground">{event.date}</p>
+                    <p className="text-sm text-slate-500">{event.date}</p>
                   </div>
                   <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    event.priority === 'high' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                    event.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                    'bg-green-500/20 text-green-400 border border-green-500/30'
+                    event.priority === 'high' ? 'bg-red-100 text-red-600 border border-red-200' :
+                    event.priority === 'medium' ? 'bg-yellow-100 text-yellow-600 border border-yellow-200' :
+                    'bg-green-100 text-green-600 border border-green-200'
                   }`}>
                     {event.priority}
                   </div>
                 </div>
               )) : (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-slate-500">
                   <Calendar className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                  <p>No upcoming events</p>
+                  <p className="font-medium">No upcoming events</p>
                   <p className="text-sm">Events will appear here as they are scheduled</p>
                 </div>
               )}
@@ -356,11 +354,13 @@ export const Dashboard = () => {
         </Card>
 
         {/* Quick Actions */}
-        <Card className="futuristic-card slide-in-from-right">
+        <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-gradient">
-              <CheckCircle className="h-6 w-6 text-emerald-400" />
-              Quick Actions
+            <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Quick Actions</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -373,15 +373,15 @@ export const Dashboard = () => {
               ].map((action, index) => (
                 <button 
                   key={index}
-                  className="w-full p-4 text-left rounded-xl glass-effect hover-lift group transition-all duration-300"
+                  className="w-full p-4 text-left rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 group transition-all duration-200"
                 >
-                  <div className="font-medium text-white group-hover:text-blue-400 transition-colors">
+                  <div className="font-medium text-slate-700 group-hover:text-blue-600 transition-colors">
                     {action.title}
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">
+                  <div className="text-sm text-slate-500 mt-1">
                     {action.desc}
                   </div>
-                  <div className="w-full h-1 bg-white/10 rounded-full mt-3 overflow-hidden">
+                  <div className="w-full h-1 bg-slate-200 rounded-full mt-3 overflow-hidden">
                     <div 
                       className={`h-full bg-gradient-to-r from-${action.color}-500 to-${action.color}-600 rounded-full transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500`}
                     />
