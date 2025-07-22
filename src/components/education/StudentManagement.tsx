@@ -43,22 +43,21 @@ export function StudentManagement() {
   const { data: studentDetails, isLoading: isLoadingDetails } = useQuery({
     queryKey: ['student-details'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('student_details')
-        .select(`
-          *,
-          students!student_details_student_id_fkey (
-            student_id,
-            profiles!students_user_id_fkey (
-              full_name,
-              email
-            )
-          )
-        `)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('student_details' as any)
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data || [];
+        if (error) {
+          console.error('Error fetching student details:', error);
+          return [];
+        }
+        return data || [];
+      } catch (error) {
+        console.error('Error in query:', error);
+        return [];
+      }
     }
   });
 
@@ -378,12 +377,12 @@ export function StudentManagement() {
               <div className="text-center py-8 text-muted-foreground">
                 Loading detailed registrations...
               </div>
-            ) : studentDetails?.length === 0 ? (
+            ) : !studentDetails || studentDetails.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 No complete registrations found
               </div>
             ) : (
-              studentDetails?.map((detail) => (
+              studentDetails?.map((detail: any) => (
                 <div key={detail.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div>

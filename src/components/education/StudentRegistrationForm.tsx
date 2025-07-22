@@ -214,9 +214,9 @@ export function StudentRegistrationForm() {
         return;
       }
 
-      // Insert student details
+      // Insert student details using type assertion
       const { error } = await supabase
-        .from('student_details')
+        .from('student_details' as any)
         .insert({
           student_id: studentData.id,
           ...formData,
