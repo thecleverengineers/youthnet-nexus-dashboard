@@ -15,9 +15,19 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { redirectToDashboard } = useRoleNavigation();
 
   useEffect(() => {
-    // Redirect to role-specific dashboard if user just logged in and is on index page
-    if (user && profile && window.location.pathname === '/') {
-      redirectToDashboard();
+    // Auto-redirect users to their role-specific dashboard after login
+    if (user && profile) {
+      const currentPath = window.location.pathname;
+      
+      // If user is on index page, redirect to role-specific dashboard
+      if (currentPath === '/') {
+        redirectToDashboard();
+      }
+      
+      // If admin user tries to access general dashboard, redirect to admin dashboard
+      if (profile.role === 'admin' && currentPath === '/dashboard') {
+        redirectToDashboard();
+      }
     }
   }, [user, profile, redirectToDashboard]);
 

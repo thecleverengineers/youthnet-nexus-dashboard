@@ -18,7 +18,10 @@ export const DashboardRouter = () => {
       };
 
       const targetRoute = roleRoutes[profile.role as keyof typeof roleRoutes];
-      if (targetRoute && window.location.pathname === '/dashboard') {
+      const currentPath = window.location.pathname;
+      
+      // Redirect to role-specific dashboard if on general dashboard
+      if (targetRoute && currentPath === '/dashboard') {
         navigate(targetRoute, { replace: true });
       }
     }
