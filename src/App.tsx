@@ -6,6 +6,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/auth/RoleBasedRoute";
+import { AdminInitializer } from "@/components/auth/AdminInitializer";
 import { Layout } from "@/components/layout/Layout";
 import { DashboardRouter } from "@/components/dashboard/DashboardRouter";
 import Index from "./pages/Index";
@@ -38,6 +39,7 @@ function App() {
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
           <TooltipProvider>
             <Toaster />
+            <AdminInitializer />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
