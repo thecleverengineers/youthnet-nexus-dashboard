@@ -11,7 +11,9 @@ import {
   Shield,
   Database,
   LogOut,
-  Activity
+  Activity,
+  GraduationCap,
+  UserPlus
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -22,6 +24,7 @@ export const AdminDashboard = () => {
   const { studentsCount, trainersCount, employeesCount, incubationProjects } = useDashboardData();
 
   const adminModules = [
+    { name: 'Student Management', href: '/education', icon: GraduationCap, color: 'blue', description: 'Manage student registrations and data' },
     { name: 'HR & Admin', href: '/hr-admin', icon: Users, color: 'blue' },
     { name: 'Education Dept', href: '/education-department', icon: Users, color: 'green' },
     { name: 'Skill Development', href: '/skill-development', icon: Activity, color: 'purple' },
@@ -69,6 +72,26 @@ export const AdminDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
+                  <p className="text-sm text-muted-foreground">Total Students</p>
+                  <p className="text-2xl font-bold text-white">{studentsCount}</p>
+                </div>
+                <GraduationCap className="h-8 w-8 text-blue-400" />
+              </div>
+              <div className="mt-2">
+                <Link to="/education">
+                  <Button size="sm" variant="outline" className="text-xs">
+                    <UserPlus className="h-3 w-3 mr-1" />
+                    Manage Students
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="text-sm text-muted-foreground">Total Users</p>
                   <p className="text-2xl font-bold text-white">{totalUsers}</p>
                 </div>
@@ -100,18 +123,6 @@ export const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="futuristic-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Data Usage</p>
-                  <p className="text-2xl font-bold text-purple-400">{Math.round(dataUsage)}%</p>
-                </div>
-                <Database className="h-8 w-8 text-purple-400" />
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Admin Modules */}
@@ -134,13 +145,70 @@ export const AdminDashboard = () => {
                         </div>
                         <div>
                           <h3 className="font-medium text-white">{module.name}</h3>
-                          <p className="text-sm text-muted-foreground">Manage {module.name.toLowerCase()}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {module.description || `Manage ${module.name.toLowerCase()}`}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Student Actions */}
+        <Card className="futuristic-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-blue-400" />
+              Student Management Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link to="/education">
+                <Card className="futuristic-card hover-lift cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <UserPlus className="h-5 w-5 text-green-400" />
+                      <div>
+                        <h4 className="font-medium text-white">Add New Student</h4>
+                        <p className="text-sm text-muted-foreground">Register new students</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              
+              <Link to="/education">
+                <Card className="futuristic-card hover-lift cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <Users className="h-5 w-5 text-blue-400" />
+                      <div>
+                        <h4 className="font-medium text-white">View All Students</h4>
+                        <p className="text-sm text-muted-foreground">Manage existing students</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              
+              <Link to="/education">
+                <Card className="futuristic-card hover-lift cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <BarChart3 className="h-5 w-5 text-purple-400" />
+                      <div>
+                        <h4 className="font-medium text-white">Student Analytics</h4>
+                        <p className="text-sm text-muted-foreground">View performance metrics</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           </CardContent>
         </Card>
