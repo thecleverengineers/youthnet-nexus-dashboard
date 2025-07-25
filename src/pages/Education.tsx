@@ -24,6 +24,8 @@ import { StudentManagement } from '@/components/education/StudentManagement';
 import { ProgramManagement } from '@/components/education/ProgramManagement';
 import { EnrollmentManagement } from '@/components/education/EnrollmentManagement';
 import { PerformanceAnalytics } from '@/components/education/PerformanceAnalytics';
+import { SchoolManagement } from '@/components/education/SchoolManagement';
+import { TeacherManagement } from '@/components/education/TeacherManagement';
 
 export function Education() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -159,7 +161,11 @@ export function Education() {
         </TabsContent>
 
         <TabsContent value="programs">
-          <ProgramManagement />
+          <div className="space-y-6">
+            <ProgramManagement />
+            <SchoolManagement />
+            <TeacherManagement />
+          </div>
         </TabsContent>
 
         <TabsContent value="analytics">

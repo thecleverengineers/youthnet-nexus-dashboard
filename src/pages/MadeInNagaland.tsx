@@ -5,6 +5,7 @@ import { ProductCatalog } from '@/components/made-in-nagaland/ProductCatalog';
 import { ProducerManagement } from '@/components/made-in-nagaland/ProducerManagement';
 import { CertificationTracker } from '@/components/made-in-nagaland/CertificationTracker';
 import { MarketplaceAnalytics } from '@/components/made-in-nagaland/MarketplaceAnalytics';
+import { ArtisanManagement } from '@/components/made-in-nagaland/ArtisanManagement';
 
 export const MadeInNagaland = () => {
   return (
@@ -27,7 +28,10 @@ export const MadeInNagaland = () => {
         </TabsContent>
 
         <TabsContent value="producers">
-          <ProducerManagement />
+          <div className="space-y-6">
+            <ProducerManagement />
+            <ArtisanManagement />
+          </div>
         </TabsContent>
 
         <TabsContent value="certification">
