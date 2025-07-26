@@ -71,17 +71,18 @@ export const ScheduledReports = () => {
     const scheduleData = {
       report_name: formData.get('report_name') as string,
       report_type: formData.get('report_type') as string,
-      frequency: formData.get('frequency') as string,
+      schedule_pattern: formData.get('frequency') as string,
       recipients: (formData.get('recipients') as string).split(',').map(r => r.trim()),
-      schedule_time: formData.get('schedule_time') as string,
+      next_scheduled: new Date().toISOString(),
+      data_sources: [(formData.get('report_type') as string)],
       is_active: true
     };
 
     createScheduleMutation.mutate(scheduleData);
   };
 
-  const getFrequencyColor = (frequency: string) => {
-    switch (frequency) {
+  const getFrequencyColor = (schedule_pattern: string) => {
+    switch (schedule_pattern) {
       case 'daily': return 'bg-blue-100 text-blue-800';
       case 'weekly': return 'bg-green-100 text-green-800';
       case 'monthly': return 'bg-orange-100 text-orange-800';
@@ -136,7 +137,7 @@ export const ScheduledReports = () => {
                     <SelectItem value="quarterly">Quarterly</SelectItem>
                   </SelectContent>
                 </Select>
-                <Input name="schedule_time" type="time" placeholder="Schedule Time" required />
+                <Input name="schedule_time" type="time" placeholder="Schedule Time" />
                 <Input name="recipients" placeholder="Recipients (comma-separated emails)" required />
                 <Button type="submit" className="w-full">Schedule Report</Button>
               </form>
@@ -153,8 +154,8 @@ export const ScheduledReports = () => {
               <TableRow>
                 <TableHead>Report</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Frequency</TableHead>
-                <TableHead>Schedule Time</TableHead>
+                <TableHead>Schedule Pattern</TableHead>
+                <TableHead>Next Scheduled</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -165,14 +166,14 @@ export const ScheduledReports = () => {
                   <TableCell className="font-medium">{report.report_name}</TableCell>
                   <TableCell><Badge variant="outline">{report.report_type}</Badge></TableCell>
                   <TableCell>
-                    <Badge className={getFrequencyColor(report.frequency)}>
-                      {report.frequency}
+                    <Badge className={getFrequencyColor(report.schedule_pattern)}>
+                      {report.schedule_pattern}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      {report.schedule_time}
+                      {new Date(report.next_scheduled).toLocaleDateString()}
                     </div>
                   </TableCell>
                   <TableCell>
