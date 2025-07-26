@@ -43,16 +43,26 @@ export const adminService = {
 
   async initializeDefaultAdmin() {
     try {
-      // Check if the default admin already exists
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'thecleverengineers@gmail.com',
-        password: 'Kites@123',
-      });
+      // Get the current session to preserve it
+      const { data: currentSession } = await supabase.auth.getSession();
+      
+      // Check if admin profile already exists by querying the profiles table
+      const { data: adminProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', 'thecleverengineers@gmail.com')
+        .eq('role', 'admin')
+        .single();
 
-      if (!error && data.user) {
+      if (!profileError && adminProfile) {
         console.log('Default admin user already exists');
-        await supabase.auth.signOut(); // Sign out after checking
         return { success: true, message: 'Default admin already exists' };
+      }
+
+      // Only create admin if no current user session exists
+      if (currentSession?.session?.user) {
+        console.log('User session exists, skipping admin creation to avoid conflicts');
+        return { success: true, message: 'Skipped admin creation - user session active' };
       }
 
       // Create the default admin user
