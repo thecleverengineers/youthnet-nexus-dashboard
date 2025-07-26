@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { redirectToDashboard } = useRoleNavigation();
 
@@ -30,6 +30,18 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
     }
   }, [user, profile, redirectToDashboard]);
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

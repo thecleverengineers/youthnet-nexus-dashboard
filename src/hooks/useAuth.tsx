@@ -18,6 +18,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  loading: boolean;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, fullName: string, role: string) => Promise<boolean>;
   createDemoAccounts: () => Promise<boolean>;
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -237,11 +239,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const profileData = await fetchProfile(session.user.id);
               if (mounted) {
                 setProfile(profileData);
+                setLoading(false);
               }
             }
           }, 0);
         } else {
           setProfile(null);
+          setLoading(false);
         }
       }
     );
@@ -260,9 +264,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const profileData = await fetchProfile(session.user.id);
             if (mounted) {
               setProfile(profileData);
+              setLoading(false);
             }
           }
         }, 0);
+      } else {
+        setLoading(false);
       }
     });
 
@@ -276,6 +283,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     profile,
+    loading,
     signIn,
     signUp,
     createDemoAccounts,
