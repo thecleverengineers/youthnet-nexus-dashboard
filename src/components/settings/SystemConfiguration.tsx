@@ -6,10 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Save, Settings2, Mail, Shield } from 'lucide-react';
+import { Save, Settings2, Mail, Shield, Send, CheckCircle, XCircle } from 'lucide-react';
 
 interface SystemSetting {
   id: string;
@@ -39,6 +40,20 @@ export const SystemConfiguration = () => {
     backup_retention_days: '',
     email_notifications_enabled: false
   });
+
+  const [smtpSettings, setSmtpSettings] = useState({
+    smtp_host: '',
+    smtp_port: '587',
+    smtp_username: '',
+    smtp_password: '',
+    smtp_encryption: 'tls',
+    smtp_from_email: '',
+    smtp_from_name: '',
+    smtp_enabled: false
+  });
+
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [smtpStatus, setSmtpStatus] = useState<'success' | 'error' | null>(null);
 
   useEffect(() => {
     if (profile?.role === 'admin') {
@@ -70,6 +85,11 @@ export const SystemConfiguration = () => {
           }));
         } else if (setting.setting_type === 'system' || setting.setting_type === 'notifications') {
           setSystemSettings(prev => ({
+            ...prev,
+            [setting.setting_key]: value
+          }));
+        } else if (setting.setting_type === 'smtp') {
+          setSmtpSettings(prev => ({
             ...prev,
             [setting.setting_key]: value
           }));
@@ -129,6 +149,48 @@ export const SystemConfiguration = () => {
       toast.error('Failed to update system settings');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveSmtpSettings = async () => {
+    setSaving(true);
+    try {
+      const promises = Object.entries(smtpSettings).map(([key, value]) =>
+        updateSetting(key, value)
+      );
+      
+      await Promise.all(promises);
+      toast.success('SMTP settings updated successfully');
+      setSmtpStatus('success');
+    } catch (error) {
+      toast.error('Failed to update SMTP settings');
+      setSmtpStatus('error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleTestEmail = async () => {
+    setTestingEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-test-email', {
+        body: { 
+          to: profile?.email,
+          subject: 'SMTP Test Email',
+          message: 'This is a test email to verify your SMTP configuration is working correctly.'
+        }
+      });
+
+      if (error) throw error;
+      
+      toast.success('Test email sent successfully! Check your inbox.');
+      setSmtpStatus('success');
+    } catch (error) {
+      console.error('Test email error:', error);
+      toast.error('Failed to send test email. Please check your SMTP settings.');
+      setSmtpStatus('error');
+    } finally {
+      setTestingEmail(false);
     }
   };
 
@@ -314,6 +376,169 @@ export const SystemConfiguration = () => {
             <Save className="h-4 w-4 mr-2" />
             Save System Settings
           </Button>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* SMTP Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            SMTP Email Configuration
+            {smtpStatus === 'success' && <CheckCircle className="h-4 w-4 text-green-500" />}
+            {smtpStatus === 'error' && <XCircle className="h-4 w-4 text-red-500" />}
+          </CardTitle>
+          <CardDescription>Configure SMTP settings for sending emails</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between space-x-2 mb-6">
+            <div className="space-y-0.5">
+              <Label>Enable SMTP Email</Label>
+              <p className="text-sm text-muted-foreground">
+                Enable SMTP email functionality for the system
+              </p>
+            </div>
+            <Switch
+              checked={smtpSettings.smtp_enabled}
+              onCheckedChange={(checked) => setSmtpSettings(prev => ({
+                ...prev,
+                smtp_enabled: checked
+              }))}
+            />
+          </div>
+
+          {smtpSettings.smtp_enabled && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-host">SMTP Host</Label>
+                  <Input
+                    id="smtp-host"
+                    value={smtpSettings.smtp_host}
+                    onChange={(e) => setSmtpSettings(prev => ({
+                      ...prev,
+                      smtp_host: e.target.value
+                    }))}
+                    placeholder="smtp.gmail.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-port">SMTP Port</Label>
+                  <Input
+                    id="smtp-port"
+                    type="number"
+                    value={smtpSettings.smtp_port}
+                    onChange={(e) => setSmtpSettings(prev => ({
+                      ...prev,
+                      smtp_port: e.target.value
+                    }))}
+                    placeholder="587"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-username">Username/Email</Label>
+                  <Input
+                    id="smtp-username"
+                    type="email"
+                    value={smtpSettings.smtp_username}
+                    onChange={(e) => setSmtpSettings(prev => ({
+                      ...prev,
+                      smtp_username: e.target.value
+                    }))}
+                    placeholder="your-email@gmail.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-password">Password</Label>
+                  <Input
+                    id="smtp-password"
+                    type="password"
+                    value={smtpSettings.smtp_password}
+                    onChange={(e) => setSmtpSettings(prev => ({
+                      ...prev,
+                      smtp_password: e.target.value
+                    }))}
+                    placeholder="Your app password"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-encryption">Encryption</Label>
+                  <Select
+                    value={smtpSettings.smtp_encryption}
+                    onValueChange={(value) => setSmtpSettings(prev => ({
+                      ...prev,
+                      smtp_encryption: value
+                    }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select encryption" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tls">TLS</SelectItem>
+                      <SelectItem value="ssl">SSL</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtp-from-email">From Email</Label>
+                  <Input
+                    id="smtp-from-email"
+                    type="email"
+                    value={smtpSettings.smtp_from_email}
+                    onChange={(e) => setSmtpSettings(prev => ({
+                      ...prev,
+                      smtp_from_email: e.target.value
+                    }))}
+                    placeholder="noreply@yourorg.com"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="smtp-from-name">From Name</Label>
+                <Input
+                  id="smtp-from-name"
+                  value={smtpSettings.smtp_from_name}
+                  onChange={(e) => setSmtpSettings(prev => ({
+                    ...prev,
+                    smtp_from_name: e.target.value
+                  }))}
+                  placeholder="Your Organization"
+                />
+              </div>
+            </>
+          )}
+          
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              onClick={handleSaveSmtpSettings} 
+              disabled={saving}
+              className="flex-1"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save SMTP Settings
+            </Button>
+            {smtpSettings.smtp_enabled && (
+              <Button 
+                onClick={handleTestEmail} 
+                disabled={testingEmail || saving}
+                variant="outline"
+                className="flex-1"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {testingEmail ? 'Sending...' : 'Send Test Email'}
+              </Button>
+            )}
+          </div>
+          
+          {smtpSettings.smtp_enabled && (
+            <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+              <p className="font-medium mb-1">Security Note:</p>
+              <p>Use app-specific passwords for Gmail. For other providers, ensure you have the correct SMTP credentials and that less secure app access is enabled if required.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
