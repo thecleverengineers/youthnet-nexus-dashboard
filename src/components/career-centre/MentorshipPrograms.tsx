@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Users, Target, Calendar, Award, Plus } from 'lucide-react';
-import { NewProgramModal } from './NewProgramModal';
 
 interface MentorshipProgramsProps {
   detailed?: boolean;
@@ -48,8 +47,6 @@ export function MentorshipPrograms({ detailed = false }: MentorshipProgramsProps
     }
   ]);
 
-  const [newProgramModalOpen, setNewProgramModalOpen] = useState(false);
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
@@ -69,7 +66,7 @@ export function MentorshipPrograms({ detailed = false }: MentorshipProgramsProps
             Mentorship Programs
           </div>
           {detailed && (
-            <Button size="sm" onClick={() => setNewProgramModalOpen(true)}>
+            <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
               New Program
             </Button>
@@ -140,11 +137,6 @@ export function MentorshipPrograms({ detailed = false }: MentorshipProgramsProps
           ))}
         </div>
       </CardContent>
-
-      <NewProgramModal 
-        open={newProgramModalOpen} 
-        onOpenChange={setNewProgramModalOpen} 
-      />
     </Card>
   );
 }

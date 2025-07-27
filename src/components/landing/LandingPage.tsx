@@ -140,10 +140,6 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
             <Button 
               variant="outline" 
               size="lg"
-              onClick={() => {
-                const featuresSection = document.querySelector('#features-section');
-                featuresSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
               className="border-2 border-gray-300 hover:border-blue-400 px-8 py-4 rounded-2xl text-lg font-semibold transition-all duration-300 hover:bg-blue-50"
             >
               {content.hero_cta_secondary || 'Learn More'}
@@ -166,7 +162,7 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
       </section>
 
       {/* Features Section */}
-      <section id="features-section" className="relative z-10 px-6 py-20 bg-white/40 backdrop-blur-sm">
+      <section className="relative z-10 px-6 py-20 bg-white/40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">

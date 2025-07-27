@@ -50,11 +50,7 @@ export const skillService = {
     }
 
     const { data, error } = await query;
-    if (error) {
-      console.error('Error fetching skill assessments:', error);
-      // Return empty array instead of throwing to prevent UI crashes
-      return [];
-    }
+    if (error) throw error;
     return data as SkillAssessment[];
   },
 
@@ -101,11 +97,7 @@ export const skillService = {
     }
 
     const { data, error } = await query;
-    if (error) {
-      console.error('Error fetching certifications:', error);
-      // Return empty array instead of throwing to prevent UI crashes
-      return [];
-    }
+    if (error) throw error;
     return data as Certification[];
   },
 
