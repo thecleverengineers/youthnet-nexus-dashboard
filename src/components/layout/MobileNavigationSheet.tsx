@@ -28,7 +28,7 @@ export const MobileNavigationSheet = ({ children }: MobileNavigationSheetProps) 
           <span className="sr-only">Open navigation menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-80 bg-white border-r border-slate-200">
+      <SheetContent side="left" className="p-0 w-80 border-r border-blue-600/20">
         <SheetHeader className="sr-only">
           <SheetTitle>Navigation Menu</SheetTitle>
           <SheetDescription>Access all application features</SheetDescription>
