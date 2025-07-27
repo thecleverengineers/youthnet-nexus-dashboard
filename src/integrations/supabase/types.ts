@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          data: Json
+          expires_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          data: Json
+          expires_at: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          data?: Json
+          expires_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       analytics_dashboards: {
         Row: {
           config: Json
@@ -878,6 +905,48 @@ export type Database = {
           },
         ]
       }
+      employer_partnerships: {
+        Row: {
+          company_name: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          industry: string | null
+          location: string | null
+          partnership_end_date: string | null
+          partnership_start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          location?: string | null
+          partnership_end_date?: string | null
+          partnership_start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          location?: string | null
+          partnership_end_date?: string | null
+          partnership_start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       export_requests: {
         Row: {
           completed_at: string | null
@@ -1215,6 +1284,50 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_stock: {
+        Row: {
+          current_stock: number
+          id: string
+          item_id: string | null
+          last_restocked_date: string | null
+          last_updated: string
+          location_id: string | null
+          maximum_capacity: number | null
+          minimum_threshold: number
+          notes: string | null
+        }
+        Insert: {
+          current_stock?: number
+          id?: string
+          item_id?: string | null
+          last_restocked_date?: string | null
+          last_updated?: string
+          location_id?: string | null
+          maximum_capacity?: number | null
+          minimum_threshold?: number
+          notes?: string | null
+        }
+        Update: {
+          current_stock?: number
+          id?: string
+          item_id?: string | null
+          last_restocked_date?: string | null
+          last_updated?: string
+          location_id?: string | null
+          maximum_capacity?: number | null
+          minimum_threshold?: number
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_stock_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
             referencedColumns: ["id"]
           },
         ]
@@ -2090,6 +2203,42 @@ export type Database = {
           },
         ]
       }
+      placement_analytics: {
+        Row: {
+          created_at: string
+          id: string
+          industry_breakdown: Json | null
+          month_year: string
+          placement_rate: number | null
+          salary_ranges: Json | null
+          total_applications: number
+          total_placements: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          industry_breakdown?: Json | null
+          month_year: string
+          placement_rate?: number | null
+          salary_ranges?: Json | null
+          total_applications?: number
+          total_placements?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          industry_breakdown?: Json | null
+          month_year?: string
+          placement_rate?: number | null
+          salary_ranges?: Json | null
+          total_applications?: number
+          total_placements?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       producers: {
         Row: {
           address: string | null
@@ -2262,6 +2411,81 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "local_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          artisan_id: string | null
+          category: string
+          certification_date: string | null
+          certification_status: string | null
+          created_at: string
+          description: string | null
+          dimensions: string | null
+          id: string
+          images: Json | null
+          materials: string[] | null
+          price: number
+          producer_id: string | null
+          product_name: string
+          status: string
+          stock_quantity: number
+          updated_at: string
+          weight_grams: number | null
+        }
+        Insert: {
+          artisan_id?: string | null
+          category: string
+          certification_date?: string | null
+          certification_status?: string | null
+          created_at?: string
+          description?: string | null
+          dimensions?: string | null
+          id?: string
+          images?: Json | null
+          materials?: string[] | null
+          price: number
+          producer_id?: string | null
+          product_name: string
+          status?: string
+          stock_quantity?: number
+          updated_at?: string
+          weight_grams?: number | null
+        }
+        Update: {
+          artisan_id?: string | null
+          category?: string
+          certification_date?: string | null
+          certification_status?: string | null
+          created_at?: string
+          description?: string | null
+          dimensions?: string | null
+          id?: string
+          images?: Json | null
+          materials?: string[] | null
+          price?: number
+          producer_id?: string | null
+          product_name?: string
+          status?: string
+          stock_quantity?: number
+          updated_at?: string
+          weight_grams?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_artisan_id_fkey"
+            columns: ["artisan_id"]
+            isOneToOne: false
+            referencedRelation: "artisans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_producer_id_fkey"
+            columns: ["producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
             referencedColumns: ["id"]
           },
         ]
@@ -2938,6 +3162,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_activities: {
+        Row: {
+          activity_date: string
+          activity_type: string
+          created_at: string
+          device_info: Json | null
+          id: string
+          ip_address: string | null
+          login_time: string | null
+          logout_time: string | null
+          session_duration_minutes: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_date?: string
+          activity_type: string
+          created_at?: string
+          device_info?: Json | null
+          id?: string
+          ip_address?: string | null
+          login_time?: string | null
+          logout_time?: string | null
+          session_duration_minutes?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_date?: string
+          activity_type?: string
+          created_at?: string
+          device_info?: Json | null
+          id?: string
+          ip_address?: string | null
+          login_time?: string | null
+          logout_time?: string | null
+          session_duration_minutes?: number | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_role_assignments: {
         Row: {
