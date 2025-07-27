@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bell, Search, User, Menu, Zap, Activity } from 'lucide-react';
+import { Bell, Search, User, Menu, Zap, Activity, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,8 +12,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { useNotifications } from '@/hooks/useNotifications';
+import { formatDistanceToNow } from 'date-fns';
 
 export const TopNavbar = () => {
+  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'success': return '✅';
+      case 'warning': return '⚠️';
+      case 'error': return '❌';
+      default: return '💡';
+    }
+  };
+
   return (
     <header className="h-16 border-b border-white/10 glass-effect">
       <div className="flex h-16 items-center px-6 gap-4">
@@ -42,29 +55,94 @@ export const TopNavbar = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative hover-glow rounded-xl">
                 <Bell className="h-5 w-5" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-gradient-to-r from-red-500 to-pink-500 border-0 pulse-glow">
-                  3
-                </Badge>
+                {unreadCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-gradient-to-r from-red-500 to-pink-500 border-0 pulse-glow">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Badge>
+                )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 glass-effect border-white/10">
-              <DropdownMenuLabel className="text-gradient">Notifications</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-80 glass-effect border-white/10 max-h-96 overflow-y-auto">
+              <div className="flex items-center justify-between p-2">
+                <DropdownMenuLabel className="text-gradient p-0">Notifications</DropdownMenuLabel>
+                {unreadCount > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={markAllAsRead}
+                    className="text-xs text-blue-400 hover:text-blue-300"
+                  >
+                    Mark all read
+                  </Button>
+                )}
+              </div>
               <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem className="flex flex-col items-start py-3 hover:bg-white/5 rounded-lg">
-                <div className="font-medium">New placement record</div>
-                <div className="text-sm text-muted-foreground">5 candidates placed this week</div>
-                <div className="text-xs text-blue-400 mt-1">2 hours ago</div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start py-3 hover:bg-white/5 rounded-lg">
-                <div className="font-medium">Training batch completed</div>
-                <div className="text-sm text-muted-foreground">Digital Marketing batch graduation</div>
-                <div className="text-xs text-blue-400 mt-1">4 hours ago</div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start py-3 hover:bg-white/5 rounded-lg">
-                <div className="font-medium">Monthly report due</div>
-                <div className="text-sm text-muted-foreground">Submit department reports by Friday</div>
-                <div className="text-xs text-blue-400 mt-1">1 day ago</div>
-              </DropdownMenuItem>
+              
+              {loading ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  Loading notifications...
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  No notifications yet
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <DropdownMenuItem 
+                    key={notification.id}
+                    className={`flex flex-col items-start py-3 hover:bg-white/5 rounded-lg relative group ${
+                      !notification.is_read ? 'bg-blue-500/10' : ''
+                    }`}
+                    onClick={() => !notification.is_read && markAsRead(notification.id)}
+                  >
+                    <div className="flex items-start justify-between w-full">
+                      <div className="flex items-start gap-2 flex-1">
+                        <span className="text-sm mt-0.5">
+                          {getNotificationIcon(notification.type)}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">
+                            {notification.title}
+                          </div>
+                          <div className="text-sm text-muted-foreground line-clamp-2">
+                            {notification.message}
+                          </div>
+                          <div className="text-xs text-blue-400 mt-1">
+                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!notification.is_read && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                            }}
+                            className="h-6 w-6 p-0 hover:bg-green-500/20"
+                          >
+                            <Check className="h-3 w-3 text-green-400" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notification.id);
+                          }}
+                          className="h-6 w-6 p-0 hover:bg-red-500/20"
+                        >
+                          <X className="h-3 w-3 text-red-400" />
+                        </Button>
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                ))
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 

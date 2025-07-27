@@ -115,6 +115,23 @@ export const useRealtimeUpdates = () => {
       )
       .subscribe();
 
+    // Subscribe to notifications (handled by useNotifications hook)
+    // This subscription is primarily for cache invalidation
+    const notificationsChannel = supabase
+      .channel('notifications-cache-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(tasksChannel);
       supabase.removeChannel(inventoryChannel);
@@ -122,6 +139,7 @@ export const useRealtimeUpdates = () => {
       supabase.removeChannel(reportsChannel);
       supabase.removeChannel(skillsChannel);
       supabase.removeChannel(trainingChannel);
+      supabase.removeChannel(notificationsChannel);
     };
   }, [queryClient]);
 };
