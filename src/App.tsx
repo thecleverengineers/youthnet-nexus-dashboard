@@ -25,6 +25,7 @@ import { LivelihoodIncubator } from "./pages/LivelihoodIncubator";
 import { HRAdmin } from "./pages/HRAdmin";
 import { UserManagementPage } from "./pages/UserManagement";
 import { AdminRBAC } from "./pages/AdminRBAC";
+import { Profile } from "./pages/Profile";
 import { Inventory } from "./pages/Inventory";
 import { ReportsPage } from "./pages/ReportsPage";
 import { Settings } from "./pages/Settings";
@@ -234,6 +235,16 @@ function App() {
                           <AdminRBAC />
                         </Layout>
                       </RoleBasedRoute>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Profile />
+                      </Layout>
                     </ProtectedRoute>
                   } 
                 />

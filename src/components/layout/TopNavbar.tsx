@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bell, Search, User, Menu, Zap, Activity, X, Check } from 'lucide-react';
+import { Bell, Search, User, Menu, Zap, Activity, X, Check, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,10 +13,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 
 export const TopNavbar = () => {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const { profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -25,6 +29,19 @@ export const TopNavbar = () => {
       case 'error': return '❌';
       default: return '💡';
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const handleProfileSettings = () => {
+    navigate('/profile');
+  };
+
+  const handlePreferences = () => {
+    navigate('/profile?tab=preferences');
   };
 
   return (
@@ -154,22 +171,34 @@ export const TopNavbar = () => {
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="hidden md:flex flex-col items-start">
-                  <span className="text-sm font-medium">Admin User</span>
-                  <span className="text-xs text-blue-400">System Admin</span>
+                  <span className="text-sm font-medium">{profile?.full_name || 'User'}</span>
+                  <span className="text-xs text-blue-400">{profile?.role?.charAt(0).toUpperCase() + (profile?.role?.slice(1) || '')}</span>
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="glass-effect border-white/10">
+            <DropdownMenuContent align="end" className="glass-effect border-white/10 w-56">
               <DropdownMenuLabel className="text-gradient">My Account</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem className="hover:bg-white/5 rounded-lg">
+              <DropdownMenuItem 
+                className="hover:bg-white/5 rounded-lg cursor-pointer"
+                onClick={handleProfileSettings}
+              >
+                <User className="h-4 w-4 mr-2" />
                 Profile Settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-white/5 rounded-lg">
+              <DropdownMenuItem 
+                className="hover:bg-white/5 rounded-lg cursor-pointer"
+                onClick={handlePreferences}
+              >
+                <Settings className="h-4 w-4 mr-2" />
                 Preferences
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem className="text-red-400 hover:bg-red-500/10 rounded-lg">
+              <DropdownMenuItem 
+                className="text-red-400 hover:bg-red-500/10 rounded-lg cursor-pointer"
+                onClick={handleSignOut}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
