@@ -205,31 +205,13 @@ const studentManagementItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { profile, loading } = useAuth();
+  const { profile } = useAuth();
   const { state, isMobile, setOpenMobile } = useSidebar();
   const isCollapsed = !isMobile && state === 'collapsed';
 
-  // Debug logging
-  console.log('AppSidebar render:', { 
-    profile, 
-    loading, 
-    profileRole: profile?.role,
-    isMobile, 
-    isCollapsed,
-    pathname: location.pathname 
-  });
-
-  // Always show basic items, filter by role when profile is available
-  const allowedNavItems = profile?.role 
-    ? navigationItems.filter(item => item.roles.includes(profile.role))
-    : navigationItems.filter(item => item.roles.includes('student')); // Default fallback
-  
-  console.log('Navigation filtering:', { 
-    profileRole: profile?.role,
-    totalItems: navigationItems.length,
-    allowedItems: allowedNavItems.length,
-    allowedItemNames: allowedNavItems.map(item => item.name)
-  });
+  const allowedNavItems = navigationItems.filter(item => 
+    profile?.role && item.roles.includes(profile.role)
+  );
 
   const coreModules = allowedNavItems.filter(item => 
     ['Dashboard', 'Education', 'Skill Development'].includes(item.name)
@@ -257,7 +239,7 @@ export function AppSidebar() {
     return (
       <SidebarGroup className="mb-4">
         <SidebarGroupLabel className={`text-sidebar-accent-foreground font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2`}>
-          {(isMobile || !isCollapsed) && (
+          {!isCollapsed && (
             <>
               <div className={`w-1.5 h-1.5 rounded-full bg-sidebar-accent-foreground`}></div>
               {title}
@@ -288,7 +270,7 @@ export function AppSidebar() {
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
-                    {(isMobile || !isCollapsed) && (
+                    {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-sm truncate text-sidebar-foreground">{item.name}</span>
@@ -305,7 +287,7 @@ export function AppSidebar() {
                         )}
                       </div>
                     )}
-                    {(isMobile || !isCollapsed) && (
+                    {!isCollapsed && (
                       <ChevronRight className="h-3 w-3 text-sidebar-accent-foreground transition-colors" />
                     )}
                   </Link>
@@ -326,7 +308,7 @@ export function AppSidebar() {
     return (
       <SidebarGroup className="mb-4">
         <SidebarGroupLabel className="text-sidebar-accent-foreground font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
-          {(isMobile || !isCollapsed) && (
+          {!isCollapsed && (
             <>
               <div className="w-1.5 h-1.5 rounded-full bg-sidebar-accent-foreground"></div>  
               Student Hub
@@ -357,7 +339,7 @@ export function AppSidebar() {
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
-                    {(isMobile || !isCollapsed) && (
+                    {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-sm truncate text-sidebar-foreground">{item.name}</span>
@@ -372,7 +354,7 @@ export function AppSidebar() {
                         </span>
                       </div>
                     )}
-                    {(isMobile || !isCollapsed) && (
+                    {!isCollapsed && (
                       <ChevronRight className="h-3 w-3 text-sidebar-accent-foreground transition-colors" />
                     )}
                   </Link>
@@ -403,7 +385,7 @@ export function AppSidebar() {
                 <Crown className="h-1.5 w-1.5 sm:h-2 sm:w-2 text-white" />
               </div>
             </div>
-            {(isMobile || !isCollapsed) && (
+            {!isCollapsed && (
               <div>
                 <span className="text-base sm:text-lg font-bold text-sidebar-foreground">YouthNet</span>
                 <div className="text-xs text-sidebar-accent-foreground font-medium">Premium MIS</div>
@@ -425,7 +407,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* User Info */}
-      {profile && (isMobile || !isCollapsed) && (
+      {profile && !isCollapsed && (
         <div className="px-4 py-3 border-b border-sidebar-border">
           <div className="bg-sidebar-accent rounded-xl p-3 border border-sidebar-border">
             <div className="flex items-center space-x-3">
@@ -453,42 +435,15 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <SidebarContent className="px-3 py-4 space-y-2 overflow-y-auto">
-        {loading ? (
-          <div className="space-y-4 animate-pulse">
-            <div className="h-4 bg-sidebar-accent rounded w-3/4"></div>
-            <div className="space-y-2">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-3 p-2">
-                  <div className="w-8 h-8 bg-sidebar-accent rounded-lg"></div>
-                  {(isMobile || !isCollapsed) && (
-                    <div className="flex-1 space-y-1">
-                      <div className="h-3 bg-sidebar-accent rounded w-2/3"></div>
-                      <div className="h-2 bg-sidebar-accent rounded w-1/2"></div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : allowedNavItems.length > 0 ? (
-          <>
-            {renderNavSection('Core Modules', coreModules, 'text-primary')}
-            {renderStudentManagementSection()}
-            {renderNavSection('Services', serviceModules, 'text-secondary')}
-            {renderNavSection('Administration', adminModules, 'text-muted-foreground')}
-          </>
-        ) : (
-          <div className="px-4 py-8 text-center">
-            <div className="text-sidebar-accent-foreground text-sm">
-              {profile ? 'No navigation items available' : 'Please wait...'}
-            </div>
-          </div>
-        )}
+        {renderNavSection('Core Modules', coreModules, 'text-primary')}
+        {renderStudentManagementSection()}
+        {renderNavSection('Services', serviceModules, 'text-secondary')}
+        {renderNavSection('Administration', adminModules, 'text-muted-foreground')}
       </SidebarContent>
 
       {/* Footer */}
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        {(isMobile || !isCollapsed) && (
+        {!isCollapsed && (
           <div className="bg-sidebar-accent rounded-xl p-3 text-center border border-sidebar-border">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
