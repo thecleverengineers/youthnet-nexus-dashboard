@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { AdvancedReportsAnalytics } from '@/components/hr-admin/AdvancedReportsAnalytics';
+import { AIInsightsDashboard } from '@/components/analytics/AIInsightsDashboard';
 import { MobilePageHeader } from '@/components/ui/mobile-navigation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export const ReportsPage = () => {
@@ -27,7 +29,20 @@ export const ReportsPage = () => {
 
       {/* Content */}
       <div className="p-4">
-        <AdvancedReportsAnalytics />
+        <Tabs defaultValue="ai-insights" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="ai-insights">AI Insights</TabsTrigger>
+            <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="ai-insights" className="space-y-6">
+            <AIInsightsDashboard />
+          </TabsContent>
+          
+          <TabsContent value="reports" className="space-y-6">
+            <AdvancedReportsAnalytics />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
