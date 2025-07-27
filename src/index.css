@@ -3,10 +3,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Professional Font Imports */
+/* Enhanced Professional Font Imports */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 /* Premium Light Design System */
 
@@ -22,17 +23,17 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 84% 4.9%;
     
-    --primary: 221 83% 53%;
+    --primary: 217 91% 60%;
     --primary-foreground: 210 40% 98%;
     
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 262 90% 67%;
+    --secondary-foreground: 210 40% 98%;
     
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 215 20% 95%;
+    --muted-foreground: 215 13% 52%;
     
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 215 16% 92%;
+    --accent-foreground: 215 27% 9%;
     
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -104,16 +105,16 @@
   
   /* Enhanced Typography Hierarchy */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-inter font-semibold tracking-tight;
+    @apply font-semibold tracking-tight;
     line-height: 1.2;
   }
   
-  h1 { @apply text-3xl lg:text-4xl; }
-  h2 { @apply text-2xl lg:text-3xl; }
-  h3 { @apply text-xl lg:text-2xl; }
-  h4 { @apply text-lg lg:text-xl; }
-  h5 { @apply text-base lg:text-lg; }
-  h6 { @apply text-sm lg:text-base; }
+  h1 { @apply text-4xl lg:text-5xl font-display font-bold; }
+  h2 { @apply text-3xl lg:text-4xl font-display font-semibold; }
+  h3 { @apply text-2xl lg:text-3xl font-medium; }
+  h4 { @apply text-xl lg:text-2xl font-medium; }
+  h5 { @apply text-lg lg:text-xl font-medium; }
+  h6 { @apply text-base lg:text-lg font-medium; }
   
   p {
     @apply leading-relaxed;
@@ -364,9 +365,13 @@
     100% { background-position: 200% 0; }
   }
   
-  /* Typography Utilities */
+  /* Enhanced Typography Utilities */
   .font-display {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Outfit', 'Poppins', sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
   }
   
   .font-mono {

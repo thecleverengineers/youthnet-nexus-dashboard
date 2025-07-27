@@ -243,7 +243,7 @@ export function AppSidebar() {
             <>
               <div className={`w-1.5 h-1.5 rounded-full ${colorClass.replace('text-', 'bg-')}`}></div>
               {title}
-              <Badge variant="secondary" className="text-xs ml-auto bg-slate-100 text-slate-600">
+              <Badge variant="secondary" className="text-xs ml-auto bg-muted text-muted-foreground">
                 {items.length}
               </Badge>
             </>
@@ -258,15 +258,15 @@ export function AppSidebar() {
                   isActive={isActive(item.href)}
                   className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'bg-blue-50 text-blue-700 shadow-sm border-l-2 border-blue-500' 
-                      : 'hover:bg-slate-50 hover:text-slate-700'
+                      ? 'bg-primary/10 text-primary shadow-sm border-l-2 border-primary' 
+                      : 'hover:bg-accent hover:text-accent-foreground'
                   }`}
                 >
                   <Link to={item.href} className="flex items-center gap-3 p-2.5" onClick={handleLinkClick}>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-blue-100 text-blue-600' 
-                        : 'bg-slate-100 group-hover:bg-slate-200 text-slate-600'
+                        ? 'bg-primary/20 text-primary' 
+                        : 'bg-muted group-hover:bg-accent text-muted-foreground'
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
@@ -275,20 +275,20 @@ export function AppSidebar() {
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-sm truncate">{item.name}</span>
                           {item.badge && (
-                            <Badge variant="outline" className="text-xs border-slate-200 text-slate-500">
+                            <Badge variant="outline" className="text-xs">
                               {item.badge}
                             </Badge>
                           )}
                         </div>
                         {item.description && (
-                          <span className="block text-xs text-slate-500 truncate mt-0.5">
+                          <span className="block text-xs text-muted-foreground truncate mt-0.5">
                             {item.description}
                           </span>
                         )}
                       </div>
                     )}
                     {!isCollapsed && (
-                      <ChevronRight className="h-3 w-3 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                      <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors" />
                     )}
                   </Link>
                 </SidebarMenuButton>
@@ -408,20 +408,20 @@ export function AppSidebar() {
 
       {/* User Info */}
       {profile && !isCollapsed && (
-        <div className="px-3 sm:px-4 py-3 border-b border-slate-200/60">
-          <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-3 border border-slate-200/50">
+        <div className="px-4 py-3 border-b border-border">
+          <div className="bg-gradient-to-r from-muted to-accent/50 rounded-xl p-3 border">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center relative overflow-hidden shadow-sm">
-                <span className="text-white text-xs sm:text-sm font-bold relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center relative overflow-hidden shadow-sm">
+                <span className="text-primary-foreground text-sm font-bold relative z-10">
                   {profile.full_name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-700 truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {profile.full_name || 'User'}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs capitalize">
+                  <Badge className="bg-primary/10 text-primary border-primary/20 text-xs capitalize">
                     <Shield className="h-2 w-2 mr-1" />
                     {profile.role}
                   </Badge>
@@ -434,23 +434,23 @@ export function AppSidebar() {
       )}
 
       {/* Navigation */}
-      <SidebarContent className="px-2 sm:px-3 py-4 space-y-2 overflow-y-auto">
-        {renderNavSection('Core Modules', coreModules, 'text-blue-600')}
+      <SidebarContent className="px-3 py-4 space-y-2 overflow-y-auto">
+        {renderNavSection('Core Modules', coreModules, 'text-primary')}
         {renderStudentManagementSection()}
-        {renderNavSection('Services', serviceModules, 'text-purple-600')}
-        {renderNavSection('Administration', adminModules, 'text-slate-600')}
+        {renderNavSection('Services', serviceModules, 'text-secondary')}
+        {renderNavSection('Administration', adminModules, 'text-muted-foreground')}
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t border-slate-200/60 p-3 sm:p-4">
+      <SidebarFooter className="border-t border-border p-4">
         {!isCollapsed && (
-          <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-3 text-center border border-slate-200/50">
+          <div className="bg-gradient-to-r from-emerald-50 to-primary/5 rounded-xl p-3 text-center border">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-xs bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent font-medium">System Online</span>
+              <span className="text-xs bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent font-medium">System Online</span>
             </div>
-            <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-              <span className="font-mono font-bold">v2.0.0</span>
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <span className="font-mono font-bold">v2.1.0</span>
             </div>
           </div>
         )}
