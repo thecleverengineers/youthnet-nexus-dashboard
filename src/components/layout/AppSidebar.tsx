@@ -207,7 +207,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { profile } = useAuth();
   const { state, isMobile, setOpenMobile } = useSidebar();
-  const isCollapsed = state === 'collapsed';
+  const isCollapsed = !isMobile && state === 'collapsed';
 
   const allowedNavItems = navigationItems.filter(item => 
     profile?.role && item.roles.includes(profile.role)
