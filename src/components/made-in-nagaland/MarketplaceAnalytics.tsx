@@ -50,11 +50,28 @@ export const MarketplaceAnalytics = () => {
     orders: metric.total_orders
   })) || [];
 
-  const categoryData = marketplaceMetrics?.[0]?.top_categories?.map((category: string, index: number) => ({
-    name: category,
-    value: Math.floor(Math.random() * 100) + 20, // Mock data for demo
-    color: COLORS[index % COLORS.length]
-  })) || [];
+  const { data: categoryData = [] } = useQuery({
+    queryKey: ['marketplace-category-data'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('category')
+        .order('category');
+
+      if (error) throw error;
+
+      const categoryCounts = (data || []).reduce((acc: Record<string, number>, product) => {
+        acc[product.category] = (acc[product.category] || 0) + 1;
+        return acc;
+      }, {});
+
+      return Object.entries(categoryCounts).map(([name, value], index) => ({
+        name,
+        value,
+        color: COLORS[index % COLORS.length]
+      }));
+    }
+  });
 
   const revenueByRegion = marketplaceMetrics?.[0]?.revenue_by_region || {};
   const regionData = Object.entries(revenueByRegion).map(([region, revenue]) => ({

@@ -5,8 +5,11 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { skillService } from '@/services/skillService';
+import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
 
 export function SkillAnalytics() {
+  useRealtimeUpdates();
+  
   const { data: assessments = [], isLoading: assessmentsLoading } = useQuery({
     queryKey: ['skill-assessments'],
     queryFn: () => skillService.getSkillAssessments()

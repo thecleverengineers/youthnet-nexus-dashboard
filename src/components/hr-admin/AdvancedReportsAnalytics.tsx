@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 export const AdvancedReportsAnalytics = () => {
   const [reports, setReports] = useState<any[]>([]);
@@ -68,31 +69,16 @@ export const AdvancedReportsAnalytics = () => {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      // Mock data instead of database query
-      const mockReports = [
-        {
-          id: '1',
-          title: 'Q4 Performance Analysis',
-          type: 'performance',
-          department: 'All',
-          generated_at: new Date().toISOString(),
-          generated_by: 'ai-system',
-          period_start: '2024-01-01',
-          period_end: '2024-03-31'
-        },
-        {
-          id: '2',
-          title: 'Attendance Report',
-          type: 'attendance',
-          department: 'HR',
-          generated_at: new Date(Date.now() - 86400000).toISOString(),
-          generated_by: 'user',
-          period_start: '2024-02-01',
-          period_end: '2024-02-29'
-        }
-      ];
-      setReports(mockReports);
+      const { data, error } = await supabase
+        .from('reports')
+        .select('*')
+        .order('generated_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setReports(data || []);
     } catch (error: any) {
+      console.error('Failed to fetch reports:', error);
       toast.error('Failed to fetch reports');
     } finally {
       setLoading(false);
@@ -101,15 +87,13 @@ export const AdvancedReportsAnalytics = () => {
 
   const fetchDashboards = async () => {
     try {
-      // Mock data instead of database query
-      const mockDashboards = [
-        {
-          id: '1',
-          name: 'Executive Dashboard',
-          created_at: new Date().toISOString()
-        }
-      ];
-      setDashboards(mockDashboards);
+      const { data, error } = await supabase
+        .from('analytics_dashboards')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDashboards(data || []);
     } catch (error: any) {
       console.error('Failed to fetch dashboards:', error);
     }
@@ -173,40 +157,83 @@ export const AdvancedReportsAnalytics = () => {
     try {
       toast.info('AI is generating your custom report...');
       
-      // Simulate AI report generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      try {
+        // Calculate date range based on config
+        const endDate = new Date().toISOString().split('T')[0];
+        const startDate = new Date(Date.now() - parseInt(reportConfig.date_range) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-      const mockReportData = {
-        summary: {
-          totalEmployees: 205,
-          performanceScore: 8.7,
-          productivityIncrease: 23,
-          costSavings: 45000
-        },
-        trends: {
-          attendance: 'improving',
-          performance: 'stable',
-          satisfaction: 'increasing'
-        }
-      };
+        // Fetch real employee data for AI analysis
+        const { data: employeesData } = await supabase
+          .from('employees')
+          .select(`
+            *,
+            profiles:user_id (
+              full_name
+            )
+          `);
 
-      // Create mock report instead of database insert
-      const newReport = {
-        id: Date.now().toString(),
-        title: reportConfig.title,
-        type: reportConfig.type,
-        department: reportConfig.department !== 'all' ? reportConfig.department : 'All',
-        data: mockReportData,
-        file_url: `/reports/${Date.now()}_${reportConfig.type}.${reportConfig.format}`,
-        generated_by: 'ai-system',
-        generated_at: new Date().toISOString(),
-        period_start: new Date(Date.now() - parseInt(reportConfig.date_range) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        period_end: new Date().toISOString().split('T')[0]
-      };
+        const { data: attendanceData } = await supabase
+          .from('attendance_tracking')
+          .select('*')
+          .gte('date', startDate)
+          .lte('date', endDate);
 
-      setReports(prev => [newReport, ...prev]);
+        const { data: tasksData } = await supabase
+          .from('employee_tasks')
+          .select('*')
+          .gte('created_at', startDate)
+          .lte('created_at', endDate);
 
-      toast.success('AI report generated successfully with advanced analytics');
+        // Calculate real metrics
+        const totalEmployees = employeesData?.length || 0;
+        const avgAttendance = attendanceData?.filter(a => a.status === 'present').length || 0;
+        const completedTasks = tasksData?.filter(t => t.status === 'completed').length || 0;
+        const totalTasks = tasksData?.length || 1;
+
+        const reportData = {
+          summary: {
+            totalEmployees,
+            performanceScore: Math.round((completedTasks / totalTasks) * 10 * 100) / 100,
+            attendanceRate: Math.round((avgAttendance / (totalEmployees * 30)) * 100),
+            taskCompletionRate: Math.round((completedTasks / totalTasks) * 100)
+          },
+          trends: {
+            attendance: avgAttendance > totalEmployees * 0.8 ? 'improving' : 'declining',
+            performance: completedTasks > totalTasks * 0.7 ? 'good' : 'needs_attention',
+            productivity: 'stable'
+          },
+          insights: [
+            `Generated report for ${totalEmployees} employees`,
+            `Task completion rate: ${Math.round((completedTasks / totalTasks) * 100)}%`,
+            `Attendance tracking shows ${avgAttendance} present records`,
+            'Real-time data analysis completed'
+          ]
+        };
+
+        // Create report in database
+        const { data: newReportData, error } = await supabase
+          .from('reports')
+          .insert([{
+            title: reportConfig.title,
+            type: reportConfig.type,
+            department: reportConfig.department !== 'all' ? reportConfig.department : 'All',
+            data: reportData,
+            generated_by: 'ai-system',
+            period_start: new Date(Date.now() - parseInt(reportConfig.date_range) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            period_end: new Date().toISOString().split('T')[0]
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setReports(prev => [newReportData, ...prev]);
+        toast.success('AI report generated successfully with real-time analytics');
+      } catch (error: any) {
+        console.error('Error generating report:', error);
+        toast.error('Failed to generate report: ' + error.message);
+      }
+
       setIsCreateReportOpen(false);
       setReportConfig({
         title: '',

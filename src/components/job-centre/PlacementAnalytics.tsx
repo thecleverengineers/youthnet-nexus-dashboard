@@ -1,26 +1,79 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export function PlacementAnalytics() {
-  const placementData = [
-    { month: 'Jan', placements: 12, applications: 45 },
-    { month: 'Feb', placements: 18, applications: 52 },
-    { month: 'Mar', placements: 15, applications: 48 },
-    { month: 'Apr', placements: 22, applications: 65 },
-    { month: 'May', placements: 28, applications: 72 },
-    { month: 'Jun', placements: 25, applications: 68 }
-  ];
+  const { data: placementData = [] } = useQuery({
+    queryKey: ['placement-monthly-data'],
+    queryFn: async () => {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-  const industryData = [
-    { name: 'IT/Software', value: 35, color: '#8884d8' },
-    { name: 'Banking/Finance', value: 25, color: '#82ca9d' },
-    { name: 'Retail', value: 20, color: '#ffc658' },
-    { name: 'Manufacturing', value: 15, color: '#ff7c7c' },
-    { name: 'Others', value: 5, color: '#8dd1e1' }
-  ];
+      const [applicationsRes, placementsRes] = await Promise.all([
+        supabase
+          .from('job_applications')
+          .select('created_at, status')
+          .gte('created_at', sixMonthsAgo.toISOString()),
+        supabase
+          .from('job_applications')
+          .select('created_at')
+          .eq('status', 'selected')
+          .gte('created_at', sixMonthsAgo.toISOString())
+      ]);
+
+      const months = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthKey = date.toLocaleString('default', { month: 'short' });
+        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+        const applications = applicationsRes.data?.filter(app => {
+          const createdAt = new Date(app.created_at);
+          return createdAt >= monthStart && createdAt <= monthEnd;
+        }).length || 0;
+
+        const placements = placementsRes.data?.filter(app => {
+          const createdAt = new Date(app.created_at);
+          return createdAt >= monthStart && createdAt <= monthEnd;
+        }).length || 0;
+
+        months.push({ month: monthKey, placements, applications });
+      }
+
+      return months;
+    }
+  });
+
+  const { data: industryData = [] } = useQuery({
+    queryKey: ['industry-distribution'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('job_postings')
+        .select('job_type')
+        .eq('status', 'open');
+
+      if (error) throw error;
+
+      const industryMap = (data || []).reduce((acc: Record<string, number>, job) => {
+        const industry = job.job_type || 'Others';
+        acc[industry] = (acc[industry] || 0) + 1;
+        return acc;
+      }, {});
+
+      const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+      
+      return Object.entries(industryMap).map(([name, value], index) => ({
+        name,
+        value,
+        color: colors[index % colors.length]
+      }));
+    }
+  });
 
   return (
     <Card>
@@ -43,14 +96,14 @@ export function PlacementAnalytics() {
                 <Line 
                   type="monotone" 
                   dataKey="placements" 
-                  stroke="#22c55e" 
+                  stroke="hsl(var(--primary))" 
                   strokeWidth={2}
                   name="Placements"
                 />
                 <Line 
                   type="monotone" 
                   dataKey="applications" 
-                  stroke="#3b82f6" 
+                  stroke="hsl(var(--secondary))" 
                   strokeWidth={2}
                   name="Applications"
                 />
@@ -69,7 +122,7 @@ export function PlacementAnalytics() {
                   innerRadius={60}
                   outerRadius={80}
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}%`}
+                  label={({ name, value }) => `${name}: ${value}`}
                 >
                   {industryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
