@@ -1,43 +1,81 @@
 
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from 'react';
+import { Package, BarChart3, Wrench, FileText } from 'lucide-react';
 import { AssetManagement } from '@/components/inventory/AssetManagement';
 import { StockTracker } from '@/components/inventory/StockTracker';
 import { MaintenanceScheduler } from '@/components/inventory/MaintenanceScheduler';
 import { InventoryReports } from '@/components/inventory/InventoryReports';
+import { MobilePageHeader, MobileTabBar } from '@/components/ui/mobile-navigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const Inventory = () => {
+  const [activeTab, setActiveTab] = useState('assets');
+  const isMobile = useIsMobile();
+
+  const tabs = [
+    { key: 'assets', label: 'Assets', icon: <Package className="h-4 w-4" /> },
+    { key: 'stock', label: 'Stock', icon: <BarChart3 className="h-4 w-4" /> },
+    { key: 'maintenance', label: 'Maintenance', icon: <Wrench className="h-4 w-4" /> },
+    { key: 'reports', label: 'Reports', icon: <FileText className="h-4 w-4" /> },
+  ];
+
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
-        <p className="text-gray-600 mt-2">Track assets, stock, and maintenance schedules</p>
+    <div className="min-h-screen bg-background">
+      {/* Mobile Header */}
+      {isMobile && (
+        <MobilePageHeader
+          title="Inventory"
+          subtitle="Asset & stock management"
+        />
+      )}
+
+      {/* Desktop Header */}
+      {!isMobile && (
+        <div className="p-6 border-b border-border">
+          <h1 className="text-3xl font-bold">Inventory Management</h1>
+          <p className="text-muted-foreground mt-2">Track assets, stock, and maintenance schedules</p>
+        </div>
+      )}
+
+      {/* Mobile Navigation */}
+      {isMobile && (
+        <div className="sticky top-16 z-20 bg-background border-b border-border p-4">
+          <MobileTabBar
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        </div>
+      )}
+
+      {/* Desktop Navigation */}
+      {!isMobile && (
+        <div className="px-6">
+          <div className="flex border-b border-border">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.key
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="p-4 space-y-6">
+        {activeTab === 'assets' && <AssetManagement />}
+        {activeTab === 'stock' && <StockTracker />}
+        {activeTab === 'maintenance' && <MaintenanceScheduler />}
+        {activeTab === 'reports' && <InventoryReports />}
       </div>
-
-      <Tabs defaultValue="assets" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="assets">Asset Management</TabsTrigger>
-          <TabsTrigger value="stock">Stock Tracker</TabsTrigger>
-          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="assets">
-          <AssetManagement />
-        </TabsContent>
-
-        <TabsContent value="stock">
-          <StockTracker />
-        </TabsContent>
-
-        <TabsContent value="maintenance">
-          <MaintenanceScheduler />
-        </TabsContent>
-
-        <TabsContent value="reports">
-          <InventoryReports />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
