@@ -91,20 +91,7 @@ export const LandingPageManagement = () => {
         });
 
       if (uploadError) {
-        // If bucket doesn't exist, create it and try again
-        if (uploadError.message.includes('Bucket not found')) {
-          // Create bucket via SQL
-          await supabase.rpc('create_storage_bucket', { bucket_name: 'logos' });
-          
-          // Try upload again
-          const { data: retryData, error: retryError } = await supabase.storage
-            .from('logos')
-            .upload(fileName, logoFile);
-            
-          if (retryError) throw retryError;
-        } else {
-          throw uploadError;
-        }
+        throw uploadError;
       }
 
       // Get public URL
