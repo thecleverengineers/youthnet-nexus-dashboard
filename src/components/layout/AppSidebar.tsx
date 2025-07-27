@@ -239,7 +239,7 @@ export function AppSidebar() {
     return (
       <SidebarGroup className="mb-4">
         <SidebarGroupLabel className={`text-sidebar-accent-foreground font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2`}>
-          {!isCollapsed && (
+          {(isMobile || !isCollapsed) && (
             <>
               <div className={`w-1.5 h-1.5 rounded-full bg-sidebar-accent-foreground`}></div>
               {title}
@@ -270,7 +270,7 @@ export function AppSidebar() {
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
-                    {!isCollapsed && (
+                    {(isMobile || !isCollapsed) && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-sm truncate text-sidebar-foreground">{item.name}</span>
@@ -287,7 +287,7 @@ export function AppSidebar() {
                         )}
                       </div>
                     )}
-                    {!isCollapsed && (
+                    {(isMobile || !isCollapsed) && (
                       <ChevronRight className="h-3 w-3 text-sidebar-accent-foreground transition-colors" />
                     )}
                   </Link>
@@ -308,7 +308,7 @@ export function AppSidebar() {
     return (
       <SidebarGroup className="mb-4">
         <SidebarGroupLabel className="text-sidebar-accent-foreground font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
-          {!isCollapsed && (
+          {(isMobile || !isCollapsed) && (
             <>
               <div className="w-1.5 h-1.5 rounded-full bg-sidebar-accent-foreground"></div>  
               Student Hub
@@ -339,7 +339,7 @@ export function AppSidebar() {
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
-                    {!isCollapsed && (
+                    {(isMobile || !isCollapsed) && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-sm truncate text-sidebar-foreground">{item.name}</span>
@@ -354,7 +354,7 @@ export function AppSidebar() {
                         </span>
                       </div>
                     )}
-                    {!isCollapsed && (
+                    {(isMobile || !isCollapsed) && (
                       <ChevronRight className="h-3 w-3 text-sidebar-accent-foreground transition-colors" />
                     )}
                   </Link>
@@ -385,7 +385,7 @@ export function AppSidebar() {
                 <Crown className="h-1.5 w-1.5 sm:h-2 sm:w-2 text-white" />
               </div>
             </div>
-            {!isCollapsed && (
+            {(isMobile || !isCollapsed) && (
               <div>
                 <span className="text-base sm:text-lg font-bold text-sidebar-foreground">YouthNet</span>
                 <div className="text-xs text-sidebar-accent-foreground font-medium">Premium MIS</div>
@@ -407,7 +407,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* User Info */}
-      {profile && !isCollapsed && (
+      {profile && (isMobile || !isCollapsed) && (
         <div className="px-4 py-3 border-b border-sidebar-border">
           <div className="bg-sidebar-accent rounded-xl p-3 border border-sidebar-border">
             <div className="flex items-center space-x-3">
@@ -443,7 +443,7 @@ export function AppSidebar() {
 
       {/* Footer */}
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        {!isCollapsed && (
+        {(isMobile || !isCollapsed) && (
           <div className="bg-sidebar-accent rounded-xl p-3 text-center border border-sidebar-border">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
