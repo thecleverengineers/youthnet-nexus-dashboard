@@ -238,12 +238,12 @@ export function AppSidebar() {
 
     return (
       <SidebarGroup className="mb-4">
-        <SidebarGroupLabel className={`text-white font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2`}>
+        <SidebarGroupLabel className={`text-gray-700 font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2`}>
           {!isCollapsed && (
             <>
-              <div className={`w-1.5 h-1.5 rounded-full bg-white`}></div>
+              <div className={`w-1.5 h-1.5 rounded-full bg-gray-700`}></div>
               {title}
-              <Badge variant="secondary" className="text-xs ml-auto bg-white/20 text-white border-white/30">
+              <Badge variant="secondary" className="text-xs ml-auto bg-gray-100 text-gray-700 border-gray-300">
                 {items.length}
               </Badge>
             </>
@@ -258,37 +258,37 @@ export function AppSidebar() {
                   isActive={isActive(item.href)}
                   className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'bg-white/20 text-white shadow-sm border-l-2 border-white' 
-                      : 'hover:bg-white/10 text-white/90'
+                      ? 'bg-blue-100 text-blue-900 shadow-sm border-l-2 border-blue-600' 
+                      : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
                   <Link to={item.href} className="flex items-center gap-3 p-2.5" onClick={handleLinkClick}>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-white/30 text-white' 
-                        : 'bg-white/20 group-hover:bg-white/30 text-white'
+                        ? 'bg-blue-200 text-blue-900' 
+                        : 'bg-gray-200 group-hover:bg-gray-300 text-gray-700'
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm truncate text-white">{item.name}</span>
+                          <span className="font-medium text-sm truncate text-gray-900">{item.name}</span>
                           {item.badge && (
-                            <Badge variant="outline" className="text-xs border-white/30 text-white bg-white/10">
+                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-700 bg-gray-50">
                               {item.badge}
                             </Badge>
                           )}
                         </div>
                         {item.description && (
-                          <span className="block text-xs text-white/70 truncate mt-0.5">
+                          <span className="block text-xs text-gray-600 truncate mt-0.5">
                             {item.description}
                           </span>
                         )}
                       </div>
                     )}
                     {!isCollapsed && (
-                      <ChevronRight className="h-3 w-3 text-white transition-colors" />
+                      <ChevronRight className="h-3 w-3 text-gray-600 transition-colors" />
                     )}
                   </Link>
                 </SidebarMenuButton>
@@ -307,12 +307,12 @@ export function AppSidebar() {
 
     return (
       <SidebarGroup className="mb-4">
-        <SidebarGroupLabel className="text-white font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
+        <SidebarGroupLabel className="text-gray-700 font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
           {!isCollapsed && (
             <>
-              <div className="w-1.5 h-1.5 rounded-full bg-white"></div>  
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-700"></div>  
               Student Hub
-              <Badge variant="secondary" className="text-xs ml-auto bg-white/20 text-white border-white/30">
+              <Badge variant="secondary" className="text-xs ml-auto bg-gray-100 text-gray-700 border-gray-300">
                 {studentManagementItems.length}
               </Badge>
             </>
@@ -327,35 +327,35 @@ export function AppSidebar() {
                   isActive={isActive(item.href)}
                   className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'bg-white/20 text-white shadow-sm border-l-2 border-white' 
-                      : 'hover:bg-white/10 text-white/90'
+                      ? 'bg-blue-100 text-blue-900 shadow-sm border-l-2 border-blue-600' 
+                      : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
                   <Link to={item.href} className="flex items-center gap-3 p-2.5" onClick={handleLinkClick}>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-white/30 text-white' 
-                        : 'bg-white/20 group-hover:bg-white/30 text-white'
+                        ? 'bg-blue-200 text-blue-900' 
+                        : 'bg-gray-200 group-hover:bg-gray-300 text-gray-700'
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm truncate text-white">{item.name}</span>
+                          <span className="font-medium text-sm truncate text-gray-900">{item.name}</span>
                           {item.badge && (
-                            <Badge variant="outline" className="text-xs border-white/30 text-white bg-white/10">
+                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-700 bg-gray-50">
                               {item.badge}
                             </Badge>
                           )}
                         </div>
-                        <span className="block text-xs text-white/70 truncate mt-0.5">
+                        <span className="block text-xs text-gray-600 truncate mt-0.5">
                           {item.description}
                         </span>
                       </div>
                     )}
                     {!isCollapsed && (
-                      <ChevronRight className="h-3 w-3 text-white transition-colors" />
+                      <ChevronRight className="h-3 w-3 text-gray-600 transition-colors" />
                     )}
                   </Link>
                 </SidebarMenuButton>
@@ -368,7 +368,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-blue-600/20 bg-gradient-to-b from-blue-600 to-blue-800 backdrop-blur-xl text-white" collapsible="icon">
+    <Sidebar className="border-r border-gray-200 bg-white text-gray-900" collapsible="icon">
       {/* Premium Header */}
       <SidebarHeader className="border-b border-slate-200/60 p-3 sm:p-4">
         <div className="flex items-center justify-between">
@@ -387,8 +387,8 @@ export function AppSidebar() {
             </div>
             {!isCollapsed && (
               <div>
-                <span className="text-base sm:text-lg font-bold text-white">YouthNet</span>
-                <div className="text-xs text-white/80 font-medium">Premium MIS</div>
+                <span className="text-base sm:text-lg font-bold text-gray-900">YouthNet</span>
+                <div className="text-xs text-gray-700 font-medium">Premium MIS</div>
               </div>
             )}
           </div>
@@ -417,12 +417,12 @@ export function AppSidebar() {
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-white truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {profile.full_name || 'User'}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge className="bg-white/20 text-white border-white/30 text-xs capitalize">
-                    <Shield className="h-2 w-2 mr-1 text-white" />
+                  <Badge className="bg-gray-100 text-gray-700 border-gray-300 text-xs capitalize">
+                    <Shield className="h-2 w-2 mr-1 text-gray-700" />
                     {profile.role}
                   </Badge>
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -447,9 +447,9 @@ export function AppSidebar() {
           <div className="bg-gradient-to-r from-emerald-50 to-primary/5 rounded-xl p-3 text-center border">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-white font-medium">System Online</span>
+              <span className="text-xs text-gray-700 font-medium">System Online</span>
             </div>
-            <div className="flex items-center justify-center gap-2 text-xs text-white/80">
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
               <span className="font-mono font-bold">v2.1.0</span>
             </div>
           </div>
