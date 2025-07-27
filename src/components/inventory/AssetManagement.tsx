@@ -111,9 +111,16 @@ export const AssetManagement = () => {
                   <TableCell>${asset.current_value}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // TODO: Open edit modal with asset data
+                        console.log('Edit asset:', asset.id);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
                       <Button variant="outline" size="sm" onClick={() => deleteAsset(asset.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
