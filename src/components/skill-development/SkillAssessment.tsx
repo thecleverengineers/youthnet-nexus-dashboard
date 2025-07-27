@@ -8,8 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Target, Clock, CheckCircle, AlertCircle, Plus, Edit } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { skillService } from '@/services/skillService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SkillAssessmentProps {
   detailed?: boolean;
@@ -18,7 +20,14 @@ interface SkillAssessmentProps {
 export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    skill_name: '',
+    level: 'beginner',
+    progress: 0,
+    status: 'pending'
+  });
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: assessments, isLoading } = useQuery({
     queryKey: ['skill-assessments'],
@@ -26,11 +35,26 @@ export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
   });
 
   const createAssessmentMutation = useMutation({
-    mutationFn: skillService.createSkillAssessment,
+    mutationFn: async (data: any) => {
+      // Get the current user's student ID
+      const studentQuery = await supabase
+        .from('students')
+        .select('id')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (studentQuery.error) throw new Error('Student not found');
+      
+      return skillService.createSkillAssessment({
+        ...data,
+        student_id: studentQuery.data.id
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skill-assessments'] });
       setIsDialogOpen(false);
       setEditingAssessment(null);
+      setFormData({ skill_name: '', level: 'beginner', progress: 0, status: 'pending' });
       toast.success('Assessment added successfully');
     },
     onError: (error: any) => {
@@ -44,6 +68,7 @@ export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
       queryClient.invalidateQueries({ queryKey: ['skill-assessments'] });
       setIsDialogOpen(false);
       setEditingAssessment(null);
+      setFormData({ skill_name: '', level: 'beginner', progress: 0, status: 'pending' });
       toast.success('Assessment updated successfully');
     }
   });
@@ -58,8 +83,7 @@ export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
       progress: parseInt(formData.get('progress') as string),
       status: formData.get('status') as 'pending' | 'in_progress' | 'completed',
       last_assessed: formData.get('last_assessed') as string,
-      next_assessment: formData.get('next_assessment') as string,
-      student_id: formData.get('student_id') as string
+      next_assessment: formData.get('next_assessment') as string
     };
 
     if (editingAssessment) {
@@ -67,6 +91,11 @@ export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
     } else {
       createAssessmentMutation.mutate(assessmentData);
     }
+  };
+
+  const handleEdit = (assessment: any) => {
+    setEditingAssessment(assessment);
+    setIsDialogOpen(true);
   };
 
   const getStatusColor = (status: string) => {
