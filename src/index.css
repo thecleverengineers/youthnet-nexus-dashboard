@@ -551,6 +551,49 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
+  
+  /* Mobile slide animations */
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Mobile-specific focus styles */
+  @media (hover: none) {
+    .hover\\:bg-slate-100:hover {
+      background-color: transparent;
+    }
+    
+    .hover\\:shadow-md:hover {
+      box-shadow: none;
+    }
+  }
+  
+  /* Enhanced mobile touch targets */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Mobile-optimized dropdowns */
+  @media (max-width: 768px) {
+    [data-radix-popper-content-wrapper] {
+      max-width: calc(100vw - 2rem) !important;
+    }
+    
+    [role="menu"] {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+  }
 }
 
 /* Sidebar Animation Styles */
