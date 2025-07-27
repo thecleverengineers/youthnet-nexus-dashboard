@@ -243,7 +243,7 @@ export function AppSidebar() {
             <>
               <div className={`w-1.5 h-1.5 rounded-full bg-black`}></div>
               {title}
-              <Badge variant="secondary" className="text-xs ml-auto bg-muted text-muted-foreground">
+              <Badge variant="secondary" className="text-xs ml-auto bg-gray-100 text-black">
                 {items.length}
               </Badge>
             </>
@@ -275,7 +275,7 @@ export function AppSidebar() {
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-sm truncate text-black">{item.name}</span>
                           {item.badge && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs border-gray-300 text-black">
                               {item.badge}
                             </Badge>
                           )}
@@ -288,7 +288,7 @@ export function AppSidebar() {
                       </div>
                     )}
                     {!isCollapsed && (
-                      <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      <ChevronRight className="h-3 w-3 text-black transition-colors" />
                     )}
                   </Link>
                 </SidebarMenuButton>
@@ -307,12 +307,12 @@ export function AppSidebar() {
 
     return (
       <SidebarGroup className="mb-4">
-        <SidebarGroupLabel className="text-emerald-600 font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
+        <SidebarGroupLabel className="text-black font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
           {!isCollapsed && (
             <>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-600"></div>  
+              <div className="w-1.5 h-1.5 rounded-full bg-black"></div>  
               Student Hub
-              <Badge variant="secondary" className="text-xs ml-auto bg-slate-100 text-slate-600">
+              <Badge variant="secondary" className="text-xs ml-auto bg-gray-100 text-black">
                 {studentManagementItems.length}
               </Badge>
             </>
@@ -368,7 +368,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-slate-200/60 bg-white/80 backdrop-blur-xl" collapsible="icon">
+    <Sidebar className="border-r border-slate-200/60 bg-white backdrop-blur-xl text-black" collapsible="icon">
       {/* Premium Header */}
       <SidebarHeader className="border-b border-slate-200/60 p-3 sm:p-4">
         <div className="flex items-center justify-between">
@@ -387,8 +387,8 @@ export function AppSidebar() {
             </div>
             {!isCollapsed && (
               <div>
-                <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">YouthNet</span>
-                <div className="text-xs text-slate-500 font-medium">Premium MIS</div>
+                <span className="text-base sm:text-lg font-bold text-black">YouthNet</span>
+                <div className="text-xs text-gray-600 font-medium">Premium MIS</div>
               </div>
             )}
           </div>
@@ -421,8 +421,8 @@ export function AppSidebar() {
                   {profile.full_name || 'User'}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge className="bg-primary/10 text-primary border-primary/20 text-xs capitalize">
-                    <Shield className="h-2 w-2 mr-1" />
+                  <Badge className="bg-blue-100 text-black border-blue-200 text-xs capitalize">
+                    <Shield className="h-2 w-2 mr-1 text-black" />
                     {profile.role}
                   </Badge>
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -447,9 +447,9 @@ export function AppSidebar() {
           <div className="bg-gradient-to-r from-emerald-50 to-primary/5 rounded-xl p-3 text-center border">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-xs bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent font-medium">System Online</span>
+              <span className="text-xs text-black font-medium">System Online</span>
             </div>
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 text-xs text-black">
               <span className="font-mono font-bold">v2.1.0</span>
             </div>
           </div>
