@@ -162,6 +162,14 @@ const navigationItems: NavigationItem[] = [
     description: 'System config',
     badge: 'Config'
   },
+  { 
+    name: 'Role Management', 
+    href: '/admin/rbac', 
+    icon: Shield, 
+    roles: ['admin'],
+    description: 'User roles & permissions',
+    badge: 'RBAC'
+  },
 ];
 
 const studentManagementItems = [
@@ -214,7 +222,7 @@ export function AppSidebar() {
   );
   
   const adminModules = allowedNavItems.filter(item => 
-    ['Education Dept', 'HR & Admin', 'User Management', 'Inventory', 'Reports', 'Settings'].includes(item.name)
+    ['Education Dept', 'HR & Admin', 'User Management', 'Inventory', 'Reports', 'Settings', 'Role Management'].includes(item.name)
   );
 
   const isActive = (href: string) => location.pathname === href;

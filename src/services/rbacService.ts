@@ -162,11 +162,19 @@ export const rbacService = {
     try {
       const { data, error } = await supabase
         .from('user_role_assignments')
-        .select('id, user_id, role_id, assigned_by, assigned_at')
-        .eq('is_active', true);
+        .select('*') as any;
 
       if (error) throw error;
-      return data?.map(item => ({ ...item, is_active: true })) || [];
+      
+      // Filter active assignments and ensure proper typing
+      const activeAssignments = (data || []).filter((item: any) => item.is_active === true);
+      return activeAssignments.map((item: any) => ({
+        id: item.id,
+        user_id: item.user_id,
+        role_id: item.role_id,
+        assigned_at: item.assigned_at,
+        is_active: true
+      }));
     } catch (error) {
       console.error('Error fetching user role assignments:', error);
       return [];

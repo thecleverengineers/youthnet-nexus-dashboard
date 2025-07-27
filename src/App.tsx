@@ -24,6 +24,7 @@ import { MadeInNagaland } from "./pages/MadeInNagaland";
 import { LivelihoodIncubator } from "./pages/LivelihoodIncubator";
 import { HRAdmin } from "./pages/HRAdmin";
 import { UserManagementPage } from "./pages/UserManagement";
+import { AdminRBAC } from "./pages/AdminRBAC";
 import { Inventory } from "./pages/Inventory";
 import { ReportsPage } from "./pages/ReportsPage";
 import { Settings } from "./pages/Settings";
@@ -221,6 +222,18 @@ function App() {
                       <Layout>
                         <Settings />
                       </Layout>
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/rbac" 
+                  element={
+                    <ProtectedRoute>
+                      <RoleBasedRoute allowedRoles={['admin']}>
+                        <Layout>
+                          <AdminRBAC />
+                        </Layout>
+                      </RoleBasedRoute>
                     </ProtectedRoute>
                   } 
                 />
