@@ -534,6 +534,47 @@ export type Database = {
           },
         ]
       }
+      dynamic_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_system_role: boolean | null
+          role_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system_role?: boolean | null
+          role_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system_role?: boolean | null
+          role_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dynamic_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       education_analytics: {
         Row: {
           created_at: string
@@ -2676,6 +2717,42 @@ export type Database = {
           },
         ]
       }
+      role_features: {
+        Row: {
+          created_at: string
+          feature_id: string
+          id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature_id: string
+          id?: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string
+          feature_id?: string
+          id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_features_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "system_features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_features_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "dynamic_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_reports_config: {
         Row: {
           created_at: string
@@ -3063,6 +3140,36 @@ export type Database = {
           file_size?: number | null
           id?: string
           status?: string
+        }
+        Relationships: []
+      }
+      system_features: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          feature_key: string
+          feature_name: string
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          feature_key: string
+          feature_name: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          feature_key?: string
+          feature_name?: string
+          id?: string
+          is_active?: boolean | null
         }
         Relationships: []
       }
@@ -3468,7 +3575,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      user_has_feature_access: {
+        Args: { user_id: string; feature_key: string }
+        Returns: boolean
+      }
     }
     Enums: {
       application_status:
