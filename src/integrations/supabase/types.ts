@@ -1226,6 +1226,50 @@ export type Database = {
           },
         ]
       }
+      inventory_categories: {
+        Row: {
+          category_name: string
+          created_at: string
+          depreciation_rate: number | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          maintenance_frequency_days: number | null
+          parent_category_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_name: string
+          created_at?: string
+          depreciation_rate?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          maintenance_frequency_days?: number | null
+          parent_category_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_name?: string
+          created_at?: string
+          depreciation_rate?: number | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          maintenance_frequency_days?: number | null
+          parent_category_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_items: {
         Row: {
           assigned_to: string | null
@@ -2782,6 +2826,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      staff_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          permissions: Json | null
+          required_qualifications: string[] | null
+          responsibilities: string[] | null
+          role_name: string
+          salary_range_max: number | null
+          salary_range_min: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          permissions?: Json | null
+          required_qualifications?: string[] | null
+          responsibilities?: string[] | null
+          role_name: string
+          salary_range_max?: number | null
+          salary_range_min?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          permissions?: Json | null
+          required_qualifications?: string[] | null
+          responsibilities?: string[] | null
+          role_name?: string
+          salary_range_max?: number | null
+          salary_range_min?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       startup_applications: {
         Row: {

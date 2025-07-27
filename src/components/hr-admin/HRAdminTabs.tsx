@@ -11,6 +11,7 @@ import { AdvancedPerformanceReviews } from './AdvancedPerformanceReviews';
 import { AdvancedTaskManagement } from './AdvancedTaskManagement';
 import { AdvancedReportsAnalytics } from './AdvancedReportsAnalytics';
 import { StaffDataImport } from './StaffDataImport';
+import { StaffTemplateManagement } from './StaffTemplateManagement';
 import { UserManagement } from '@/components/user-management/UserManagement';
 
 export const HRAdminTabs = () => {
@@ -26,9 +27,10 @@ export const HRAdminTabs = () => {
       </div>
 
       <Tabs defaultValue="employees" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11">
+        <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
           <TabsTrigger value="employees">Employees</TabsTrigger>
           <TabsTrigger value="users">Manage Users</TabsTrigger>
+          <TabsTrigger value="templates">Staff Templates</TabsTrigger>
           <TabsTrigger value="import">Import Staff</TabsTrigger>
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="payroll">Payroll</TabsTrigger>
@@ -46,6 +48,10 @@ export const HRAdminTabs = () => {
 
         <TabsContent value="users" className="space-y-6">
           <UserManagement />
+        </TabsContent>
+
+        <TabsContent value="templates" className="space-y-6">
+          <StaffTemplateManagement />
         </TabsContent>
 
         <TabsContent value="import" className="space-y-6">

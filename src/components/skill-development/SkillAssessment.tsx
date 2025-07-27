@@ -7,9 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Target, Clock, CheckCircle, AlertCircle, Plus, Edit } from 'lucide-react';
 import { toast } from 'sonner';
+import { skillService } from '@/services/skillService';
 
 interface SkillAssessmentProps {
   detailed?: boolean;
@@ -22,36 +22,11 @@ export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
 
   const { data: assessments, isLoading } = useQuery({
     queryKey: ['skill-assessments'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('skill_assessments')
-        .select(`
-          *,
-          students:student_id (
-            student_id,
-            profiles:user_id (
-              full_name
-            )
-          )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(detailed ? 50 : 10);
-
-      if (error) throw error;
-      return data || [];
-    }
+    queryFn: () => skillService.getSkillAssessments(detailed ? 50 : 10)
   });
 
   const createAssessmentMutation = useMutation({
-    mutationFn: async (assessmentData: any) => {
-      const { data, error } = await supabase
-        .from('skill_assessments')
-        .insert([assessmentData])
-        .select();
-      
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: skillService.createSkillAssessment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skill-assessments'] });
       setIsDialogOpen(false);
@@ -64,16 +39,7 @@ export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
   });
 
   const updateAssessmentMutation = useMutation({
-    mutationFn: async ({ id, ...updateData }: any) => {
-      const { data, error } = await supabase
-        .from('skill_assessments')
-        .update(updateData)
-        .eq('id', id)
-        .select();
-      
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: ({ id, ...updateData }: any) => skillService.updateSkillAssessment(id, updateData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skill-assessments'] });
       setIsDialogOpen(false);
@@ -90,7 +56,7 @@ export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
       skill_name: formData.get('skill_name') as string,
       level: formData.get('level') as string,
       progress: parseInt(formData.get('progress') as string),
-      status: formData.get('status') as string,
+      status: formData.get('status') as 'pending' | 'in_progress' | 'completed',
       last_assessed: formData.get('last_assessed') as string,
       next_assessment: formData.get('next_assessment') as string,
       student_id: formData.get('student_id') as string
@@ -226,9 +192,9 @@ export function SkillAssessment({ detailed = false }: SkillAssessmentProps) {
                     <div>
                       <h3 className="font-semibold">{assessment.skill_name}</h3>
                       <p className="text-sm text-muted-foreground">{assessment.level}</p>
-                      {assessment.students?.profiles?.full_name && (
+                      {(assessment as any).students?.profiles?.full_name && (
                         <p className="text-sm text-muted-foreground">
-                          Student: {assessment.students.profiles.full_name}
+                          Student: {(assessment as any).students.profiles.full_name}
                         </p>
                       )}
                     </div>

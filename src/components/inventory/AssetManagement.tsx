@@ -4,11 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Plus, Edit, Trash2, Package } from 'lucide-react';
 import { AssetForm } from './AssetForm';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { inventoryService } from '@/services/inventoryService';
 
 export const AssetManagement = () => {
   const [showForm, setShowForm] = useState(false);
@@ -16,25 +16,17 @@ export const AssetManagement = () => {
 
   const { data: assets, isLoading, refetch } = useQuery({
     queryKey: ['inventory_items'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select('*')
-        .order('created_at', { ascending: false });
+    queryFn: inventoryService.getItems
+  });
 
-      if (error) throw error;
-      return data;
-    }
+  const { data: categories } = useQuery({
+    queryKey: ['inventory_categories'],
+    queryFn: inventoryService.getCategories
   });
 
   const deleteAsset = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('inventory_items')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await inventoryService.deleteItem(id);
 
       toast({
         title: "Success",
@@ -57,7 +49,8 @@ export const AssetManagement = () => {
       case 'available': return 'bg-green-100 text-green-800';
       case 'in_use': return 'bg-blue-100 text-blue-800';
       case 'maintenance': return 'bg-yellow-100 text-yellow-800';
-      case 'retired': return 'bg-gray-100 text-gray-800';
+      case 'damaged': return 'bg-red-100 text-red-800';
+      case 'disposed': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
