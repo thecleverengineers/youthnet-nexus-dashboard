@@ -464,7 +464,7 @@
     transform: translateY(-4px) scale(1.01);
   }
   
-  /* Mobile Responsive Adjustments */
+  /* Enhanced Mobile Responsive System */
   @media (max-width: 768px) {
     .premium-dashboard-grid {
       grid-template-columns: 1fr;
@@ -472,23 +472,84 @@
     }
     
     .premium-stats-grid {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 0.75rem;
     }
     
     .glass-card {
-      @apply p-4;
+      @apply p-3;
     }
     
-    h1 { @apply text-2xl; }
-    h2 { @apply text-xl; }
-    h3 { @apply text-lg; }
+    h1 { @apply text-xl; }
+    h2 { @apply text-lg; }
+    h3 { @apply text-base; }
+    
+    /* Mobile-specific utilities */
+    .mobile-table {
+      @apply block;
+    }
+    
+    .mobile-table thead {
+      @apply hidden;
+    }
+    
+    .mobile-table tr {
+      @apply block mb-4 bg-white rounded-lg shadow-sm border border-slate-200 p-4;
+    }
+    
+    .mobile-table td {
+      @apply block text-sm;
+    }
+    
+    .mobile-table td:before {
+      content: attr(data-label) ": ";
+      @apply font-medium text-slate-600 inline-block w-24;
+    }
   }
   
   @media (max-width: 640px) {
     .premium-stats-grid {
       grid-template-columns: 1fr;
     }
+    
+    .glass-card {
+      @apply p-3;
+    }
+    
+    /* Extra small mobile adjustments */
+    .premium-dashboard-grid {
+      gap: 0.75rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .glass-card {
+      @apply p-2;
+    }
+    
+    h1 { @apply text-lg; }
+    h2 { @apply text-base; }
+    h3 { @apply text-sm; }
+  }
+  
+  /* Touch-friendly interactions */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Safe area support */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Mobile-optimized scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }
 
