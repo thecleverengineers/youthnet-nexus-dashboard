@@ -409,7 +409,7 @@ export function AppSidebar() {
       {/* User Info */}
       {profile && !isCollapsed && (
         <div className="px-4 py-3 border-b border-sidebar-border">
-          <div className="bg-gradient-to-r from-sidebar-accent to-sidebar-accent/50 rounded-xl p-3 border border-sidebar-border">
+          <div className="bg-sidebar-accent rounded-xl p-3 border border-sidebar-border">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sidebar-primary to-secondary flex items-center justify-center relative overflow-hidden shadow-sm">
                 <span className="text-sidebar-primary-foreground text-sm font-bold relative z-10">
@@ -444,7 +444,7 @@ export function AppSidebar() {
       {/* Footer */}
       <SidebarFooter className="border-t border-sidebar-border p-4">
         {!isCollapsed && (
-          <div className="bg-gradient-to-r from-sidebar-accent to-sidebar-accent/50 rounded-xl p-3 text-center border border-sidebar-border">
+          <div className="bg-sidebar-accent rounded-xl p-3 text-center border border-sidebar-border">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
               <span className="text-xs text-sidebar-accent-foreground font-medium">System Online</span>
