@@ -61,22 +61,22 @@ export const AnalyticsDashboard = () => {
     }
   });
 
-  // Mock data for charts
-  const monthlyData = [
-    { month: 'Jan', students: 45, employees: 12, projects: 8 },
-    { month: 'Feb', students: 52, employees: 15, projects: 12 },
-    { month: 'Mar', students: 48, employees: 18, projects: 15 },
-    { month: 'Apr', students: 61, employees: 22, projects: 18 },
-    { month: 'May', students: 55, employees: 25, projects: 22 },
-    { month: 'Jun', students: 67, employees: 28, projects: 25 }
-  ];
+  // Fetch dynamic analytics data
+  const { data: monthlyData = [] } = useQuery({
+    queryKey: ['monthly-growth-data'],
+    queryFn: async () => {
+      const { analyticsService } = await import('@/services/analyticsService');
+      return analyticsService.getMonthlyGrowthData();
+    }
+  });
 
-  const departmentData = [
-    { department: 'Education', participants: studentsCount || 0 },
-    { department: 'HR', participants: employeesCount || 0 },
-    { department: 'Incubation', participants: incubationProjects || 0 },
-    { department: 'Job Centre', participants: jobApplications || 0 }
-  ];
+  const { data: departmentData = [] } = useQuery({
+    queryKey: ['department-data'],
+    queryFn: async () => {
+      const { analyticsService } = await import('@/services/analyticsService');
+      return analyticsService.getDepartmentData();
+    }
+  });
 
   return (
     <div className="space-y-6">

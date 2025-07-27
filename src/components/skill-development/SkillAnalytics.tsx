@@ -3,21 +3,77 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { skillService } from '@/services/skillService';
 
 export function SkillAnalytics() {
-  const skillData = [
-    { skill: 'Web Dev', assessments: 45, certifications: 12 },
-    { skill: 'Marketing', assessments: 32, certifications: 8 },
-    { skill: 'Data Science', assessments: 28, certifications: 6 },
-    { skill: 'Design', assessments: 22, certifications: 5 },
-    { skill: 'Business', assessments: 18, certifications: 4 }
-  ];
+  const { data: assessments = [], isLoading: assessmentsLoading } = useQuery({
+    queryKey: ['skill-assessments'],
+    queryFn: () => skillService.getSkillAssessments()
+  });
 
-  const completionData = [
-    { name: 'Completed', value: 68, color: '#22c55e' },
-    { name: 'In Progress', value: 25, color: '#3b82f6' },
-    { name: 'Pending', value: 7, color: '#f59e0b' }
-  ];
+  const { data: certifications = [], isLoading: certificationsLoading } = useQuery({
+    queryKey: ['certifications'],
+    queryFn: () => skillService.getCertifications()
+  });
+
+  // Process skill data
+  const skillData = React.useMemo(() => {
+    const skillMap = new Map();
+    
+    assessments.forEach(assessment => {
+      const skill = assessment.skill_name;
+      if (!skillMap.has(skill)) {
+        skillMap.set(skill, { skill, assessments: 0, certifications: 0 });
+      }
+      skillMap.get(skill).assessments++;
+    });
+
+    certifications.forEach(cert => {
+      cert.skills?.forEach(skill => {
+        if (!skillMap.has(skill)) {
+          skillMap.set(skill, { skill, assessments: 0, certifications: 0 });
+        }
+        skillMap.get(skill).certifications++;
+      });
+    });
+
+    return Array.from(skillMap.values()).slice(0, 5);
+  }, [assessments, certifications]);
+
+  // Process completion data
+  const completionData = React.useMemo(() => {
+    const total = assessments.length;
+    if (total === 0) return [];
+
+    const completed = assessments.filter(a => a.status === 'completed').length;
+    const inProgress = assessments.filter(a => a.status === 'in_progress').length;
+    const pending = assessments.filter(a => a.status === 'pending').length;
+
+    return [
+      { name: 'Completed', value: Math.round((completed / total) * 100), color: 'hsl(var(--chart-1))' },
+      { name: 'In Progress', value: Math.round((inProgress / total) * 100), color: 'hsl(var(--chart-2))' },
+      { name: 'Pending', value: Math.round((pending / total) * 100), color: 'hsl(var(--chart-3))' }
+    ];
+  }, [assessments]);
+
+  if (assessmentsLoading || certificationsLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Skill Analytics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            Loading analytics data...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
