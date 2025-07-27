@@ -238,10 +238,10 @@ export function AppSidebar() {
 
     return (
       <SidebarGroup className="mb-4">
-        <SidebarGroupLabel className={`${colorClass} font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2`}>
+        <SidebarGroupLabel className={`text-black font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2`}>
           {!isCollapsed && (
             <>
-              <div className={`w-1.5 h-1.5 rounded-full ${colorClass.replace('text-', 'bg-')}`}></div>
+              <div className={`w-1.5 h-1.5 rounded-full bg-black`}></div>
               {title}
               <Badge variant="secondary" className="text-xs ml-auto bg-muted text-muted-foreground">
                 {items.length}
@@ -258,22 +258,22 @@ export function AppSidebar() {
                   isActive={isActive(item.href)}
                   className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'bg-primary/10 text-primary shadow-sm border-l-2 border-primary' 
-                      : 'hover:bg-accent hover:text-accent-foreground'
+                      ? 'bg-primary/10 text-black shadow-sm border-l-2 border-primary' 
+                      : 'hover:bg-accent text-black'
                   }`}
                 >
                   <Link to={item.href} className="flex items-center gap-3 p-2.5" onClick={handleLinkClick}>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-primary/20 text-primary' 
-                        : 'bg-muted group-hover:bg-accent text-muted-foreground'
+                        ? 'bg-primary/20 text-black' 
+                        : 'bg-muted group-hover:bg-accent text-black'
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm truncate">{item.name}</span>
+                          <span className="font-medium text-sm truncate text-black">{item.name}</span>
                           {item.badge && (
                             <Badge variant="outline" className="text-xs">
                               {item.badge}
@@ -281,7 +281,7 @@ export function AppSidebar() {
                           )}
                         </div>
                         {item.description && (
-                          <span className="block text-xs text-muted-foreground truncate mt-0.5">
+                          <span className="block text-xs text-black truncate mt-0.5">
                             {item.description}
                           </span>
                         )}
@@ -417,7 +417,7 @@ export function AppSidebar() {
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground truncate">
+                <p className="text-sm font-medium text-black truncate">
                   {profile.full_name || 'User'}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
