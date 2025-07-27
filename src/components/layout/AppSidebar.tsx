@@ -205,13 +205,31 @@ const studentManagementItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile, loading } = useAuth();
   const { state, isMobile, setOpenMobile } = useSidebar();
   const isCollapsed = !isMobile && state === 'collapsed';
 
-  const allowedNavItems = navigationItems.filter(item => 
-    profile?.role && item.roles.includes(profile.role)
-  );
+  // Debug logging
+  console.log('AppSidebar render:', { 
+    profile, 
+    loading, 
+    profileRole: profile?.role,
+    isMobile, 
+    isCollapsed,
+    pathname: location.pathname 
+  });
+
+  // Always show basic items, filter by role when profile is available
+  const allowedNavItems = profile?.role 
+    ? navigationItems.filter(item => item.roles.includes(profile.role))
+    : navigationItems.filter(item => item.roles.includes('student')); // Default fallback
+  
+  console.log('Navigation filtering:', { 
+    profileRole: profile?.role,
+    totalItems: navigationItems.length,
+    allowedItems: allowedNavItems.length,
+    allowedItemNames: allowedNavItems.map(item => item.name)
+  });
 
   const coreModules = allowedNavItems.filter(item => 
     ['Dashboard', 'Education', 'Skill Development'].includes(item.name)
@@ -435,10 +453,37 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <SidebarContent className="px-3 py-4 space-y-2 overflow-y-auto">
-        {renderNavSection('Core Modules', coreModules, 'text-primary')}
-        {renderStudentManagementSection()}
-        {renderNavSection('Services', serviceModules, 'text-secondary')}
-        {renderNavSection('Administration', adminModules, 'text-muted-foreground')}
+        {loading ? (
+          <div className="space-y-4 animate-pulse">
+            <div className="h-4 bg-sidebar-accent rounded w-3/4"></div>
+            <div className="space-y-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center space-x-3 p-2">
+                  <div className="w-8 h-8 bg-sidebar-accent rounded-lg"></div>
+                  {(isMobile || !isCollapsed) && (
+                    <div className="flex-1 space-y-1">
+                      <div className="h-3 bg-sidebar-accent rounded w-2/3"></div>
+                      <div className="h-2 bg-sidebar-accent rounded w-1/2"></div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : allowedNavItems.length > 0 ? (
+          <>
+            {renderNavSection('Core Modules', coreModules, 'text-primary')}
+            {renderStudentManagementSection()}
+            {renderNavSection('Services', serviceModules, 'text-secondary')}
+            {renderNavSection('Administration', adminModules, 'text-muted-foreground')}
+          </>
+        ) : (
+          <div className="px-4 py-8 text-center">
+            <div className="text-sidebar-accent-foreground text-sm">
+              {profile ? 'No navigation items available' : 'Please wait...'}
+            </div>
+          </div>
+        )}
       </SidebarContent>
 
       {/* Footer */}
