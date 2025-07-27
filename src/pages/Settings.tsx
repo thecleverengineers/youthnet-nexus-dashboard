@@ -5,6 +5,7 @@ import { SystemConfiguration } from '@/components/settings/SystemConfiguration';
 import { UserPermissions } from '@/components/settings/UserPermissions';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { BackupRestore } from '@/components/settings/BackupRestore';
+import { LandingPageManagement } from '@/components/settings/LandingPageManagement';
 
 export const Settings = () => {
   return (
@@ -15,8 +16,9 @@ export const Settings = () => {
       </div>
 
       <Tabs defaultValue="system" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="system">System Config</TabsTrigger>
+          <TabsTrigger value="landing">Landing Page</TabsTrigger>
           <TabsTrigger value="permissions">User Permissions</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="backup">Backup & Restore</TabsTrigger>
@@ -24,6 +26,10 @@ export const Settings = () => {
 
         <TabsContent value="system">
           <SystemConfiguration />
+        </TabsContent>
+
+        <TabsContent value="landing">
+          <LandingPageManagement />
         </TabsContent>
 
         <TabsContent value="permissions">

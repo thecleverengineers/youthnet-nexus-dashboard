@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useLandingPageContent } from '@/hooks/useLandingPageContent';
 import { 
   Users, 
   BookOpen, 
@@ -24,60 +25,48 @@ interface LandingPageProps {
 }
 
 export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
-  const features = [
-    {
-      icon: Users,
-      title: "Student Management",
-      description: "Comprehensive student tracking and enrollment management",
-      color: "from-blue-500 to-cyan-500"
-    },
-    {
-      icon: BookOpen,
-      title: "Education Programs",
-      description: "Manage courses, curricula, and academic progress",
-      color: "from-purple-500 to-pink-500"
-    },
-    {
-      icon: Briefcase,
-      title: "Career Services",
-      description: "Job placement tracking and career counseling",
-      color: "from-green-500 to-emerald-500"
-    },
-    {
-      icon: TrendingUp,
-      title: "Analytics Dashboard",
-      description: "Real-time insights and performance metrics",
-      color: "from-orange-500 to-yellow-500"
-    },
-    {
-      icon: Shield,
-      title: "Role-Based Access",
-      description: "Secure multi-level permission management",
-      color: "from-red-500 to-rose-500"
-    },
-    {
-      icon: GraduationCap,
-      title: "Skill Development",
-      description: "Training programs and certification tracking",
-      color: "from-indigo-500 to-blue-500"
-    }
-  ];
+  const { content, loading } = useLandingPageContent();
 
-  const stats = [
-    { label: "Active Students", value: "10,000+", icon: Users },
-    { label: "Success Rate", value: "95%", icon: TrendingUp },
-    { label: "Programs", value: "150+", icon: BookOpen },
-    { label: "Partners", value: "50+", icon: Globe }
-  ];
+  // Icon mapping for dynamic content
+  const iconMap: { [key: string]: any } = {
+    Users,
+    BookOpen,
+    TrendingUp,
+    Shield,
+    Briefcase,
+    GraduationCap,
+    Globe,
+    Star,
+    ArrowRight,
+    CheckCircle,
+    BarChart3,
+    Award,
+    Clock,
+    Zap
+  };
 
-  const benefits = [
-    "Streamlined administrative processes",
-    "Real-time data analytics and reporting", 
-    "Automated workflow management",
-    "Secure cloud-based infrastructure",
-    "Mobile-responsive design",
-    "24/7 technical support"
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-xl text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const features = content.features?.map((feature: any) => ({
+    ...feature,
+    icon: iconMap[feature.icon] || Users
+  })) || [];
+
+  const stats = content.stats?.map((stat: any) => ({
+    ...stat,
+    icon: iconMap[stat.icon] || Users
+  })) || [];
+
+  const benefits = content.benefits || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
@@ -93,11 +82,19 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <GraduationCap className="h-6 w-6 text-white" />
+              {content.logo_url ? (
+                <img 
+                  src={content.logo_url} 
+                  alt="Logo" 
+                  className="h-6 w-6 object-contain"
+                />
+              ) : (
+                <GraduationCap className="h-6 w-6 text-white" />
+              )}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">YouthNet</h1>
-              <p className="text-xs text-gray-600">MIS Platform</p>
+              <h1 className="text-xl font-bold text-gray-900">{content.site_title || 'YouthNet'}</h1>
+              <p className="text-xs text-gray-600">{content.site_subtitle || 'MIS Platform'}</p>
             </div>
           </div>
           <Button 
@@ -118,18 +115,17 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
             className="mb-6 px-4 py-2 bg-blue-100 text-blue-800 border border-blue-200 rounded-full"
           >
             <Star className="h-3 w-3 mr-1" />
-            Advanced Management Platform
+            {content.hero_badge_text || 'Advanced Management Platform'}
           </Badge>
           
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
             <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-              YouthNet MIS
+              {content.hero_title || 'YouthNet MIS'}
             </span>
           </h1>
           
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Comprehensive Management Information System designed for youth development, 
-            education programs, and career advancement initiatives.
+            {content.hero_description || 'Comprehensive Management Information System designed for youth development, education programs, and career advancement initiatives.'}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
@@ -139,14 +135,14 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 text-lg font-semibold"
             >
               <Zap className="mr-2 h-5 w-5" />
-              Get Started Now
+              {content.hero_cta_primary || 'Get Started Now'}
             </Button>
             <Button 
               variant="outline" 
               size="lg"
               className="border-2 border-gray-300 hover:border-blue-400 px-8 py-4 rounded-2xl text-lg font-semibold transition-all duration-300 hover:bg-blue-50"
             >
-              Learn More
+              {content.hero_cta_secondary || 'Learn More'}
             </Button>
           </div>
 
@@ -170,13 +166,13 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Powerful Features for
+              {content.features_title || 'Powerful Features for'}
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                Modern Management
+                {content.features_subtitle || 'Modern Management'}
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to manage youth development programs, track progress, and drive success.
+              {content.features_description || 'Everything you need to manage youth development programs, track progress, and drive success.'}
             </p>
           </div>
 
@@ -209,14 +205,13 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Why Choose
+                {content.benefits_title || 'Why Choose'}
                 <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent block">
-                  YouthNet MIS?
+                  {content.benefits_subtitle || 'YouthNet MIS?'}
                 </span>
               </h2>
               <p className="text-xl text-gray-600 mb-8">
-                Built specifically for youth development organizations, our platform combines 
-                powerful features with intuitive design.
+                {content.benefits_description || 'Built specifically for youth development organizations, our platform combines powerful features with intuitive design.'}
               </p>
               
               <div className="space-y-4">
@@ -290,10 +285,10 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
       <section className="relative z-10 px-6 py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600">
         <div className="max-w-4xl mx-auto text-center text-white">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Transform Your Organization?
+            {content.cta_title || 'Ready to Transform Your Organization?'}
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of organizations already using YouthNet MIS to drive success.
+            {content.cta_description || 'Join thousands of organizations already using YouthNet MIS to drive success.'}
           </p>
           <Button 
             onClick={onSignInClick}
@@ -301,7 +296,7 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
             className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 text-lg font-semibold"
           >
             <Zap className="mr-2 h-5 w-5" />
-            Start Your Journey
+            {content.cta_button_text || 'Start Your Journey'}
           </Button>
         </div>
       </section>
@@ -311,15 +306,23 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-3 mb-6">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <GraduationCap className="h-5 w-5 text-white" />
+              {content.logo_url ? (
+                <img 
+                  src={content.logo_url} 
+                  alt="Logo" 
+                  className="h-5 w-5 object-contain"
+                />
+              ) : (
+                <GraduationCap className="h-5 w-5 text-white" />
+              )}
             </div>
-            <span className="text-xl font-bold">YouthNet MIS</span>
+            <span className="text-xl font-bold">{content.site_title || 'YouthNet MIS'}</span>
           </div>
           <p className="text-gray-400 mb-4">
-            Empowering youth development through innovative technology solutions.
+            {content.footer_description || 'Empowering youth development through innovative technology solutions.'}
           </p>
           <p className="text-sm text-gray-500">
-            © 2024 YouthNet. All rights reserved.
+            {content.footer_copyright || '© 2024 YouthNet. All rights reserved.'}
           </p>
         </div>
       </footer>
