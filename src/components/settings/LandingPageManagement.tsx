@@ -82,11 +82,39 @@ export const LandingPageManagement = () => {
       const fileExt = logoFile.name.split('.').pop();
       const fileName = `logo-${Date.now()}.${fileExt}`;
       
-      // For now, we'll just store the file name. In production, you'd upload to storage
-      const logoUrl = `/uploads/${fileName}`;
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(fileName, logoFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        // If bucket doesn't exist, create it and try again
+        if (uploadError.message.includes('Bucket not found')) {
+          // Create bucket via SQL
+          await supabase.rpc('create_storage_bucket', { bucket_name: 'logos' });
+          
+          // Try upload again
+          const { data: retryData, error: retryError } = await supabase.storage
+            .from('logos')
+            .upload(fileName, logoFile);
+            
+          if (retryError) throw retryError;
+        } else {
+          throw uploadError;
+        }
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
       
-      await updateContent('logo_url', logoUrl);
-      toast.success('Logo updated successfully');
+      await updateContent('logo_url', publicUrl);
+      setLogoFile(null);
+      toast.success('Logo uploaded successfully');
     } catch (error) {
       console.error('Error uploading logo:', error);
       toast.error('Failed to upload logo');
@@ -237,31 +265,76 @@ export const LandingPageManagement = () => {
           <Card>
             <CardHeader>
               <CardTitle>Logo Management</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Upload and manage your organization's logo
+              </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Upload New Logo</Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
-                />
-              </div>
-              <Button onClick={handleLogoUpload} disabled={saving || !logoFile}>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Logo
-              </Button>
+            <CardContent className="space-y-6">
+              {/* Current Logo Display */}
+              {imageContent.map((item) => {
+                const currentLogoUrl = getContentValue(item);
+                return (
+                  <div key={item.id} className="space-y-4">
+                    <div>
+                      <Label className="text-base font-medium">Current Logo</Label>
+                      {currentLogoUrl ? (
+                        <div className="mt-2 p-4 border rounded-lg bg-gray-50">
+                          <img 
+                            src={currentLogoUrl} 
+                            alt="Current Logo" 
+                            className="max-h-20 max-w-40 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          <p className="text-xs text-gray-500 mt-2 break-all">{currentLogoUrl}</p>
+                        </div>
+                      ) : (
+                        <div className="mt-2 p-4 border rounded-lg bg-gray-50 text-center text-gray-500">
+                          No logo uploaded
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Logo URL (or upload new)</Label>
+                      <Input
+                        value={currentLogoUrl || ''}
+                        onChange={(e) => updateContent(item.content_key, e.target.value)}
+                        placeholder="Enter logo URL or upload file below..."
+                      />
+                    </div>
+                  </div>
+                );
+              })}
               
-              {imageContent.map((item) => (
-                <div key={item.id} className="space-y-2">
-                  <Label>Current Logo URL</Label>
-                  <Input
-                    value={getContentValue(item)}
-                    onChange={(e) => updateContent(item.content_key, e.target.value)}
-                    placeholder="Enter logo URL..."
-                  />
+              {/* Upload New Logo */}
+              <div className="border-t pt-6">
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Upload New Logo</Label>
+                  <div className="space-y-3">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                      className="cursor-pointer"
+                    />
+                    {logoFile && (
+                      <div className="text-sm text-gray-600">
+                        Selected: {logoFile.name} ({(logoFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </div>
+                    )}
+                    <Button 
+                      onClick={handleLogoUpload} 
+                      disabled={saving || !logoFile}
+                      className="w-full sm:w-auto"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      {saving ? 'Uploading...' : 'Upload Logo'}
+                    </Button>
+                  </div>
                 </div>
-              ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
