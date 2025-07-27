@@ -327,35 +327,35 @@ export function AppSidebar() {
                   isActive={isActive(item.href)}
                   className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'bg-emerald-50 text-emerald-700 shadow-sm border-l-2 border-emerald-500' 
-                      : 'hover:bg-slate-50 hover:text-slate-700'
+                      ? 'bg-blue-500/30 text-white shadow-sm border-l-2 border-white' 
+                      : 'hover:bg-blue-500/20 text-white'
                   }`}
                 >
                   <Link to={item.href} className="flex items-center gap-3 p-2.5" onClick={handleLinkClick}>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-emerald-100 text-emerald-600' 
-                        : 'bg-slate-100 group-hover:bg-slate-200 text-slate-600'
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-blue-500/20 group-hover:bg-blue-400/30 text-white'
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm truncate">{item.name}</span>
+                          <span className="font-medium text-sm truncate text-white">{item.name}</span>
                           {item.badge && (
-                            <Badge variant="outline" className="text-xs border-slate-200 text-slate-500">
+                            <Badge variant="outline" className="text-xs border-white/30 text-white bg-blue-500/20">
                               {item.badge}
                             </Badge>
                           )}
                         </div>
-                        <span className="block text-xs text-slate-500 truncate mt-0.5">
+                        <span className="block text-xs text-blue-100 truncate mt-0.5">
                           {item.description}
                         </span>
                       </div>
                     )}
                     {!isCollapsed && (
-                      <ChevronRight className="h-3 w-3 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                      <ChevronRight className="h-3 w-3 text-white transition-colors" />
                     )}
                   </Link>
                 </SidebarMenuButton>
