@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from './AppSidebar';
+import { ModernSidebar } from './ModernSidebar';
 import { TopNavbar } from './TopNavbar';
 import { Menu } from 'lucide-react';
 
@@ -13,9 +13,9 @@ export const Layout = ({ children }: LayoutProps) => {
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-primary/5 to-secondary/5">
-        <AppSidebar />
+        <ModernSidebar />
         
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden ml-16 lg:ml-80 transition-all duration-300">
           {/* Mobile-Optimized Header */}
           <header className="sticky top-0 z-50 flex items-center justify-between h-16 px-4 lg:px-6 border-b border-border bg-background/95 backdrop-blur-xl shadow-sm">
             <div className="flex items-center gap-3">

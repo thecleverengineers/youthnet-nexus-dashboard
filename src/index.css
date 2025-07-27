@@ -395,6 +395,31 @@
   .status-away {
     @apply bg-amber-500;
   }
+
+  /* Gradient text utilities */
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-secondary {
+    @apply bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-accent {
+    @apply bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-muted {
+    @apply bg-gradient-to-r from-muted-foreground to-muted-foreground/80 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-destructive {
+    @apply bg-gradient-to-r from-destructive to-destructive/80 bg-clip-text text-transparent;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent;
+  }
 }
 
 /* Component Specific Premium Styles */
