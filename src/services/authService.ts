@@ -1,24 +1,33 @@
-
 import { supabase } from '@/integrations/supabase/client';
-
-export interface CreateUserData {
-  email: string;
-  password: string;
-  fullName: string;
-  role: 'student' | 'trainer' | 'staff' | 'admin';
-}
+import { createUserSchema, validateAndSanitize, sanitizeInput, type CreateUserData } from '@/lib/validation';
 
 export const authService = {
   async createUserWithRole(userData: CreateUserData) {
     try {
+      // Validate and sanitize input data
+      const validation = validateAndSanitize(createUserSchema, userData);
+      if (!validation.success) {
+        throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+      }
+
+      const validatedData = validation.data;
+
+      // Additional sanitization
+      const sanitizedData = {
+        email: validatedData.email.toLowerCase().trim(),
+        password: validatedData.password,
+        fullName: sanitizeInput(validatedData.fullName),
+        role: validatedData.role
+      };
+
       // Create the user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
+        email: sanitizedData.email,
+        password: sanitizedData.password,
         options: {
           data: {
-            full_name: userData.fullName,
-            role: userData.role,
+            full_name: sanitizedData.fullName,
+            role: sanitizedData.role,
           },
           emailRedirectTo: `${window.location.origin}/`
         }
@@ -32,7 +41,7 @@ export const authService = {
         throw new Error('User creation failed');
       }
 
-      console.log(`User created with role: ${userData.role}`);
+      console.log(`User created with role: ${sanitizedData.role}`);
       return { user: authData.user, error: null };
     } catch (error) {
       console.error('Error creating user:', error);
@@ -42,6 +51,13 @@ export const authService = {
 
   async ensureUserProfile(userId: string, userData: Partial<CreateUserData>) {
     try {
+      // Sanitize input data
+      const sanitizedUserData = {
+        email: userData.email ? userData.email.toLowerCase().trim() : null,
+        fullName: userData.fullName ? sanitizeInput(userData.fullName) : 'User',
+        role: userData.role || 'student'
+      };
+
       // Check if profile exists
       const { data: existingProfile } = await supabase
         .from('profiles')
@@ -59,9 +75,9 @@ export const authService = {
         .from('profiles')
         .insert({
           id: userId,
-          email: userData.email || null,
-          full_name: userData.fullName || 'User',
-          role: userData.role || 'student',
+          email: sanitizedUserData.email,
+          full_name: sanitizedUserData.fullName,
+          role: sanitizedUserData.role,
           phone: null
         })
         .select()
