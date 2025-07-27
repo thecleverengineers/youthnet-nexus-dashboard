@@ -21,11 +21,17 @@ import {
   Plus,
   Search,
   BarChart3,
-  Zap
+  Zap,
+  Eye,
+  Edit,
+  PlayCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { TaskActionModal } from './TaskActionModal';
+import { AdvancedFilter } from '@/components/ui/advanced-filter';
+import { useNotificationActions } from '@/hooks/useNotification';
 
 interface Task {
   id: string;
@@ -60,10 +66,23 @@ export const AdvancedTaskManagement = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [taskActionModal, setTaskActionModal] = useState<{
+    open: boolean;
+    task: Task | null;
+    action: 'view' | 'complete' | 'update' | null;
+  }>({
+    open: false,
+    task: null,
+    action: null
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [assigneeFilter, setAssigneeFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('');
+  
+  const { showSuccess, showError, showInfo } = useNotificationActions();
   
   const [stats, setStats] = useState({
     total: 0,

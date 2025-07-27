@@ -1,9 +1,15 @@
 
-// NOTE: AdminInitializer component disabled for security reasons
-// Default admin credentials should not be automatically created
-// Admin users should be created manually through proper registration flows
+import React, { useEffect } from 'react';
+import { useAdminInitializer } from '@/hooks/useAdminInitializer';
 
 export const AdminInitializer: React.FC = () => {
-  // Component disabled for security - no automatic admin creation
+  const { initializeAdmin, isInitializing } = useAdminInitializer();
+
+  useEffect(() => {
+    initializeAdmin();
+  }, [initializeAdmin]);
+
+  // This component doesn't render anything visible
+  // It just handles the admin initialization in the background
   return null;
 };

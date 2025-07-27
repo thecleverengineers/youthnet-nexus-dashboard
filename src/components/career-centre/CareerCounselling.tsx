@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +14,8 @@ interface CareerCounsellingProps {
 }
 
 export function CareerCounselling({ detailed = false }: CareerCounsellingProps) {
-  const [sessions] = useState([
+  // Mock sessions data with database integration structure
+  const mockSessions = [
     {
       id: 1,
       studentName: 'John Doe',
@@ -41,9 +44,26 @@ export function CareerCounselling({ detailed = false }: CareerCounsellingProps) 
       status: 'in_progress',
       date: '2024-01-18',
       duration: 90,
-      notes: 'Mock interview session and feedback on communication skills.'
+      notes: 'Conducted mock interview session focusing on communication skills, technical knowledge assessment, and behavioral questions. Provided detailed feedback on areas of improvement.'
     }
-  ]);
+  ];
+
+  const { data: sessions, isLoading } = useQuery({
+    queryKey: ['career-sessions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('career_counseling_sessions')
+        .select('*')
+        .order('session_date', { ascending: false })
+        .limit(detailed ? 50 : 5);
+
+      if (error) {
+        console.error('Error fetching career sessions:', error);
+        return mockSessions; // Fallback to mock data
+      }
+      return data?.length ? data : mockSessions; // Use mock data if no real data
+    }
+  });
 
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
@@ -87,8 +107,13 @@ export function CareerCounselling({ detailed = false }: CareerCounsellingProps) 
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {sessions.map((session) => (
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Loading sessions...
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {sessions?.map((session) => (
             <div key={session.id} className="border rounded-lg p-4">
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -137,8 +162,9 @@ export function CareerCounselling({ detailed = false }: CareerCounsellingProps) 
                 )}
               </div>
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
 
       <ScheduleSessionModal 

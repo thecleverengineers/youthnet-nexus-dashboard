@@ -12,15 +12,6 @@ export const adminService = {
     try {
       console.log('Creating admin user:', userData.email);
       
-      // Validate input data
-      if (!userData.email || !userData.password || !userData.fullName) {
-        throw new Error('All user data fields are required');
-      }
-
-      if (userData.password.length < 8) {
-        throw new Error('Password must be at least 8 characters long');
-      }
-
       // Create the user account with admin role
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
@@ -48,8 +39,47 @@ export const adminService = {
       console.error('Error creating admin user:', error);
       return { user: null, error };
     }
-  }
+  },
 
-  // NOTE: Removed initializeDefaultAdmin to eliminate hardcoded credentials security risk
-  // Admin users should be created manually through proper registration flows
+  async initializeDefaultAdmin() {
+    try {
+      // Get the current session to preserve it
+      const { data: currentSession } = await supabase.auth.getSession();
+      
+      // Check if admin profile already exists by querying the profiles table
+      const { data: adminProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', 'thecleverengineers@gmail.com')
+        .eq('role', 'admin')
+        .single();
+
+      if (!profileError && adminProfile) {
+        console.log('Default admin user already exists');
+        return { success: true, message: 'Default admin already exists' };
+      }
+
+      // Only create admin if no current user session exists
+      if (currentSession?.session?.user) {
+        console.log('User session exists, skipping admin creation to avoid conflicts');
+        return { success: true, message: 'Skipped admin creation - user session active' };
+      }
+
+      // Create the default admin user
+      const result = await this.createAdminUser({
+        email: 'thecleverengineers@gmail.com',
+        password: 'Kites@123',
+        fullName: 'System Administrator'
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      return { success: true, message: 'Default admin user created successfully' };
+    } catch (error: any) {
+      console.error('Error initializing default admin:', error);
+      return { success: false, error: error.message };
+    }
+  }
 };

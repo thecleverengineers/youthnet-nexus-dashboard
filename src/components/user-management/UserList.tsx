@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { MobileTable, MobileTableHeader } from '@/components/ui/mobile-table';
+import { MobileStatsGrid, MobileStatsCard } from '@/components/ui/mobile-stats';
 import { 
   Search, 
   Edit, 
@@ -161,178 +163,294 @@ export const UserList: React.FC<UserListProps> = ({ onUserUpdate }) => {
     );
   }
 
+  // Mobile columns configuration
+  const mobileColumns = [
+    {
+      key: 'full_name',
+      label: 'Name',
+      render: (value: string) => (
+        <div className="font-semibold text-foreground">
+          {value || 'N/A'}
+        </div>
+      )
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      render: (value: string) => (
+        <div className="text-muted-foreground text-sm truncate">
+          {value}
+        </div>
+      )
+    },
+    {
+      key: 'role',
+      label: 'Role',
+      render: (value: string) => (
+        <Badge className={getRoleBadgeColor(value)}>
+          {value}
+        </Badge>
+      )
+    },
+    {
+      key: 'phone',
+      label: 'Phone',
+      render: (value: string) => (
+        <span className="text-sm">{value || 'N/A'}</span>
+      )
+    },
+    {
+      key: 'created_at',
+      label: 'Created',
+      render: (value: string) => (
+        <span className="text-sm text-muted-foreground">
+          {new Date(value).toLocaleDateString()}
+        </span>
+      )
+    }
+  ];
+
+  const getUserActions = (user: Profile) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-9 w-9 p-0 touch-manipulation hover:bg-slate-100"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+          <span className="sr-only">Open user actions</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={() => setViewingUser(user)}>
+          <Eye className="mr-2 h-4 w-4" />
+          View Details
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setEditingUser(user)}>
+          <Edit className="mr-2 h-4 w-4" />
+          Edit User
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {user.role !== 'banned' ? (
+          <DropdownMenuItem 
+            onClick={() => handleBanUser(user.id, true)}
+            className="text-orange-600"
+          >
+            <Ban className="mr-2 h-4 w-4" />
+            Ban User
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem 
+            onClick={() => handleBanUser(user.id, false)}
+            className="text-green-600"
+          >
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Unban User
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem 
+          onClick={() => setUserToDelete(user)}
+          className="text-red-600"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete User
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  // User statistics
+  const userStats = {
+    total: filteredUsers.length,
+    admin: filteredUsers.filter(u => u.role === 'admin').length,
+    staff: filteredUsers.filter(u => u.role === 'staff').length,
+    trainer: filteredUsers.filter(u => u.role === 'trainer').length,
+    student: filteredUsers.filter(u => u.role === 'student').length,
+    banned: filteredUsers.filter(u => u.role === 'banned').length,
+  };
+
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>System Users</span>
-            <Badge variant="outline">{filteredUsers.length} users</Badge>
-          </CardTitle>
+    <div className="space-y-6">
+      {/* Mobile-Optimized Stats */}
+      <MobileStatsGrid columns={3}>
+        <MobileStatsCard
+          title="Total Users"
+          value={userStats.total}
+          icon={UserCheck}
+          trend="neutral"
+        />
+        <MobileStatsCard
+          title="Active Users"
+          value={userStats.total - userStats.banned}
+          icon={CheckCircle}
+          trend="up"
+        />
+        <MobileStatsCard
+          title="Admin Users"
+          value={userStats.admin}
+          icon={UserX}
+          trend="neutral"
+        />
+      </MobileStatsGrid>
+
+      {/* Mobile-Optimized Table Header and Filters */}
+      <Card className="border-slate-200">
+        <CardHeader className="pb-4">
+          <MobileTableHeader
+            title="System Users"
+            subtitle={`Managing ${filteredUsers.length} users across the platform`}
+            actions={
+              <Badge variant="outline" className="text-sm">
+                {filteredUsers.length} users
+              </Badge>
+            }
+          />
           
-          <div className="flex gap-4 items-center">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          {/* Mobile-Friendly Filters */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search users..."
+                placeholder="Search users by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11 text-base"
               />
             </div>
             
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Role" />
+              <SelectTrigger className="w-full sm:w-40 h-11">
+                <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="staff">Staff</SelectItem>
-                <SelectItem value="trainer">Trainer</SelectItem>
-                <SelectItem value="student">Student</SelectItem>
-                <SelectItem value="banned">Banned</SelectItem>
+                <SelectItem value="admin">Admin ({userStats.admin})</SelectItem>
+                <SelectItem value="staff">Staff ({userStats.staff})</SelectItem>
+                <SelectItem value="trainer">Trainer ({userStats.trainer})</SelectItem>
+                <SelectItem value="student">Student ({userStats.student})</SelectItem>
+                <SelectItem value="banned">Banned ({userStats.banned})</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardHeader>
         
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length === 0 ? (
+        <CardContent className="pt-0">
+          {/* Desktop Table */}
+          <div className="hidden lg:block">
+            <div className="rounded-md border border-slate-200">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                      No users found
-                    </TableCell>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
-                        {user.full_name || 'N/A'}
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Badge className={getRoleBadgeColor(user.role)}>
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{user.phone || 'N/A'}</TableCell>
-                      <TableCell>
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setViewingUser(user)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEditingUser(user)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit User
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {user.role !== 'banned' ? (
-                              <DropdownMenuItem 
-                                onClick={() => handleBanUser(user.id, true)}
-                                className="text-orange-600"
-                              >
-                                <Ban className="mr-2 h-4 w-4" />
-                                Ban User
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem 
-                                onClick={() => handleBanUser(user.id, false)}
-                                className="text-green-600"
-                              >
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Unban User
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem 
-                              onClick={() => setUserToDelete(user)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete User
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No users found matching your criteria
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <TableRow key={user.id} className="hover:bg-slate-50/50">
+                        <TableCell className="font-medium">
+                          {user.full_name || 'N/A'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                        <TableCell>
+                          <Badge className={getRoleBadgeColor(user.role)}>
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{user.phone || 'N/A'}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {getUserActions(user)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* Mobile Table */}
+          <div className="lg:hidden">
+            <MobileTable
+              data={filteredUsers}
+              columns={mobileColumns}
+              keyField="id"
+              actions={getUserActions}
+              onRowClick={(user) => setViewingUser(user)}
+              emptyMessage="No users found matching your criteria"
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* Edit User Dialog */}
+      {/* Mobile-Optimized Edit User Dialog */}
       <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">Edit User</DialogTitle>
           </DialogHeader>
           {editingUser && (
-            <UserForm 
-              user={editingUser}
-              onSuccess={handleUserFormSuccess}
-              onCancel={() => setEditingUser(null)}
-            />
+            <div className="p-1">
+              <UserForm 
+                user={editingUser}
+                onSuccess={handleUserFormSuccess}
+                onCancel={() => setEditingUser(null)}
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* View User Dialog */}
+      {/* Mobile-Optimized View User Dialog */}
       <Dialog open={!!viewingUser} onOpenChange={() => setViewingUser(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">User Details</DialogTitle>
           </DialogHeader>
-          {viewingUser && <UserDetails user={viewingUser} />}
+          {viewingUser && (
+            <div className="p-1">
+              <UserDetails user={viewingUser} />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Mobile-Optimized Delete Confirmation Dialog */}
       <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-full max-w-md mx-4">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-lg">Delete User?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
               This action cannot be undone. This will permanently delete the user account
-              for {userToDelete?.full_name || userToDelete?.email} and remove all associated data.
+              for <strong>{userToDelete?.full_name || userToDelete?.email}</strong> and remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => userToDelete && handleDeleteUser(userToDelete.id)}
-              className="bg-red-600 hover:bg-red-700"
+              className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white"
             >
               Delete User
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { adminService } from '@/services/adminService';
 import { toast } from 'sonner';
 
@@ -7,33 +7,33 @@ export const useAdminInitializer = () => {
   const [isInitializing, setIsInitializing] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const createAdminUser = async (userData: { email: string; password: string; fullName: string }) => {
-    if (isInitializing) return;
+  const initializeAdmin = async () => {
+    if (isInitialized || isInitializing) return;
     
     setIsInitializing(true);
     try {
-      const result = await adminService.createAdminUser(userData);
+      const result = await adminService.initializeDefaultAdmin();
       
-      if (result.error) {
-        toast.error(`Admin creation failed: ${result.error.message}`);
-        return { success: false, error: result.error };
-      } else {
-        toast.success('Admin user created successfully');
+      if (result.success) {
+        console.log('Admin initialization:', result.message);
         setIsInitialized(true);
-        return { success: true, user: result.user };
+      } else {
+        console.error('Admin initialization failed:', result.error);
       }
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to create admin user';
-      toast.error(errorMessage);
-      console.error('Failed to create admin user:', error);
-      return { success: false, error: errorMessage };
+    } catch (error) {
+      console.error('Failed to initialize admin user:', error);
     } finally {
       setIsInitializing(false);
     }
   };
 
+  useEffect(() => {
+    // Initialize admin user when the hook is first used
+    initializeAdmin();
+  }, []);
+
   return {
-    createAdminUser,
+    initializeAdmin,
     isInitializing,
     isInitialized
   };
