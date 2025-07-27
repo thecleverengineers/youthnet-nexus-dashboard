@@ -81,7 +81,7 @@ export function EmployerManagement() {
 
                 <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
                   <span>Active Jobs: {employer.activeJobs}</span>
-                  <span>Partnership Since: 2023</span>
+                  <span>Partnership Since: {employer.partnershipYear || 'N/A'}</span>
                 </div>
 
                 <div className="flex gap-2">
