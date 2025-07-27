@@ -21,7 +21,6 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, fullName: string, role: string) => Promise<boolean>;
-  createDemoAccounts: () => Promise<boolean>;
   signOut: () => Promise<void>;
 }
 
@@ -151,60 +150,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const createDemoAccounts = async (): Promise<boolean> => {
-    try {
-      console.log('Creating demo accounts...');
-
-      const demoUsers = [
-        { email: 'admin@youthnet.in', password: 'admin123', fullName: 'Admin User', role: 'admin' },
-        { email: 'staff@youthnet.in', password: 'staff123', fullName: 'Staff Member', role: 'staff' },
-        { email: 'trainer@youthnet.in', password: 'trainer123', fullName: 'Trainer User', role: 'trainer' },
-        { email: 'student@youthnet.in', password: 'student123', fullName: 'Student User', role: 'student' },
-      ];
-
-      let successCount = 0;
-      
-      for (const demoUser of demoUsers) {
-        try {
-          const { data, error } = await supabase.auth.signUp({
-            email: demoUser.email,
-            password: demoUser.password,
-            options: {
-              data: {
-                full_name: demoUser.fullName,
-                role: demoUser.role,
-              },
-              emailRedirectTo: `${window.location.origin}/`
-            }
-          });
-
-          if (!error) {
-            successCount++;
-            console.log(`Demo user created: ${demoUser.email}`);
-          } else if (error.message.includes('already registered')) {
-            console.log(`Demo user already exists: ${demoUser.email}`);
-            successCount++;
-          } else {
-            console.error(`Error creating ${demoUser.email}:`, error);
-          }
-        } catch (err) {
-          console.error(`Error creating ${demoUser.email}:`, err);
-        }
-      }
-
-      if (successCount > 0) {
-        toast.success(`Demo accounts ready! (${successCount}/${demoUsers.length})`);
-        return true;
-      } else {
-        toast.error('Failed to create demo accounts');
-        return false;
-      }
-    } catch (error) {
-      console.error('Error creating demo accounts:', error);
-      toast.error('Failed to create demo accounts');
-      return false;
-    }
-  };
 
   const signOut = async () => {
     try {
@@ -286,7 +231,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signIn,
     signUp,
-    createDemoAccounts,
     signOut,
   };
 
