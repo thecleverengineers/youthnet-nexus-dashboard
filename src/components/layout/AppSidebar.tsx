@@ -238,12 +238,12 @@ export function AppSidebar() {
 
     return (
       <SidebarGroup className="mb-4">
-        <SidebarGroupLabel className={`text-gray-700 font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2`}>
+        <SidebarGroupLabel className={`text-sidebar-accent-foreground font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2`}>
           {!isCollapsed && (
             <>
-              <div className={`w-1.5 h-1.5 rounded-full bg-gray-700`}></div>
+              <div className={`w-1.5 h-1.5 rounded-full bg-sidebar-accent-foreground`}></div>
               {title}
-              <Badge variant="secondary" className="text-xs ml-auto bg-gray-100 text-gray-700 border-gray-300">
+              <Badge variant="secondary" className="text-xs ml-auto bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border">
                 {items.length}
               </Badge>
             </>
@@ -258,37 +258,37 @@ export function AppSidebar() {
                   isActive={isActive(item.href)}
                   className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'bg-blue-100 text-blue-900 shadow-sm border-l-2 border-blue-600' 
-                      : 'hover:bg-gray-100 text-gray-700'
+                      ? 'bg-sidebar-accent text-sidebar-primary shadow-sm border-l-2 border-sidebar-primary' 
+                      : 'hover:bg-sidebar-accent text-sidebar-foreground'
                   }`}
                 >
                   <Link to={item.href} className="flex items-center gap-3 p-2.5" onClick={handleLinkClick}>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-blue-200 text-blue-900' 
-                        : 'bg-gray-200 group-hover:bg-gray-300 text-gray-700'
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground' 
+                        : 'bg-sidebar-accent group-hover:bg-sidebar-border text-sidebar-accent-foreground'
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm truncate text-gray-900">{item.name}</span>
+                          <span className="font-medium text-sm truncate text-sidebar-foreground">{item.name}</span>
                           {item.badge && (
-                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-700 bg-gray-50">
+                            <Badge variant="outline" className="text-xs border-sidebar-border text-sidebar-accent-foreground bg-sidebar-accent">
                               {item.badge}
                             </Badge>
                           )}
                         </div>
                         {item.description && (
-                          <span className="block text-xs text-gray-600 truncate mt-0.5">
+                          <span className="block text-xs text-sidebar-accent-foreground truncate mt-0.5">
                             {item.description}
                           </span>
                         )}
                       </div>
                     )}
                     {!isCollapsed && (
-                      <ChevronRight className="h-3 w-3 text-gray-600 transition-colors" />
+                      <ChevronRight className="h-3 w-3 text-sidebar-accent-foreground transition-colors" />
                     )}
                   </Link>
                 </SidebarMenuButton>
@@ -307,12 +307,12 @@ export function AppSidebar() {
 
     return (
       <SidebarGroup className="mb-4">
-        <SidebarGroupLabel className="text-gray-700 font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
+        <SidebarGroupLabel className="text-sidebar-accent-foreground font-medium text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
           {!isCollapsed && (
             <>
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-700"></div>  
+              <div className="w-1.5 h-1.5 rounded-full bg-sidebar-accent-foreground"></div>  
               Student Hub
-              <Badge variant="secondary" className="text-xs ml-auto bg-gray-100 text-gray-700 border-gray-300">
+              <Badge variant="secondary" className="text-xs ml-auto bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border">
                 {studentManagementItems.length}
               </Badge>
             </>
@@ -327,35 +327,35 @@ export function AppSidebar() {
                   isActive={isActive(item.href)}
                   className={`group transition-all duration-200 ${
                     isActive(item.href) 
-                      ? 'bg-blue-100 text-blue-900 shadow-sm border-l-2 border-blue-600' 
-                      : 'hover:bg-gray-100 text-gray-700'
+                      ? 'bg-sidebar-accent text-sidebar-primary shadow-sm border-l-2 border-sidebar-primary' 
+                      : 'hover:bg-sidebar-accent text-sidebar-foreground'
                   }`}
                 >
                   <Link to={item.href} className="flex items-center gap-3 p-2.5" onClick={handleLinkClick}>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
                       isActive(item.href) 
-                        ? 'bg-blue-200 text-blue-900' 
-                        : 'bg-gray-200 group-hover:bg-gray-300 text-gray-700'
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground' 
+                        : 'bg-sidebar-accent group-hover:bg-sidebar-border text-sidebar-accent-foreground'
                     }`}>
                       <item.icon className="h-4 w-4" />
                     </div>
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm truncate text-gray-900">{item.name}</span>
+                          <span className="font-medium text-sm truncate text-sidebar-foreground">{item.name}</span>
                           {item.badge && (
-                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-700 bg-gray-50">
+                            <Badge variant="outline" className="text-xs border-sidebar-border text-sidebar-accent-foreground bg-sidebar-accent">
                               {item.badge}
                             </Badge>
                           )}
                         </div>
-                        <span className="block text-xs text-gray-600 truncate mt-0.5">
+                        <span className="block text-xs text-sidebar-accent-foreground truncate mt-0.5">
                           {item.description}
                         </span>
                       </div>
                     )}
                     {!isCollapsed && (
-                      <ChevronRight className="h-3 w-3 text-gray-600 transition-colors" />
+                      <ChevronRight className="h-3 w-3 text-sidebar-accent-foreground transition-colors" />
                     )}
                   </Link>
                 </SidebarMenuButton>
@@ -368,13 +368,13 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-white text-gray-900" collapsible="icon">
+    <Sidebar className="border-r border-sidebar-border bg-sidebar text-sidebar-foreground" collapsible="icon">
       {/* Premium Header */}
-      <SidebarHeader className="border-b border-slate-200/60 p-3 sm:p-4">
+      <SidebarHeader className="border-b border-sidebar-border p-3 sm:p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center overflow-hidden shadow-lg">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-sidebar-primary to-secondary flex items-center justify-center overflow-hidden shadow-lg">
                 <img 
                   src="/lovable-uploads/42d39ae8-ded6-4d36-87fd-20233841bdf4.png" 
                   alt="YouthNet Logo" 
@@ -387,8 +387,8 @@ export function AppSidebar() {
             </div>
             {!isCollapsed && (
               <div>
-                <span className="text-base sm:text-lg font-bold text-gray-900">YouthNet</span>
-                <div className="text-xs text-gray-700 font-medium">Premium MIS</div>
+                <span className="text-base sm:text-lg font-bold text-sidebar-foreground">YouthNet</span>
+                <div className="text-xs text-sidebar-accent-foreground font-medium">Premium MIS</div>
               </div>
             )}
           </div>
@@ -398,7 +398,7 @@ export function AppSidebar() {
               variant="ghost" 
               size="sm" 
               onClick={() => setOpenMobile(false)}
-              className="hover:bg-slate-100 h-8 w-8 p-0"
+              className="hover:bg-sidebar-accent h-8 w-8 p-0 text-sidebar-foreground"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -408,21 +408,21 @@ export function AppSidebar() {
 
       {/* User Info */}
       {profile && !isCollapsed && (
-        <div className="px-4 py-3 border-b border-border">
-          <div className="bg-gradient-to-r from-muted to-accent/50 rounded-xl p-3 border">
+        <div className="px-4 py-3 border-b border-sidebar-border">
+          <div className="bg-gradient-to-r from-sidebar-accent to-sidebar-accent/50 rounded-xl p-3 border border-sidebar-border">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center relative overflow-hidden shadow-sm">
-                <span className="text-primary-foreground text-sm font-bold relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sidebar-primary to-secondary flex items-center justify-center relative overflow-hidden shadow-sm">
+                <span className="text-sidebar-primary-foreground text-sm font-bold relative z-10">
                   {profile.full_name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
                   {profile.full_name || 'User'}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge className="bg-gray-100 text-gray-700 border-gray-300 text-xs capitalize">
-                    <Shield className="h-2 w-2 mr-1 text-gray-700" />
+                  <Badge className="bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border text-xs capitalize">
+                    <Shield className="h-2 w-2 mr-1 text-sidebar-accent-foreground" />
                     {profile.role}
                   </Badge>
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -442,14 +442,14 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="border-t border-border p-4">
+      <SidebarFooter className="border-t border-sidebar-border p-4">
         {!isCollapsed && (
-          <div className="bg-gradient-to-r from-emerald-50 to-primary/5 rounded-xl p-3 text-center border">
+          <div className="bg-gradient-to-r from-sidebar-accent to-sidebar-accent/50 rounded-xl p-3 text-center border border-sidebar-border">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-gray-700 font-medium">System Online</span>
+              <span className="text-xs text-sidebar-accent-foreground font-medium">System Online</span>
             </div>
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
+            <div className="flex items-center justify-center gap-2 text-xs text-sidebar-accent-foreground">
               <span className="font-mono font-bold">v2.1.0</span>
             </div>
           </div>
