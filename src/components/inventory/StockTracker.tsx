@@ -128,8 +128,13 @@ export const StockTracker = () => {
                         />
                         <Button 
                           size="sm" 
-                          onClick={() => updateStock(item.id, updateQuantity[item.id] || 0)}
-                          disabled={!updateQuantity[item.id]}
+                          onClick={() => {
+                            const newQuantity = updateQuantity[item.id] || 0;
+                            if (newQuantity > 0) {
+                              updateStock(item.id, newQuantity);
+                            }
+                          }}
+                          disabled={!updateQuantity[item.id] || updateQuantity[item.id] <= 0}
                         >
                           Update
                         </Button>

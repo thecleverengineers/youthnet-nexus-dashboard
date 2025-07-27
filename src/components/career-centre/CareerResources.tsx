@@ -107,11 +107,24 @@ export function CareerResources() {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.open(`/preview/${resource.id}`, '_blank')}
+                >
                   <Eye className="h-4 w-4 mr-2" />
                   Preview
                 </Button>
-                <Button size="sm">
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    // Create a download link
+                    const link = document.createElement('a');
+                    link.href = `/download/${resource.id}`;
+                    link.download = `${resource.title}.pdf`;
+                    link.click();
+                  }}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Download
                 </Button>

@@ -124,7 +124,14 @@ export const StartupApplications = () => {
                   <TableCell>{application.submitted_at ? new Date(application.submitted_at).toLocaleDateString() : 'N/A'}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          // TODO: Open application details modal
+                          console.log('View application details:', application.id);
+                        }}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                       {application.application_status === 'pending' && (

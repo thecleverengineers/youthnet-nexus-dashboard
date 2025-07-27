@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Calendar, User, Clock, Filter } from 'lucide-react';
+import { ScheduleSessionModal } from './ScheduleSessionModal';
+import { SessionDetailsModal } from './SessionDetailsModal';
 
 interface CareerCounsellingProps {
   detailed?: boolean;
@@ -43,6 +45,16 @@ export function CareerCounselling({ detailed = false }: CareerCounsellingProps) 
     }
   ]);
 
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const handleViewDetails = (session: any) => {
+    setSelectedSession(session);
+    setDetailsModalOpen(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -63,11 +75,11 @@ export function CareerCounselling({ detailed = false }: CareerCounsellingProps) 
           </div>
           {detailed && (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setFilterOpen(!filterOpen)}>
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setScheduleModalOpen(true)}>
                 Schedule Session
               </Button>
             </div>
@@ -110,7 +122,7 @@ export function CareerCounselling({ detailed = false }: CareerCounsellingProps) 
               )}
 
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => handleViewDetails(session)}>
                   View Details
                 </Button>
                 {session.status === 'scheduled' && (
@@ -128,6 +140,17 @@ export function CareerCounselling({ detailed = false }: CareerCounsellingProps) 
           ))}
         </div>
       </CardContent>
+
+      <ScheduleSessionModal 
+        open={scheduleModalOpen} 
+        onOpenChange={setScheduleModalOpen} 
+      />
+      
+      <SessionDetailsModal 
+        open={detailsModalOpen} 
+        onOpenChange={setDetailsModalOpen} 
+        session={selectedSession}
+      />
     </Card>
   );
 }

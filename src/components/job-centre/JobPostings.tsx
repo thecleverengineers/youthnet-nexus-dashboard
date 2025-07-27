@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Briefcase, MapPin, DollarSign, Calendar, Search, Plus, Eye } from 'lucide-react';
+import { JobDetailsModal } from './JobDetailsModal';
 
 interface JobPostingsProps {
   detailed?: boolean;
@@ -14,6 +15,8 @@ interface JobPostingsProps {
 
 export function JobPostings({ detailed = false }: JobPostingsProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [jobDetailsOpen, setJobDetailsOpen] = useState(false);
 
   const { data: jobPostings, isLoading } = useQuery({
     queryKey: ['job-postings'],
@@ -34,6 +37,11 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
     job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.location?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
+
+  const handleViewDetails = (job: any) => {
+    setSelectedJob(job);
+    setJobDetailsOpen(true);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -135,7 +143,7 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
                 )}
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(job)}>
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
                   </Button>
@@ -153,6 +161,12 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
           )}
         </div>
       </CardContent>
+
+      <JobDetailsModal 
+        open={jobDetailsOpen} 
+        onOpenChange={setJobDetailsOpen}
+        job={selectedJob}
+      />
     </Card>
   );
 }
