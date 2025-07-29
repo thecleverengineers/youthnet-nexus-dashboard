@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useLandingPageContent } from '@/hooks/useLandingPageContent';
+import { BannerSlider } from './BannerSlider';
 import { 
   Users, 
   BookOpen, 
@@ -107,28 +108,15 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative z-10 px-6 py-20">
+      {/* Hero Section with Banner Slider */}
+      <section className="relative z-10">
+        <BannerSlider />
+      </section>
+
+      {/* Quick Actions Section */}
+      <section className="relative z-10 px-6 py-16">
         <div className="max-w-7xl mx-auto text-center">
-          <Badge 
-            variant="secondary" 
-            className="mb-6 px-4 py-2 bg-blue-100 text-blue-800 border border-blue-200 rounded-full"
-          >
-            <Star className="h-3 w-3 mr-1" />
-            {content.hero_badge_text || 'Advanced Management Platform'}
-          </Badge>
-          
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-              {content.hero_title || 'YouthNet MIS'}
-            </span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            {content.hero_description || 'Comprehensive Management Information System designed for youth development, education programs, and career advancement initiatives.'}
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button 
               onClick={onSignInClick}
               size="lg"

@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Globe, Users, Bell, Database } from 'lucide-react';
+import { Settings as SettingsIcon, Globe, Users, Bell, Database, Image } from 'lucide-react';
 import { SystemConfiguration } from '@/components/settings/SystemConfiguration';
 import { UserPermissions } from '@/components/settings/UserPermissions';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { BackupRestore } from '@/components/settings/BackupRestore';
 import { LandingPageManagement } from '@/components/settings/LandingPageManagement';
+import { BannerManagement } from '@/components/admin/BannerManagement';
 import { MobilePageHeader, MobileTabBar } from '@/components/ui/mobile-navigation';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -16,6 +17,7 @@ export const Settings = () => {
   const tabs = [
     { key: 'system', label: 'System', icon: <SettingsIcon className="h-4 w-4" /> },
     { key: 'landing', label: 'Landing', icon: <Globe className="h-4 w-4" /> },
+    { key: 'banners', label: 'Banners', icon: <Image className="h-4 w-4" /> },
     { key: 'permissions', label: 'Users', icon: <Users className="h-4 w-4" /> },
     { key: 'notifications', label: 'Alerts', icon: <Bell className="h-4 w-4" /> },
     { key: 'backup', label: 'Backup', icon: <Database className="h-4 w-4" /> },
@@ -75,6 +77,7 @@ export const Settings = () => {
       <div className="p-4 space-y-6">
         {activeTab === 'system' && <SystemConfiguration />}
         {activeTab === 'landing' && <LandingPageManagement />}
+        {activeTab === 'banners' && <BannerManagement />}
         {activeTab === 'permissions' && <UserPermissions />}
         {activeTab === 'notifications' && <NotificationSettings />}
         {activeTab === 'backup' && <BackupRestore />}
