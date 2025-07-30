@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/auth/RoleBasedRoute";
 import { AdminInitializer } from "@/components/auth/AdminInitializer";
@@ -39,10 +40,11 @@ function App() {
       <AuthProvider>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <TooltipProvider>
-            <Toaster />
-            <AdminInitializer />
-            <BrowserRouter>
-              <Routes>
+            <ErrorBoundary>
+              <Toaster />
+              <AdminInitializer />
+              <BrowserRouter>
+                <Routes>
                 <Route path="/" element={<Index />} />
                 <Route 
                   path="/dashboard/admin" 
@@ -251,6 +253,7 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+            </ErrorBoundary>
           </TooltipProvider>
         </ThemeProvider>
       </AuthProvider>

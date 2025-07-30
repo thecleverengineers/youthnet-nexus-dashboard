@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
 import { BannerForm } from './BannerForm';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { bannerService, Banner } from '@/services/bannerService';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, GripVertical } from 'lucide-react';
@@ -112,7 +113,12 @@ export const BannerManagement = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center p-8">
+        <LoadingSpinner size="lg" />
+        <span className="ml-2 text-muted-foreground">Loading banners...</span>
+      </div>
+    );
   }
 
   return (

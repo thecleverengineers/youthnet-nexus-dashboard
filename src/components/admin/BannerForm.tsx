@@ -4,7 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Banner } from '@/services/bannerService';
+import { AlertCircle } from 'lucide-react';
 
 interface BannerFormProps {
   banner?: Banner | null;
@@ -21,6 +23,8 @@ export const BannerForm = ({ banner, onSave, onCancel }: BannerFormProps) => {
     display_order: 0,
     is_active: true,
   });
+  const [loading, setLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (banner) {
@@ -35,9 +39,14 @@ export const BannerForm = ({ banner, onSave, onCancel }: BannerFormProps) => {
     }
   }, [banner]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    setLoading(true);
+    try {
+      await onSave(formData);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (field: string, value: string | number | boolean) => {
@@ -80,11 +89,20 @@ export const BannerForm = ({ banner, onSave, onCancel }: BannerFormProps) => {
         />
         {formData.image_url && (
           <div className="mt-2">
-            <img
-              src={formData.image_url}
-              alt="Preview"
-              className="w-full h-32 object-cover rounded-lg"
-            />
+            {imageError ? (
+              <div className="flex items-center gap-2 text-destructive text-sm">
+                <AlertCircle className="h-4 w-4" />
+                Failed to load image preview
+              </div>
+            ) : (
+              <img
+                src={formData.image_url}
+                alt="Preview"
+                className="w-full h-32 object-cover rounded-lg"
+                onError={() => setImageError(true)}
+                onLoad={() => setImageError(false)}
+              />
+            )}
           </div>
         )}
       </div>
@@ -123,8 +141,15 @@ export const BannerForm = ({ banner, onSave, onCancel }: BannerFormProps) => {
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit">
-          {banner ? 'Update' : 'Create'} Banner
+        <Button type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <LoadingSpinner size="sm" className="mr-2" />
+              {banner ? 'Updating...' : 'Creating...'}
+            </>
+          ) : (
+            `${banner ? 'Update' : 'Create'} Banner`
+          )}
         </Button>
       </div>
     </form>
