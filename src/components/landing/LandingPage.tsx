@@ -259,39 +259,6 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
           </CardContent>
         </Card>
 
-        {/* Features grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-16 animate-fade-in">
-          <Card className="glass-card text-center p-6 hover-lift">
-            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Shield className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="font-display font-semibold text-foreground mb-2">Secure Access</h3>
-            <p className="text-sm text-muted-foreground">
-              Enterprise-grade security with role-based permissions
-            </p>
-          </Card>
-
-          <Card className="glass-card text-center p-6 hover-lift">
-            <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <GraduationCap className="h-6 w-6 text-accent" />
-            </div>
-            <h3 className="font-display font-semibold text-foreground mb-2">Comprehensive</h3>
-            <p className="text-sm text-muted-foreground">
-              Complete youth development program management
-            </p>
-          </Card>
-
-          <Card className="glass-card text-center p-6 hover-lift">
-            <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="h-6 w-6 text-secondary" />
-            </div>
-            <h3 className="font-display font-semibold text-foreground mb-2">Modern UI</h3>
-            <p className="text-sm text-muted-foreground">
-              Intuitive interface designed for efficiency
-            </p>
-          </Card>
-        </div>
-
         {/* Footer */}
         <footer className="mt-16 text-center text-sm text-muted-foreground">
           <p>© 2024 YouthNet MIS. Empowering youth development through technology.</p>
