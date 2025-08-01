@@ -1,6 +1,5 @@
 
 import { useAuth } from '@/hooks/useAuth';
-import { AuthModal } from './AuthModal';
 import { useState, useEffect } from 'react';
 import { useRoleNavigation } from '@/hooks/useRoleNavigation';
 import { LandingPage } from '@/components/landing/LandingPage';
@@ -11,7 +10,6 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, profile, loading } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const { redirectToDashboard } = useRoleNavigation();
 
   useEffect(() => {
@@ -44,15 +42,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return (
-      <>
-        <LandingPage onSignInClick={() => setShowAuthModal(true)} />
-        <AuthModal 
-          isOpen={showAuthModal} 
-          onClose={() => setShowAuthModal(false)} 
-        />
-      </>
-    );
+    return <LandingPage />;
   }
 
   return <>{children}</>;
