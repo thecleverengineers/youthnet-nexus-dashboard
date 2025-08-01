@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+import { useLandingPageContent } from '@/hooks/useLandingPageContent';
 import { GraduationCap, Lock, Shield, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -14,6 +15,7 @@ interface LandingPageProps {
 }
 
 export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
+  const { content, loading: contentLoading } = useLandingPageContent();
   const { signIn, signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -97,13 +99,21 @@ export const LandingPage = ({ onSignInClick }: LandingPageProps) => {
         {/* Logo and branding */}
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-2xl mb-6 glass-effect">
-            <GraduationCap className="h-10 w-10 text-primary" />
+            {content?.logo_url ? (
+              <img 
+                src={content.logo_url} 
+                alt="YouthNet Logo" 
+                className="h-16 w-16 object-contain rounded-xl"
+              />
+            ) : (
+              <GraduationCap className="h-10 w-10 text-primary" />
+            )}
           </div>
           <h1 className="text-4xl md:text-6xl font-display font-bold text-foreground mb-4">
-            Youth<span className="text-gradient-primary">Net</span>
+            {content?.site_title || 'Youth'}<span className="text-gradient-primary">{content?.site_title ? '' : 'Net'}</span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground font-light">
-            Modern Management Information System
+            {content?.site_subtitle || 'Modern Management Information System'}
           </p>
         </div>
 
