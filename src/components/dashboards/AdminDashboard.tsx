@@ -191,10 +191,6 @@ export const AdminDashboard = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold text-gradient-primary mb-1">
                   Admin Control Center
                 </h1>
-                <p className="text-base sm:text-lg text-muted-foreground flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-primary" />
-                  Welcome back, <span className="text-gradient-secondary font-medium">{profile?.full_name}</span>
-                </p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge className="gradient-bg-primary text-white border-0 px-3 py-1">
                     <Star className="h-3 w-3 mr-1" />
@@ -207,14 +203,6 @@ export const AdminDashboard = () => {
                 </div>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={signOut} 
-              className="premium-button bg-gradient-to-r from-red-50 to-orange-50 border-red-200 hover:border-red-300 text-red-600 hover:text-red-700"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
           </div>
         </div>
 
