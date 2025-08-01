@@ -11,6 +11,7 @@ import { CertificationTracking } from '@/components/skill-development/Certificat
 import { SkillAnalytics } from '@/components/skill-development/SkillAnalytics';
 import { MobilePageHeader, MobileTabBar, MobileFloatingActionButton } from '@/components/ui/mobile-navigation';
 import { MobileStatsGrid, MobileStatsCard } from '@/components/ui/mobile-stats';
+import { PremiumPageHeader } from '@/components/ui/premium-page-header';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function SkillDevelopment() {
@@ -74,21 +75,28 @@ export function SkillDevelopment() {
 
       {/* Desktop Header */}
       {!isMobile && (
-        <div className="flex justify-between items-center p-6">
-          <div>
-            <h1 className="text-3xl font-bold">Skill Development Centre</h1>
-            <p className="text-muted-foreground">Comprehensive skill assessment and development platform</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export Reports
-            </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              New Assessment
-            </Button>
-          </div>
+        <div className="p-6">
+          <PremiumPageHeader
+            title="Skill Development Centre"
+            subtitle="Comprehensive skill assessment and development platform"
+            icon={Target}
+            badges={[
+              { label: 'Assessment Hub', icon: Award },
+              { label: 'Development Center', variant: 'secondary' as const }
+            ]}
+            actions={
+              <>
+                <Button variant="outline" size="sm" className="premium-button">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Reports
+                </Button>
+                <Button size="sm" className="premium-button">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Assessment
+                </Button>
+              </>
+            }
+          />
         </div>
       )}
 

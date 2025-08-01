@@ -8,6 +8,7 @@ import { BackupRestore } from '@/components/settings/BackupRestore';
 import { LandingPageManagement } from '@/components/settings/LandingPageManagement';
 import { BannerManagement } from '@/components/admin/BannerManagement';
 import { MobilePageHeader, MobileTabBar } from '@/components/ui/mobile-navigation';
+import { PremiumPageHeader } from '@/components/ui/premium-page-header';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export const Settings = () => {
@@ -35,9 +36,16 @@ export const Settings = () => {
 
       {/* Desktop Header */}
       {!isMobile && (
-        <div className="p-6 border-b border-border">
-          <h1 className="text-3xl font-bold">System Settings</h1>
-          <p className="text-muted-foreground mt-2">Configure system preferences and manage user access</p>
+        <div className="p-6">
+          <PremiumPageHeader
+            title="System Settings"
+            subtitle="Configure system preferences and manage user access"
+            icon={SettingsIcon}
+            badges={[
+              { label: 'System Config', icon: SettingsIcon },
+              { label: 'Admin Panel', variant: 'secondary' as const }
+            ]}
+          />
         </div>
       )}
 

@@ -7,6 +7,7 @@ import { CertificationTracker } from '@/components/made-in-nagaland/Certificatio
 import { MarketplaceAnalytics } from '@/components/made-in-nagaland/MarketplaceAnalytics';
 import { ArtisanManagement } from '@/components/made-in-nagaland/ArtisanManagement';
 import { MobilePageHeader, MobileTabBar } from '@/components/ui/mobile-navigation';
+import { PremiumPageHeader } from '@/components/ui/premium-page-header';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export const MadeInNagaland = () => {
@@ -32,9 +33,16 @@ export const MadeInNagaland = () => {
 
       {/* Desktop Header */}
       {!isMobile && (
-        <div className="p-6 border-b border-border">
-          <h1 className="text-3xl font-bold">Made in Nagaland</h1>
-          <p className="text-muted-foreground mt-2">Promote and manage local products and producers</p>
+        <div className="p-6">
+          <PremiumPageHeader
+            title="Made in Nagaland"
+            subtitle="Promote and manage local products and producers"
+            icon={Package}
+            badges={[
+              { label: 'Local Products', icon: Package },
+              { label: 'Producer Network', variant: 'secondary' as const, icon: Users }
+            ]}
+          />
         </div>
       )}
 

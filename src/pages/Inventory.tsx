@@ -6,6 +6,7 @@ import { StockTracker } from '@/components/inventory/StockTracker';
 import { MaintenanceScheduler } from '@/components/inventory/MaintenanceScheduler';
 import { InventoryReports } from '@/components/inventory/InventoryReports';
 import { MobilePageHeader, MobileTabBar } from '@/components/ui/mobile-navigation';
+import { PremiumPageHeader } from '@/components/ui/premium-page-header';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export const Inventory = () => {
@@ -31,9 +32,16 @@ export const Inventory = () => {
 
       {/* Desktop Header */}
       {!isMobile && (
-        <div className="p-6 border-b border-border">
-          <h1 className="text-3xl font-bold">Inventory Management</h1>
-          <p className="text-muted-foreground mt-2">Track assets, stock, and maintenance schedules</p>
+        <div className="p-6">
+          <PremiumPageHeader
+            title="Inventory Management"
+            subtitle="Track assets, stock, and maintenance schedules"
+            icon={Package}
+            badges={[
+              { label: 'Asset Tracking', icon: Package },
+              { label: 'Maintenance Hub', variant: 'secondary' as const }
+            ]}
+          />
         </div>
       )}
 

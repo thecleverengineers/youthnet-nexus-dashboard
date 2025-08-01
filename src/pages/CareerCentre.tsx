@@ -1,16 +1,18 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MobileStatsGrid, MobileStatsCard } from '@/components/ui/mobile-stats';
+import { PremiumPageHeader } from '@/components/ui/premium-page-header';
+import { PremiumStatsGrid, PremiumStatsCard } from '@/components/ui/premium-stats-grid';
 import { 
   MessageSquare, 
   Users, 
   BookOpen, 
   Target,
   Plus,
-  Download
+  Download,
+  Heart,
+  Star
 } from 'lucide-react';
 import { CareerCounselling } from '@/components/career-centre/CareerCounselling';
 import { MentorshipPrograms } from '@/components/career-centre/MentorshipPrograms';
@@ -20,112 +22,105 @@ import { CareerAnalytics } from '@/components/career-centre/CareerAnalytics';
 export function CareerCentre() {
   const [activeTab, setActiveTab] = useState('overview');
 
+  const badges = [
+    { label: 'Career Guidance', icon: Heart },
+    { label: 'Mentorship Hub', variant: 'secondary' as const, icon: Star }
+  ];
+
+  const headerActions = (
+    <>
+      <Button variant="outline" size="sm" className="premium-button">
+        <Download className="h-4 w-4 mr-2" />
+        Export Reports
+      </Button>
+      <Button size="sm" className="premium-button">
+        <Plus className="h-4 w-4 mr-2" />
+        New Session
+      </Button>
+    </>
+  );
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Career Development Centre</h1>
-          <p className="text-muted-foreground">Comprehensive career guidance and mentorship services</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Reports
-          </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            New Session
-          </Button>
-        </div>
-      </div>
+      <PremiumPageHeader
+        title="Career Development Centre"
+        subtitle="Comprehensive career guidance and mentorship services"
+        icon={Heart}
+        badges={badges}
+        actions={headerActions}
+      />
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Counselling Sessions</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">156</div>
-            <p className="text-xs text-muted-foreground">
-              +22% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Mentees</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">89</div>
-            <p className="text-xs text-muted-foreground">
-              12 new this month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resources Accessed</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2,847</div>
-            <p className="text-xs text-muted-foreground">
-              +35% engagement
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Career Goals Met</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">73%</div>
-            <p className="text-xs text-muted-foreground">
-              +8% success rate
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <PremiumStatsGrid columns={4}>
+        <PremiumStatsCard
+          title="Counselling Sessions"
+          value={156}
+          change={{ value: '+22% from last month', type: 'increase' }}
+          icon={MessageSquare}
+        />
+        <PremiumStatsCard
+          title="Active Mentees"
+          value={89}
+          change={{ value: '12 new this month', type: 'increase' }}
+          icon={Users}
+        />
+        <PremiumStatsCard
+          title="Resources Accessed"
+          value="2,847"
+          change={{ value: '+35% engagement', type: 'increase' }}
+          icon={BookOpen}
+        />
+        <PremiumStatsCard
+          title="Career Goals Met"
+          value="73%"
+          change={{ value: '+8% success rate', type: 'increase' }}
+          icon={Target}
+        />
+      </PremiumStatsGrid>
 
       {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="counselling">Counselling</TabsTrigger>
-          <TabsTrigger value="mentorship">Mentorship</TabsTrigger>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
-        </TabsList>
+      <div className="premium-card border-0 bg-gradient-to-r from-background to-primary/5 p-1 rounded-xl">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full h-auto p-1 bg-transparent grid grid-cols-4">
+            <TabsTrigger value="overview" className="flex-1 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 rounded-lg">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="counselling" className="flex-1 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 rounded-lg">
+              Counselling
+            </TabsTrigger>
+            <TabsTrigger value="mentorship" className="flex-1 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 rounded-lg">
+              Mentorship
+            </TabsTrigger>
+            <TabsTrigger value="resources" className="flex-1 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 rounded-lg">
+              Resources
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CareerCounselling />
-            <MentorshipPrograms />
+          <div className="mt-6">
+            <TabsContent value="overview" className="space-y-6 fade-in">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <CareerCounselling />
+                <MentorshipPrograms />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="counselling" className="fade-in">
+              <CareerCounselling detailed={true} />
+            </TabsContent>
+
+            <TabsContent value="mentorship" className="fade-in">
+              <MentorshipPrograms detailed={true} />
+            </TabsContent>
+
+            <TabsContent value="resources" className="fade-in">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <CareerResources />
+                <CareerAnalytics />
+              </div>
+            </TabsContent>
           </div>
-        </TabsContent>
-
-        <TabsContent value="counselling">
-          <CareerCounselling detailed={true} />
-        </TabsContent>
-
-        <TabsContent value="mentorship">
-          <MentorshipPrograms detailed={true} />
-        </TabsContent>
-
-        <TabsContent value="resources">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CareerResources />
-            <CareerAnalytics />
-          </div>
-        </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 }

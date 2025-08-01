@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MobileStatsGrid, MobileStatsCard } from '@/components/ui/mobile-stats';
+import { PremiumPageHeader } from '@/components/ui/premium-page-header';
+import { PremiumStatsGrid, PremiumStatsCard } from '@/components/ui/premium-stats-grid';
 import { 
   Briefcase, 
   Users, 
@@ -56,112 +56,105 @@ export function JobCentre() {
     );
   }
 
+  const badges = [
+    { label: 'Career Services', icon: Briefcase },
+    { label: 'Placement System', variant: 'secondary' as const }
+  ];
+
+  const headerActions = (
+    <>
+      <Button variant="outline" size="sm" className="premium-button">
+        <Download className="h-4 w-4 mr-2" />
+        Export Reports
+      </Button>
+      <Button size="sm" className="premium-button">
+        <Plus className="h-4 w-4 mr-2" />
+        New Job Posting
+      </Button>
+    </>
+  );
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Job Centre</h1>
-          <p className="text-muted-foreground">Comprehensive job placement and career services</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Reports
-          </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            New Job Posting
-          </Button>
-        </div>
-      </div>
+      <PremiumPageHeader
+        title="Job Centre"
+        subtitle="Comprehensive job placement and career services"
+        icon={Briefcase}
+        badges={badges}
+        actions={headerActions}
+      />
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalJobs || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              +12% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Applications</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalApplications || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              +25% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Placements</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.successfulPlacements || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              +18% success rate
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Employers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.activeEmployers || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              5 new this month
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <PremiumStatsGrid columns={4}>
+        <PremiumStatsCard
+          title="Total Jobs"
+          value={stats?.totalJobs || 0}
+          change={{ value: '+12% from last month', type: 'increase' }}
+          icon={Briefcase}
+        />
+        <PremiumStatsCard
+          title="Applications"
+          value={stats?.totalApplications || 0}
+          change={{ value: '+25% from last month', type: 'increase' }}
+          icon={FileText}
+        />
+        <PremiumStatsCard
+          title="Placements"
+          value={stats?.successfulPlacements || 0}
+          change={{ value: '+18% success rate', type: 'increase' }}
+          icon={TrendingUp}
+        />
+        <PremiumStatsCard
+          title="Active Employers"
+          value={stats?.activeEmployers || 0}
+          change={{ value: '5 new this month', type: 'neutral' }}
+          icon={Users}
+        />
+      </PremiumStatsGrid>
 
       {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="job-postings">Job Postings</TabsTrigger>
-          <TabsTrigger value="applications">Applications</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
+      <div className="premium-card border-0 bg-gradient-to-r from-background to-primary/5 p-1 rounded-xl">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full h-auto p-1 bg-transparent grid grid-cols-4">
+            <TabsTrigger value="overview" className="flex-1 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 rounded-lg">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="job-postings" className="flex-1 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 rounded-lg">
+              Job Postings
+            </TabsTrigger>
+            <TabsTrigger value="applications" className="flex-1 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 rounded-lg">
+              Applications
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex-1 px-4 py-3 text-sm font-medium transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-primary/10 rounded-lg">
+              Analytics
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <JobPostings />
-            <ApplicationTracking />
+          <div className="mt-6">
+            <TabsContent value="overview" className="space-y-6 fade-in">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <JobPostings />
+                <ApplicationTracking />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="job-postings" className="fade-in">
+              <JobPostings detailed={true} />
+            </TabsContent>
+
+            <TabsContent value="applications" className="fade-in">
+              <ApplicationTracking detailed={true} />
+            </TabsContent>
+
+            <TabsContent value="analytics" className="fade-in">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <PlacementAnalytics />
+                <EmployerManagement />
+              </div>
+            </TabsContent>
           </div>
-        </TabsContent>
-
-        <TabsContent value="job-postings">
-          <JobPostings detailed={true} />
-        </TabsContent>
-
-        <TabsContent value="applications">
-          <ApplicationTracking detailed={true} />
-        </TabsContent>
-
-        <TabsContent value="analytics">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PlacementAnalytics />
-            <EmployerManagement />
-          </div>
-        </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 }

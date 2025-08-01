@@ -6,6 +6,7 @@ import { ParticipantTracker } from '@/components/livelihood/ParticipantTracker';
 import { OutcomeAssessment } from '@/components/livelihood/OutcomeAssessment';
 import { CommunityImpact } from '@/components/livelihood/CommunityImpact';
 import { MobilePageHeader, MobileTabBar } from '@/components/ui/mobile-navigation';
+import { PremiumPageHeader } from '@/components/ui/premium-page-header';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export const LivelihoodIncubator = () => {
@@ -31,9 +32,16 @@ export const LivelihoodIncubator = () => {
 
       {/* Desktop Header */}
       {!isMobile && (
-        <div className="p-6 border-b border-border">
-          <h1 className="text-3xl font-bold">Livelihood Incubator</h1>
-          <p className="text-muted-foreground mt-2">Manage livelihood programs and community development</p>
+        <div className="p-6">
+          <PremiumPageHeader
+            title="Livelihood Incubator"
+            subtitle="Manage livelihood programs and community development"
+            icon={Lightbulb}
+            badges={[
+              { label: 'Community Programs', icon: Heart },
+              { label: 'Development Hub', variant: 'secondary' as const }
+            ]}
+          />
         </div>
       )}
 
