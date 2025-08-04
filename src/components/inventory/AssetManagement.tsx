@@ -4,11 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Plus, Edit, Trash2, Package } from 'lucide-react';
 import { AssetForm } from './AssetForm';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { inventoryService } from '@/services/inventoryService';
 
 export const AssetManagement = () => {
   const [showForm, setShowForm] = useState(false);
@@ -17,51 +17,24 @@ export const AssetManagement = () => {
   const { data: assets, isLoading, refetch } = useQuery({
     queryKey: ['inventory_items'],
     queryFn: async () => {
-      try {
-        return await inventoryService.getItems();
-      } catch (error) {
-        console.error('Error fetching inventory items:', error);
-        // Return mock data as fallback
-        return [
-          {
-            id: '1',
-            name: 'Dell Laptop',
-            category: 'Electronics',
-            description: 'Dell Inspiron 15 3000 Series',
-            status: 'available',
-            location: 'IT Department',
-            purchase_date: '2024-01-15',
-            purchase_price: 45000,
-            current_value: 40000,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: '2',
-            name: 'Office Chair',
-            category: 'Furniture',
-            description: 'Ergonomic office chair with lumbar support',
-            status: 'in_use',
-            location: 'HR Department',
-            purchase_date: '2024-01-10',
-            purchase_price: 8500,
-            current_value: 7500,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ];
-      }
-    }
-  });
+      const { data, error } = await supabase
+        .from('inventory_items')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  const { data: categories } = useQuery({
-    queryKey: ['inventory_categories'],
-    queryFn: inventoryService.getCategories
+      if (error) throw error;
+      return data;
+    }
   });
 
   const deleteAsset = async (id: string) => {
     try {
-      await inventoryService.deleteItem(id);
+      const { error } = await supabase
+        .from('inventory_items')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
 
       toast({
         title: "Success",
@@ -84,8 +57,7 @@ export const AssetManagement = () => {
       case 'available': return 'bg-green-100 text-green-800';
       case 'in_use': return 'bg-blue-100 text-blue-800';
       case 'maintenance': return 'bg-yellow-100 text-yellow-800';
-      case 'damaged': return 'bg-red-100 text-red-800';
-      case 'disposed': return 'bg-gray-100 text-gray-800';
+      case 'retired': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -146,16 +118,9 @@ export const AssetManagement = () => {
                   <TableCell>${asset.current_value}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        // TODO: Open edit modal with asset data
-                        console.log('Edit asset:', asset.id);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => deleteAsset(asset.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>

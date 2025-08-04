@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Briefcase, MapPin, DollarSign, Calendar, Search, Plus, Eye } from 'lucide-react';
-import { JobDetailsModal } from './JobDetailsModal';
 
 interface JobPostingsProps {
   detailed?: boolean;
@@ -15,8 +14,6 @@ interface JobPostingsProps {
 
 export function JobPostings({ detailed = false }: JobPostingsProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedJob, setSelectedJob] = useState<any>(null);
-  const [jobDetailsOpen, setJobDetailsOpen] = useState(false);
 
   const { data: jobPostings, isLoading } = useQuery({
     queryKey: ['job-postings'],
@@ -27,53 +24,8 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
         .order('created_at', { ascending: false })
         .limit(detailed ? 50 : 5);
 
-      if (error) {
-        console.error('Error fetching job postings:', error);
-        // Return mock data as fallback
-        return [
-          {
-            id: '1',
-            title: 'Frontend Developer',
-            company: 'Tech Solutions Inc.',
-            location: 'Kohima, Nagaland',
-            salary_range: '₹4-6 LPA',
-            job_type: 'Full-time',
-            status: 'open',
-            description: 'Looking for a skilled frontend developer with React experience.',
-            requirements: 'React, JavaScript, CSS, HTML',
-            posted_date: new Date().toISOString().split('T')[0],
-            closing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-          },
-          {
-            id: '2',
-            title: 'Digital Marketing Specialist',
-            company: 'Growth Marketing Agency',
-            location: 'Dimapur, Nagaland',
-            salary_range: '₹3-5 LPA',
-            job_type: 'Full-time',
-            status: 'open',
-            description: 'Seeking a creative digital marketing specialist to drive online campaigns.',
-            requirements: 'SEO, SEM, Social Media Marketing, Analytics',
-            posted_date: new Date().toISOString().split('T')[0],
-            closing_date: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-          }
-        ];
-      }
-      return data?.length ? data : [
-        {
-          id: '1',
-          title: 'Frontend Developer',
-          company: 'Tech Solutions Inc.',
-          location: 'Kohima, Nagaland',
-          salary_range: '₹4-6 LPA',
-          job_type: 'Full-time',
-          status: 'open',
-          description: 'Looking for a skilled frontend developer with React experience.',
-          requirements: 'React, JavaScript, CSS, HTML',
-          posted_date: new Date().toISOString().split('T')[0],
-          closing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-        }
-      ];
+      if (error) throw error;
+      return data || [];
     }
   });
 
@@ -82,11 +34,6 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
     job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.location?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
-
-  const handleViewDetails = (job: any) => {
-    setSelectedJob(job);
-    setJobDetailsOpen(true);
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -188,7 +135,7 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
                 )}
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(job)}>
+                  <Button variant="outline" size="sm">
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
                   </Button>
@@ -206,12 +153,6 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
           )}
         </div>
       </CardContent>
-
-      <JobDetailsModal 
-        open={jobDetailsOpen} 
-        onOpenChange={setJobDetailsOpen}
-        job={selectedJob}
-      />
     </Card>
   );
 }

@@ -1,56 +1,43 @@
 
 import React from 'react';
-import { GraduationCap, BookOpen, Users, UserCheck, BarChart3, Star } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CourseManagement } from '@/components/education-department/CourseManagement';
 import { StudentAssignment } from '@/components/education-department/StudentAssignment';
 import { InstructorManagement } from '@/components/education-department/InstructorManagement';
 import { EducationAnalytics } from '@/components/education-department/EducationAnalytics';
-import { PremiumPageHeader } from '@/components/ui/premium-page-header';
-import { PremiumTabs } from '@/components/ui/premium-tabs';
 
 export const EducationDepartment = () => {
-  const tabs = [
-    {
-      key: 'courses',
-      label: 'Course Management',
-      icon: BookOpen,
-      content: <CourseManagement />
-    },
-    {
-      key: 'assignments',
-      label: 'Student Assignment',
-      icon: UserCheck,
-      content: <StudentAssignment />
-    },
-    {
-      key: 'instructors',
-      label: 'Instructors',
-      icon: Users,
-      content: <InstructorManagement />
-    },
-    {
-      key: 'analytics',
-      label: 'Analytics',
-      icon: BarChart3,
-      content: <EducationAnalytics />
-    }
-  ];
-
-  const badges = [
-    { label: 'Department System', icon: Star },
-    { label: 'Academic Management', variant: 'secondary' as const }
-  ];
-
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <PremiumPageHeader
-        title="Education Department"
-        subtitle="Manage courses, instructors, and student assignments"
-        icon={GraduationCap}
-        badges={badges}
-      />
+    <div className="container mx-auto p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Education Department</h1>
+        <p className="text-gray-600 mt-2">Manage courses, instructors, and student assignments</p>
+      </div>
 
-      <PremiumTabs tabs={tabs} defaultValue="courses" />
+      <Tabs defaultValue="courses" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="courses">Course Management</TabsTrigger>
+          <TabsTrigger value="assignments">Student Assignment</TabsTrigger>
+          <TabsTrigger value="instructors">Instructors</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="courses">
+          <CourseManagement />
+        </TabsContent>
+
+        <TabsContent value="assignments">
+          <StudentAssignment />
+        </TabsContent>
+
+        <TabsContent value="instructors">
+          <InstructorManagement />
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <EducationAnalytics />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

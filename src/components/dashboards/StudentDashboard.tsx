@@ -1,211 +1,204 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, BookOpen, Award, TrendingUp } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { 
+  User,
+  BookOpen,
+  Award,
+  Calendar,
+  TrendingUp,
+  Target,
+  Clock,
+  LogOut
+} from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export function StudentDashboard() {
-  const { user, profile } = useAuth();
+export const StudentDashboard = () => {
+  const { user, profile, signOut } = useAuth();
+  const [studentData, setStudentData] = useState(null);
+  const [enrollments, setEnrollments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: studentData } = useQuery({
-    queryKey: ['student-data', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
+  useEffect(() => {
+    if (user) {
+      loadStudentData();
+    }
+  }, [user]);
 
-      const { data: studentRecord } = await supabase
+  const loadStudentData = async () => {
+    try {
+      // Fetch student record
+      const { data: student } = await supabase
         .from('students')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (!studentRecord) return null;
+      setStudentData(student);
 
-      const { data: enrollments } = await supabase
+      // Fetch enrollments
+      const { data: enrollmentData } = await supabase
         .from('student_enrollments')
         .select(`
           *,
-          training_programs (
-            name,
-            description,
-            duration_weeks
-          )
+          training_programs(name, duration_weeks)
         `)
-        .eq('student_id', studentRecord.id);
+        .eq('student_id', student?.id);
 
-      const { data: courseEnrollments } = await supabase
-        .from('course_enrollments')
-        .select(`
-          *,
-          education_courses (
-            course_name,
-            description,
-            duration_months
-          )
-        `)
-        .eq('student_id', studentRecord.id);
+      setEnrollments(enrollmentData || []);
+    } catch (error) {
+      console.error('Error loading student data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      return {
-        student: studentRecord,
-        enrollments: enrollments || [],
-        courseEnrollments: courseEnrollments || []
-      };
-    },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const student = studentData?.student;
-  const enrollments = studentData?.enrollments || [];
-  const courseEnrollments = studentData?.courseEnrollments || [];
-  const allEnrollments = [...enrollments, ...courseEnrollments];
-
-  const activeCount = allEnrollments.filter(e => 
-    e.status === 'active' || e.status === 'enrolled'
-  ).length;
-  
-  const completedCount = allEnrollments.filter(e => 
-    e.status === 'completed'
-  ).length;
-
-  const progressPercentage = allEnrollments.length > 0 
-    ? Math.round((completedCount / allEnrollments.length) * 100)
-    : 0;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg">
-        <h1 className="text-2xl font-bold mb-2">Welcome Back, {profile?.full_name || 'Student'}!</h1>
-        <p className="opacity-90">Student ID: {student?.student_id || 'Loading...'}</p>
-        <p className="opacity-90">Status: {student?.status || 'Active'}</p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Enrollments</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Current programs
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completedCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Programs finished
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Progress</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{progressPercentage}%</div>
-            <p className="text-xs text-muted-foreground">
-              Overall completion
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Current Enrollments */}
-      <Card>
-        <CardHeader>
-          <CardTitle>My Programs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {allEnrollments.length > 0 ? (
-            <div className="space-y-4">
-              {enrollments.map((enrollment) => (
-                <div key={enrollment.id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold">
-                      {enrollment.training_programs?.name || 'Training Program'}
-                    </h3>
-                    <Badge variant={enrollment.status === 'active' ? 'default' : 
-                            enrollment.status === 'completed' ? 'secondary' : 'destructive'}>
-                      {enrollment.status}
-                    </Badge>
-                  </div>
-                  {enrollment.training_programs?.description && (
-                    <p className="text-sm text-gray-600 mb-2">
-                      {enrollment.training_programs.description}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Enrolled: {new Date(enrollment.enrollment_date).toLocaleDateString()}
-                    </div>
-                    {enrollment.training_programs?.duration_weeks && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {enrollment.training_programs.duration_weeks} weeks
-                      </div>
-                    )}
-                  </div>
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <Card className="futuristic-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <User className="h-8 w-8 text-white" />
                 </div>
-              ))}
-              
-              {courseEnrollments.map((enrollment) => (
-                <div key={enrollment.id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold">
-                      {enrollment.education_courses?.course_name || 'Education Course'}
-                    </h3>
-                    <Badge variant={enrollment.status === 'enrolled' ? 'default' : 
-                            enrollment.status === 'completed' ? 'secondary' : 'destructive'}>
-                      {enrollment.status}
-                    </Badge>
-                  </div>
-                  {enrollment.education_courses?.description && (
-                    <p className="text-sm text-gray-600 mb-2">
-                      {enrollment.education_courses.description}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Enrolled: {new Date(enrollment.enrollment_date).toLocaleDateString()}
-                    </div>
-                    {enrollment.education_courses?.duration_months && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {enrollment.education_courses.duration_months} months
-                      </div>
-                    )}
-                  </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">Welcome, {profile?.full_name}!</h1>
+                  <p className="text-muted-foreground">Student ID: {studentData?.student_id}</p>
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 mt-1">
+                    Student
+                  </Badge>
                 </div>
-              ))}
+              </div>
+              <Button variant="outline" onClick={signOut} className="hover:bg-red-500/20">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
             </div>
-          ) : (
-            <div className="text-center py-8">
-              <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Enrollments Yet</h3>
-              <p className="text-gray-600">
-                You haven't enrolled in any programs yet. Contact your advisor to get started!
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Active Courses</p>
+                  <p className="text-2xl font-bold text-white">{enrollments.length}</p>
+                </div>
+                <BookOpen className="h-8 w-8 text-blue-400" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-2xl font-bold text-green-400">
+                    {enrollments.filter(e => e.status === 'completed').length}
+                  </p>
+                </div>
+                <Award className="h-8 w-8 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">In Progress</p>
+                  <p className="text-2xl font-bold text-yellow-400">
+                    {enrollments.filter(e => e.status === 'active').length}
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-yellow-400" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="futuristic-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Overall Progress</p>
+                  <p className="text-2xl font-bold text-purple-400">75%</p>
+                  <Progress value={75} className="mt-2" />
+                </div>
+                <TrendingUp className="h-8 w-8 text-purple-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Current Enrollments */}
+        <Card className="futuristic-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-blue-400" />
+              Your Courses
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {enrollments.length > 0 ? (
+              <div className="space-y-4">
+                {enrollments.map((enrollment) => (
+                  <div key={enrollment.id} className="p-4 rounded-lg bg-gray-800/50 hover:bg-gray-800/70 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-white">
+                          {enrollment.training_programs?.name || 'Course'}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          Duration: {enrollment.training_programs?.duration_weeks} weeks
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Enrolled: {new Date(enrollment.enrollment_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge 
+                        className={
+                          enrollment.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                          enrollment.status === 'active' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                          'bg-gray-500/20 text-gray-400 border-gray-500/30'
+                        }
+                      >
+                        {enrollment.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No courses enrolled yet</p>
+                <Button className="mt-4">Browse Courses</Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
-}
+};

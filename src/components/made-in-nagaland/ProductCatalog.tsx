@@ -117,14 +117,7 @@ export const ProductCatalog = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {
-                          // TODO: Open edit modal with product data
-                          console.log('Edit product:', product.id);
-                        }}
-                      >
+                      <Button variant="outline" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => deleteProduct(product.id)}>

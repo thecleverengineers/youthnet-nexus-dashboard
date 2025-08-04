@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MobileStatsGrid, MobileStatsCard } from '@/components/ui/mobile-stats';
 import { 
   Users, 
   GraduationCap, 
@@ -25,8 +24,6 @@ import { StudentManagement } from '@/components/education/StudentManagement';
 import { ProgramManagement } from '@/components/education/ProgramManagement';
 import { EnrollmentManagement } from '@/components/education/EnrollmentManagement';
 import { PerformanceAnalytics } from '@/components/education/PerformanceAnalytics';
-import { SchoolManagement } from '@/components/education/SchoolManagement';
-import { TeacherManagement } from '@/components/education/TeacherManagement';
 
 export function Education() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -162,11 +159,7 @@ export function Education() {
         </TabsContent>
 
         <TabsContent value="programs">
-          <div className="space-y-6">
-            <ProgramManagement />
-            <SchoolManagement />
-            <TeacherManagement />
-          </div>
+          <ProgramManagement />
         </TabsContent>
 
         <TabsContent value="analytics">

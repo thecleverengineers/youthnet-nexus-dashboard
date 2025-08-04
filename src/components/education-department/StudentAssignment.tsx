@@ -10,13 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { UserPlus, Search, Filter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export const StudentAssignment = () => {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
   const [assignmentReason, setAssignmentReason] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: courses } = useQuery({
@@ -34,13 +35,13 @@ export const StudentAssignment = () => {
   });
 
   const { data: students } = useQuery({
-    queryKey: ['students-with-profiles'],
+    queryKey: ['students'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('students')
         .select(`
           *,
-          profiles!students_user_id_fkey(full_name, email)
+          profiles:user_id(full_name, email)
         `)
         .order('created_at', { ascending: false });
       
@@ -56,11 +57,11 @@ export const StudentAssignment = () => {
         .from('course_enrollments')
         .select(`
           *,
-          students!course_enrollments_student_id_fkey(
+          students(
             student_id,
-            profiles!students_user_id_fkey(full_name, email)
+            profiles:user_id(full_name, email)
           ),
-          education_courses!course_enrollments_course_id_fkey(course_name, course_code)
+          education_courses(course_name, course_code)
         `)
         .order('enrollment_date', { ascending: false });
       
@@ -82,16 +83,27 @@ export const StudentAssignment = () => {
       setSelectedCourse('');
       setSelectedStudent('');
       setAssignmentReason('');
-      toast.success('Student assigned successfully');
+      toast({
+        title: "Student assigned",
+        description: "Student has been successfully assigned to the course.",
+      });
     },
     onError: (error) => {
-      toast.error('Failed to assign student. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to assign student. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
   const handleAssignment = () => {
     if (!selectedCourse || !selectedStudent) {
-      toast.error('Please select both a course and a student.');
+      toast({
+        title: "Missing information",
+        description: "Please select both a course and a student.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -212,7 +224,7 @@ export const StudentAssignment = () => {
                 <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
                     <div className="font-medium">
-                      {enrollment.students?.profiles?.full_name || 'Unknown Student'}
+                      {enrollment.students?.profiles?.full_name}
                     </div>
                     <div className="text-sm text-gray-600">
                       {enrollment.students?.student_id} • {enrollment.students?.profiles?.email}

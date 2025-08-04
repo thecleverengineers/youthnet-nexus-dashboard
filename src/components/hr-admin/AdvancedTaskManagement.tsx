@@ -21,17 +21,11 @@ import {
   Plus,
   Search,
   BarChart3,
-  Zap,
-  Eye,
-  Edit,
-  PlayCircle
+  Zap
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { TaskActionModal } from './TaskActionModal';
-import { AdvancedFilter } from '@/components/ui/advanced-filter';
-import { useNotificationActions } from '@/hooks/useNotification';
 
 interface Task {
   id: string;
@@ -54,35 +48,15 @@ interface Task {
   completed_at?: string;
 }
 
-interface Employee {
-  id: string;
-  employee_id: string;
-  position: string;
-  department: string;
-}
-
 export const AdvancedTaskManagement = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [taskActionModal, setTaskActionModal] = useState<{
-    open: boolean;
-    task: Task | null;
-    action: 'view' | 'complete' | 'update' | null;
-  }>({
-    open: false,
-    task: null,
-    action: null
-  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [assigneeFilter, setAssigneeFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('');
-  
-  const { showSuccess, showError, showInfo } = useNotificationActions();
   
   const [stats, setStats] = useState({
     total: 0,
@@ -114,85 +88,24 @@ export const AdvancedTaskManagement = () => {
 
   const loadData = async () => {
     try {
-      // Load employees from database
-      const { data: employeesData, error: employeesError } = await supabase
-        .from('employees')
-        .select('id, employee_id, position, department');
+      const [tasksResponse, employeesResponse] = await Promise.all([
+        supabase.from('employee_tasks').select('*').order('created_at', { ascending: false }),
+        supabase.from('employees').select('id, employee_id, position, department').eq('employment_status', 'active')
+      ]);
 
-      if (employeesError) throw employeesError;
-
-      const employeesList: Employee[] = employeesData?.map(emp => ({
-        id: emp.id,
-        employee_id: emp.employee_id,
-        position: emp.position || 'Unknown Position',
-        department: emp.department || 'Unknown Department'
-      })) || [];
-
-      // Mock tasks data instead of querying non-existent table
-      const mockTasks: Task[] = [
-        {
-          id: '1',
-          title: 'Complete Q4 Performance Reviews',
-          description: 'Conduct and finalize all employee performance reviews for Q4',
-          assigned_to: employeesList[0]?.id || 'emp-1',
-          assigned_by: 'manager-1',
-          priority: 'high',
-          status: 'in_progress',
-          due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          estimated_hours: 20,
-          actual_hours: 12,
-          completion_percentage: 60,
-          tags: ['HR', 'Performance'],
-          dependencies: [],
-          ai_complexity_score: 0.7,
-          auto_assigned: false,
-          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          title: 'Update Employee Handbook',
-          description: 'Review and update company policies in the employee handbook',
-          assigned_to: employeesList[1]?.id || 'emp-2',
-          assigned_by: 'manager-1',
-          priority: 'medium',
-          status: 'pending',
-          due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          estimated_hours: 8,
-          actual_hours: 0,
-          completion_percentage: 0,
-          tags: ['Documentation', 'Policy'],
-          dependencies: [],
-          ai_complexity_score: 0.4,
-          auto_assigned: true,
-          created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '3',
-          title: 'Payroll System Integration',
-          description: 'Integrate new payroll system with existing HR database',
-          assigned_to: employeesList[0]?.id || 'emp-1',
-          assigned_by: 'manager-1',
-          priority: 'urgent',
-          status: 'completed',
-          due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          estimated_hours: 16,
-          actual_hours: 18,
-          completion_percentage: 100,
-          tags: ['Technology', 'Integration'],
-          dependencies: [],
-          ai_complexity_score: 0.9,
-          auto_assigned: false,
-          created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          updated_at: new Date().toISOString(),
-          completed_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-        }
-      ];
-
-      setTasks(mockTasks);
-      setEmployees(employeesList);
-      calculateStats(mockTasks);
+      if (tasksResponse.data) {
+        // Convert database response to proper Task type
+        const convertedTasks: Task[] = tasksResponse.data.map(task => ({
+          ...task,
+          priority: task.priority as 'low' | 'medium' | 'high' | 'urgent',
+          status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+          tags: task.tags || [],
+          dependencies: task.dependencies || []
+        }));
+        setTasks(convertedTasks);
+        calculateStats(convertedTasks);
+      }
+      if (employeesResponse.data) setEmployees(employeesResponse.data);
 
     } catch (error) {
       console.error('Error loading data:', error);
@@ -246,24 +159,26 @@ export const AdvancedTaskManagement = () => {
       const aiComplexityScore = calculateAIComplexity(newTask);
       const autoAssigned = shouldAutoAssign(newTask);
 
-      const taskData: Task = {
-        id: Date.now().toString(),
+      const taskData = {
         ...newTask,
         assigned_by: 'current-user-id', // This should come from auth context
         ai_complexity_score: aiComplexityScore,
         auto_assigned: autoAssigned,
         completion_percentage: 0,
         actual_hours: 0,
-        status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
-      // Add to mock data instead of database
-      setTasks(prev => [taskData, ...prev]);
+      const { error } = await supabase
+        .from('employee_tasks')
+        .insert([taskData]);
+
+      if (error) throw error;
 
       toast.success('Task created successfully!');
       setIsCreateDialogOpen(false);
+      loadData();
       
       // Reset form
       setNewTask({
@@ -309,8 +224,8 @@ export const AdvancedTaskManagement = () => {
 
   const updateTaskStatus = async (taskId: string, newStatus: string) => {
     try {
-      const updateData: Partial<Task> = {
-        status: newStatus as any,
+      const updateData: any = {
+        status: newStatus,
         updated_at: new Date().toISOString()
       };
 
@@ -319,14 +234,15 @@ export const AdvancedTaskManagement = () => {
         updateData.completion_percentage = 100;
       }
 
-      // Update mock data instead of database
-      setTasks(prev => prev.map(task => 
-        task.id === taskId 
-          ? { ...task, ...updateData }
-          : task
-      ));
+      const { error } = await supabase
+        .from('employee_tasks')
+        .update(updateData)
+        .eq('id', taskId);
+
+      if (error) throw error;
 
       toast.success('Task status updated!');
+      loadData();
     } catch (error: any) {
       toast.error('Failed to update task: ' + error.message);
     }
@@ -662,7 +578,7 @@ export const AdvancedTaskManagement = () => {
                           <div>
                             <p className="text-xs text-gray-400 mb-1">Progress</p>
                             <div className="flex items-center gap-2">
-                              <Progress value={task.completion_percentage} className="flex-1 h-2"  />
+                              <Progress value={task.completion_percentage} className="flex-1 h-2" />
                               <span className="text-xs text-white font-medium">{task.completion_percentage}%</span>
                             </div>
                           </div>
@@ -714,7 +630,7 @@ export const AdvancedTaskManagement = () => {
             </div>
           ) : (
             <div className="p-12 text-center">
-              <Target className="h-16 w-16 text-gray-600 mx-auto mb-4 opacity-50" />
+              <Target className="h-16 w-16 text-gray-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">No Tasks Found</h3>
               <p className="text-gray-400 mb-6">
                 {searchTerm || statusFilter !== 'all' || priorityFilter !== 'all' 

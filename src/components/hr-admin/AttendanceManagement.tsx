@@ -3,24 +3,36 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Clock, 
   LogIn, 
   LogOut, 
+  Calendar as CalendarIcon,
   TrendingUp,
+  MapPin,
   User,
+  Timer,
+  Coffee,
   AlertTriangle,
+  Award,
   BarChart3,
   Users,
-  Target
+  Target,
+  Zap
 } from 'lucide-react';
-import { attendanceService, AttendanceRecord } from '@/services/attendanceService';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 export const AttendanceManagement = () => {
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
-  const [currentEmployee, setCurrentEmployee] = useState<any>(null);
-  const [todayAttendance, setTodayAttendance] = useState<AttendanceRecord | null>(null);
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentEmployee, setCurrentEmployee] = useState(null);
+  const [todayAttendance, setTodayAttendance] = useState(null);
   const [stats, setStats] = useState({
     present: 0,
     absent: 0,
@@ -31,72 +43,156 @@ export const AttendanceManagement = () => {
   });
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Update current time every second
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
+    // Load employee session
     const session = localStorage.getItem('employee_session');
     if (session) {
-      const empData = JSON.parse(session);
-      setCurrentEmployee(empData);
-      loadTodayAttendance(empData.id);
+      setCurrentEmployee(JSON.parse(session));
     }
 
+    fetchTodayAttendance();
     fetchAttendanceRecords();
     fetchStats();
 
     return () => clearInterval(timer);
   }, []);
 
-  const loadTodayAttendance = async (employeeId: string) => {
-    const attendance = await attendanceService.getTodayAttendance(employeeId);
-    setTodayAttendance(attendance);
-    setIsCheckedIn(!!(attendance?.check_in && !attendance?.check_out));
+  const fetchTodayAttendance = async () => {
+    const session = localStorage.getItem('employee_session');
+    if (!session) return;
+
+    const employee = JSON.parse(session);
+    const today = format(new Date(), 'yyyy-MM-dd');
+
+    const { data } = await supabase
+      .from('attendance_records')
+      .select('*')
+      .eq('employee_id', employee.id)
+      .eq('date', today)
+      .single();
+
+    if (data) {
+      setTodayAttendance(data);
+      setIsCheckedIn(data.check_in && !data.check_out);
+    }
   };
 
   const fetchAttendanceRecords = async () => {
-    const records = await attendanceService.fetchAttendanceRecords();
-    setAttendanceRecords(records);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('attendance_records')
+        .select(`
+          *,
+          employees (
+            employee_id,
+            profiles (full_name)
+          )
+        `)
+        .order('date', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setAttendanceRecords(data || []);
+    } catch (error: any) {
+      toast.error('Failed to fetch attendance records');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchStats = async () => {
-    const records = await attendanceService.fetchAttendanceRecords();
     const today = format(new Date(), 'yyyy-MM-dd');
-    const todayRecords = records.filter(r => r.date === today);
     
-    const stats = {
-      present: todayRecords.filter(r => r.status === 'present').length,
-      absent: todayRecords.filter(r => r.status === 'absent').length,
-      late: todayRecords.filter(r => r.status === 'late').length,
-      onTime: todayRecords.filter(r => r.status === 'present').length,
-      totalHours: 200,
-      overtime: 15
-    };
+    try {
+      const { data } = await supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('date', today);
 
-    setStats(stats);
+      if (data) {
+        const stats = data.reduce((acc, record) => {
+          if (record.status === 'present') acc.present++;
+          if (record.status === 'absent') acc.absent++;
+          if (record.status === 'late') acc.late++;
+          if (record.check_in && new Date(record.check_in).getHours() <= 9) acc.onTime++;
+          // Note: total_hours calculation would need to be implemented based on check_in/check_out
+          return acc;
+        }, { present: 0, absent: 0, late: 0, onTime: 0, totalHours: 0, overtime: 0 });
+
+        setStats(stats);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
   };
 
   const handleCheckIn = async () => {
-    if (!currentEmployee) return;
+    const session = localStorage.getItem('employee_session');
+    if (!session) {
+      toast.error('Please login first');
+      return;
+    }
+
+    const employee = JSON.parse(session);
+    const now = new Date();
+    const today = format(now, 'yyyy-MM-dd');
     
-    const result = await attendanceService.checkIn(currentEmployee.id);
-    if (result) {
-      setTodayAttendance(result);
+    try {
+      const checkInTime = now.toISOString();
+      const isLate = now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 15);
+      
+      const { error } = await supabase
+        .from('attendance_records')
+        .upsert({
+          employee_id: employee.id,
+          date: today,
+          check_in: checkInTime,
+          status: isLate ? 'late' : 'present'
+        }, {
+          onConflict: 'employee_id,date'
+        });
+
+      if (error) throw error;
+
       setIsCheckedIn(true);
+      toast.success(`Checked in at ${format(now, 'HH:mm')}${isLate ? ' (Late)' : ''}`);
+      fetchTodayAttendance();
       fetchStats();
+    } catch (error: any) {
+      toast.error('Check-in failed: ' + error.message);
     }
   };
 
   const handleCheckOut = async () => {
-    if (!currentEmployee) return;
+    const session = localStorage.getItem('employee_session');
+    if (!session || !todayAttendance) return;
+
+    const now = new Date();
     
-    const result = await attendanceService.checkOut(currentEmployee.id);
-    if (result) {
-      setTodayAttendance(result);
+    try {
+      const { error } = await supabase
+        .from('attendance_records')
+        .update({
+          check_out: now.toISOString()
+        })
+        .eq('id', todayAttendance.id);
+
+      if (error) throw error;
+
       setIsCheckedIn(false);
+      toast.success(`Checked out at ${format(now, 'HH:mm')}`);
+      fetchTodayAttendance();
       fetchStats();
+    } catch (error: any) {
+      toast.error('Check-out failed: ' + error.message);
     }
   };
 
@@ -124,7 +220,7 @@ export const AttendanceManagement = () => {
                 Advanced Attendance System
               </CardTitle>
               <p className="text-muted-foreground">
-                Real-time workforce management
+                Biometric-enabled workforce management
               </p>
             </div>
             <div className="text-right">
@@ -269,9 +365,15 @@ export const AttendanceManagement = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {attendanceRecords.length > 0 ? (
+          {loading ? (
             <div className="space-y-3">
-              {attendanceRecords.slice(0, 10).map((record) => (
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="animate-pulse bg-gray-800/50 rounded-lg h-16"></div>
+              ))}
+            </div>
+          ) : attendanceRecords.length > 0 ? (
+            <div className="space-y-3">
+              {attendanceRecords.map((record) => (
                 <div key={record.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 hover:bg-gray-800/70 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">

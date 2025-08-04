@@ -83,18 +83,10 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
 
         toast.success('Employee updated successfully!');
       } else {
-        // Create new employee - we need to create a user profile first
-        // For now, we'll create a placeholder user_id
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-          throw new Error('User must be authenticated to create employees');
-        }
-
-        // Create new employee with current user as placeholder (in real app, you'd create proper user)
+        // Create new employee
         const { error } = await supabase
           .from('employees')
-          .insert({
+          .insert([{
             employee_id: formData.employee_id,
             position: formData.position,
             department: formData.department,
@@ -108,8 +100,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
             emergency_contact_phone: formData.emergency_contact_phone,
             bank_account: formData.bank_account,
             tax_id: formData.tax_id,
-            user_id: user.id, // This should be the actual user ID for the new employee
-          });
+          }]);
 
         if (error) throw error;
         toast.success('Employee created successfully!');

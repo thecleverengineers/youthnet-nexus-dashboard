@@ -1,11 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
 
 export function useDashboardData() {
-  const { user, profile } = useAuth();
-
   const studentsQuery = useQuery({
     queryKey: ['students-count'],
     queryFn: async () => {
@@ -14,7 +11,6 @@ export function useDashboardData() {
         .select('*', { count: 'exact', head: true });
       return count || 0;
     },
-    staleTime: 5 * 60 * 1000,
   });
 
   const trainersQuery = useQuery({
@@ -25,18 +21,6 @@ export function useDashboardData() {
         .select('*', { count: 'exact', head: true });
       return count || 0;
     },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const employeesQuery = useQuery({
-    queryKey: ['employees-count'],
-    queryFn: async () => {
-      const { count } = await supabase
-        .from('employees')
-        .select('*', { count: 'exact', head: true });
-      return count || 0;
-    },
-    staleTime: 5 * 60 * 1000,
   });
 
   const jobApplicationsQuery = useQuery({
@@ -48,7 +32,6 @@ export function useDashboardData() {
         .eq('status', 'selected');
       return count || 0;
     },
-    staleTime: 5 * 60 * 1000,
   });
 
   const incubationProjectsQuery = useQuery({
@@ -60,13 +43,12 @@ export function useDashboardData() {
         .in('status', ['development', 'testing', 'launched']);
       return count || 0;
     },
-    staleTime: 5 * 60 * 1000,
   });
 
   const departmentStatsQuery = useQuery({
     queryKey: ['department-stats'],
     queryFn: async () => {
-      // Get real enrollment data
+      // Get student counts by enrollment status
       const { data: enrollments } = await supabase
         .from('student_enrollments')
         .select(`
@@ -75,63 +57,32 @@ export function useDashboardData() {
           training_programs(name)
         `);
 
-      const { data: courseEnrollments } = await supabase
-        .from('course_enrollments')
-        .select('status');
-
-      // Get employee data by department
-      const { data: employees } = await supabase
-        .from('employees')
-        .select('department, employment_status');
-
-      // Calculate real department statistics
-      const educationStudents = courseEnrollments?.filter(e => e.status === 'enrolled').length || 0;
-      const skillDevStudents = enrollments?.filter(e => e.status === 'active').length || 0;
-      const jobCentreEmployees = employees?.filter(e => e.department === 'Job Centre').length || 0;
-      const careerDevEmployees = employees?.filter(e => e.department === 'Career Development').length || 0;
-      const incubationStudents = enrollments?.filter(e => e.status === 'active').length * 0.1 || 0;
-
-      // Calculate completion rates based on completed vs total enrollments
-      const totalEnrollments = enrollments?.length || 1;
-      const completedEnrollments = enrollments?.filter(e => e.status === 'completed').length || 0;
-      const completionRate = totalEnrollments > 0 ? Math.round((completedEnrollments / totalEnrollments) * 100) : 0;
-
+      // Process data for department performance chart
       const departmentData = [
-        { 
-          name: 'Education', 
-          students: educationStudents, 
-          completion: completionRate > 0 ? completionRate : 85 
-        },
-        { 
-          name: 'Skill Dev', 
-          students: skillDevStudents, 
-          completion: completionRate > 0 ? completionRate + 7 : 92 
-        },
-        { 
-          name: 'Job Centre', 
-          students: jobCentreEmployees, 
-          completion: completionRate > 0 ? completionRate - 7 : 78 
-        },
-        { 
-          name: 'Career Dev', 
-          students: careerDevEmployees, 
-          completion: completionRate > 0 ? completionRate + 3 : 88 
-        },
-        { 
-          name: 'Incubation', 
-          students: Math.floor(incubationStudents), 
-          completion: completionRate > 0 ? completionRate + 10 : 95 
-        },
+        { name: 'Education', students: 0, completion: 85 },
+        { name: 'Skill Dev', students: 0, completion: 92 },
+        { name: 'Job Centre', students: 0, completion: 78 },
+        { name: 'Career Dev', students: 0, completion: 88 },
+        { name: 'Incubation', students: 0, completion: 95 },
       ];
+
+      if (enrollments) {
+        // Count students by department (simplified)
+        departmentData[0].students = enrollments.filter(e => e.status === 'active').length;
+        departmentData[1].students = Math.floor(departmentData[0].students * 0.7);
+        departmentData[2].students = Math.floor(departmentData[0].students * 0.5);
+        departmentData[3].students = Math.floor(departmentData[0].students * 0.3);
+        departmentData[4].students = Math.floor(departmentData[0].students * 0.1);
+      }
 
       return departmentData;
     },
-    staleTime: 5 * 60 * 1000,
   });
 
   const placementDataQuery = useQuery({
     queryKey: ['placement-data'],
     queryFn: async () => {
+      // Get job applications with job details
       const { data: applications } = await supabase
         .from('job_applications')
         .select(`
@@ -140,52 +91,24 @@ export function useDashboardData() {
         `)
         .eq('status', 'selected');
 
-      if (!applications || applications.length === 0) {
-        // Return empty array if no placement data
-        return [];
-      }
-
-      const companyTypes = applications.reduce((acc: any, app: any) => {
-        const company = app.job_postings?.company || 'Others';
-        let category = 'Others';
-        
-        if (company.toLowerCase().includes('tech') || 
-            company.toLowerCase().includes('software') || 
-            company.toLowerCase().includes('it')) {
-          category = 'IT/Software';
-        } else if (company.toLowerCase().includes('bank') || 
-                   company.toLowerCase().includes('finance')) {
-          category = 'Banking';
-        } else if (company.toLowerCase().includes('retail') || 
-                   company.toLowerCase().includes('shop')) {
-          category = 'Retail';
-        } else if (company.toLowerCase().includes('manufacturing') || 
-                   company.toLowerCase().includes('factory')) {
-          category = 'Manufacturing';
-        }
-        
-        acc[category] = (acc[category] || 0) + 1;
-        return acc;
-      }, {});
-
-      const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
-      return Object.entries(companyTypes).map(([name, value], index) => ({
-        name,
-        value: value as number,
-        color: colors[index % colors.length]
-      }));
+      // Mock placement distribution data
+      return [
+        { name: 'IT/Software', value: 35, color: '#8884d8' },
+        { name: 'Banking', value: 25, color: '#82ca9d' },
+        { name: 'Retail', value: 20, color: '#ffc658' },
+        { name: 'Manufacturing', value: 15, color: '#ff7c7c' },
+        { name: 'Others', value: 5, color: '#8dd1e1' },
+      ];
     },
-    staleTime: 5 * 60 * 1000,
   });
 
   return {
     studentsCount: studentsQuery.data || 0,
     trainersCount: trainersQuery.data || 0,
-    employeesCount: employeesQuery.data || 0,
     jobPlacements: jobApplicationsQuery.data || 0,
     incubationProjects: incubationProjectsQuery.data || 0,
     departmentData: departmentStatsQuery.data || [],
     placementData: placementDataQuery.data || [],
-    loading: false,
+    loading: studentsQuery.isLoading || trainersQuery.isLoading || jobApplicationsQuery.isLoading || incubationProjectsQuery.isLoading,
   };
 }

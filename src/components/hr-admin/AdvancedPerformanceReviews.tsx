@@ -97,28 +97,42 @@ export const AdvancedPerformanceReviews = () => {
       const [reviewsResponse, employeesResponse] = await Promise.all([
         supabase
           .from('performance_reviews')
-          .select('*')
+          .select(`
+            id,
+            employee_id,
+            reviewer_id,
+            review_period_start,
+            review_period_end,
+            overall_rating,
+            goals_achieved,
+            areas_for_improvement,
+            development_plan,
+            created_at,
+            updated_at,
+            ai_generated_insights,
+            skill_assessment,
+            career_recommendations,
+            peer_feedback,
+            self_assessment
+          `)
           .order('created_at', { ascending: false }),
-        supabase.from('employees').select('id, employee_id, position, department')
+        supabase.from('employees').select('id, employee_id, position, department').eq('employment_status', 'active')
       ]);
 
-      let reviewsData: PerformanceReview[] = [];
-      
       if (reviewsResponse.data) {
         // Convert database response to proper PerformanceReview type
-        reviewsData = reviewsResponse.data.map(review => ({
+        const convertedReviews: PerformanceReview[] = reviewsResponse.data.map(review => ({
           ...review,
           comments: '', // Set default value since comments field doesn't exist in DB response
           overall_rating: review.overall_rating as 'excellent' | 'good' | 'satisfactory' | 'needs_improvement' | 'unsatisfactory'
         }));
-        setReviews(reviewsData);
+        setReviews(convertedReviews);
       }
-      
       if (employeesResponse.data) setEmployees(employeesResponse.data);
 
       // Calculate analytics
-      const total = reviewsData.length;
-      const ratings = reviewsData.map(r => {
+      const total = reviewsResponse.data?.length || 0;
+      const ratings = reviewsResponse.data?.map(r => {
         switch (r.overall_rating) {
           case 'excellent': return 5;
           case 'good': return 4;
@@ -127,7 +141,7 @@ export const AdvancedPerformanceReviews = () => {
           case 'unsatisfactory': return 1;
           default: return 3;
         }
-      });
+      }) || [];
       
       const avgRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
 

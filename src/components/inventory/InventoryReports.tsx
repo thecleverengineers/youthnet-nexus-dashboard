@@ -1,126 +1,124 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Download, Calendar, TrendingUp } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { FileText, Download, Calendar, TrendingUp } from 'lucide-react';
 
 export const InventoryReports = () => {
   const [reportType, setReportType] = useState('overview');
 
-  const { data: categoryData = [] } = useQuery({
-    queryKey: ['inventory-category-data'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select('category')
-        .order('category');
+  const categoryData = [
+    { name: 'IT Equipment', value: 45, count: 23 },
+    { name: 'Furniture', value: 30, count: 15 },
+    { name: 'Office Supplies', value: 15, count: 8 },
+    { name: 'Vehicles', value: 10, count: 5 }
+  ];
 
-      if (error) throw error;
+  const monthlyData = [
+    { month: 'Jan', purchases: 12, disposals: 2 },
+    { month: 'Feb', purchases: 8, disposals: 1 },
+    { month: 'Mar', purchases: 15, disposals: 3 },
+    { month: 'Apr', purchases: 10, disposals: 1 },
+    { month: 'May', purchases: 18, disposals: 4 },
+    { month: 'Jun', purchases: 14, disposals: 2 }
+  ];
 
-      const categoryCounts = (data || []).reduce((acc: Record<string, number>, item) => {
-        acc[item.category] = (acc[item.category] || 0) + 1;
-        return acc;
-      }, {});
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-      return Object.entries(categoryCounts).map(([name, count]) => ({
-        name,
-        value: Math.round((count / data.length) * 100),
-        count
-      }));
+  const reports = [
+    {
+      id: 1,
+      name: 'Asset Valuation Report',
+      type: 'Financial',
+      generated: '2024-06-15',
+      status: 'ready'
+    },
+    {
+      id: 2,
+      name: 'Monthly Inventory Summary',
+      type: 'Summary',
+      generated: '2024-06-01',
+      status: 'ready'
+    },
+    {
+      id: 3,
+      name: 'Depreciation Analysis',
+      type: 'Analysis',
+      generated: '2024-05-30',
+      status: 'processing'
     }
-  });
-
-  const { data: monthlyData = [] } = useQuery({
-    queryKey: ['inventory-monthly-data'],
-    queryFn: async () => {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select('created_at, purchase_date')
-        .gte('created_at', sixMonthsAgo.toISOString());
-
-      if (error) throw error;
-
-      const months = [];
-      for (let i = 5; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        const monthKey = date.toLocaleString('default', { month: 'short' });
-        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
-        const purchases = (data || []).filter(item => {
-          const createdAt = new Date(item.created_at);
-          return createdAt >= monthStart && createdAt <= monthEnd;
-        }).length;
-
-        months.push({
-          month: monthKey,
-          purchases,
-          disposals: Math.floor(purchases * 0.1) // Estimate disposals as 10% of purchases
-        });
-      }
-
-      return months;
-    }
-  });
-
-  const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
-
-  const { data: reports = [] } = useQuery({
-    queryKey: ['inventory-reports'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('reports')
-        .select('*')
-        .eq('type', 'inventory')
-        .order('generated_at', { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      return data || [];
-    }
-  });
+  ];
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Inventory Reports & Analytics
-            </div>
-            <div className="flex gap-2">
-              <Select value={reportType} onValueChange={setReportType}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="overview">Overview</SelectItem>
-                  <SelectItem value="category">Category Analysis</SelectItem>
-                  <SelectItem value="trends">Trends</SelectItem>
-                  <SelectItem value="maintenance">Maintenance</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button>
-                <Download className="h-4 w-4 mr-2" />
-                Export Report
-              </Button>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Category Distribution */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Category Distribution</h3>
-              <ResponsiveContainer width="100%" height={250}>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Inventory Reports
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline">
+              <Calendar className="h-4 w-4 mr-2" />
+              Schedule Report
+            </Button>
+            <Button>
+              <Download className="h-4 w-4 mr-2" />
+              Generate Report
+            </Button>
+          </div>
+        </CardTitle>
+        <CardDescription>Generate inventory and asset reports</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="flex items-center p-4">
+              <TrendingUp className="h-8 w-8 text-blue-600 mr-3" />
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Assets</p>
+                <p className="text-2xl font-bold">51</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center p-4">
+              <TrendingUp className="h-8 w-8 text-green-600 mr-3" />
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Value</p>
+                <p className="text-2xl font-bold">$125,450</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center p-4">
+              <TrendingUp className="h-8 w-8 text-yellow-600 mr-3" />
+              <div>
+                <p className="text-sm font-medium text-gray-600">In Use</p>
+                <p className="text-2xl font-bold">38</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center p-4">
+              <TrendingUp className="h-8 w-8 text-red-600 mr-3" />
+              <div>
+                <p className="text-sm font-medium text-gray-600">Maintenance</p>
+                <p className="text-2xl font-bold">3</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Assets by Category</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={categoryData}
@@ -139,79 +137,59 @@ export const InventoryReports = () => {
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Monthly Trends */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Monthly Activity</h3>
-              <ResponsiveContainer width="100%" height={250}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Monthly Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="purchases" fill="hsl(var(--primary))" name="Purchases" />
-                  <Bar dataKey="disposals" fill="hsl(var(--secondary))" name="Disposals" />
+                  <Bar dataKey="purchases" fill="#8884d8" name="Purchases" />
+                  <Bar dataKey="disposals" fill="#82ca9d" name="Disposals" />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <div className="p-4 rounded-lg bg-muted">
-              <h4 className="text-sm font-medium text-muted-foreground">Total Items</h4>
-              <p className="text-2xl font-bold">{categoryData.reduce((sum, cat) => sum + cat.count, 0)}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-muted">
-              <h4 className="text-sm font-medium text-muted-foreground">Categories</h4>
-              <p className="text-2xl font-bold">{categoryData.length}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-muted">
-              <h4 className="text-sm font-medium text-muted-foreground">This Month</h4>
-              <p className="text-2xl font-bold">{monthlyData[monthlyData.length - 1]?.purchases || 0}</p>
-            </div>
-            <div className="p-4 rounded-lg bg-muted">
-              <h4 className="text-sm font-medium text-muted-foreground">Utilization</h4>
-              <p className="text-2xl font-bold">85%</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Reports */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Recent Reports
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {reports.length > 0 ? (
-            <div className="space-y-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Reports</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
               {reports.map((report) => (
-                <div key={report.id} className="flex items-center justify-between p-4 rounded-lg border">
+                <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h4 className="font-medium">{report.title}</h4>
+                    <h3 className="font-medium">{report.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Generated on {new Date(report.generated_at).toLocaleDateString()}
+                      {report.type} • Generated on {new Date(report.generated).toLocaleDateString()}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Badge className={report.status === 'ready' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                      {report.status}
+                    </Badge>
+                    {report.status === 'ready' && (
+                      <Button variant="outline" size="sm">
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No reports generated yet. Generate your first inventory report to see it here.
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </CardContent>
+    </Card>
   );
 };
