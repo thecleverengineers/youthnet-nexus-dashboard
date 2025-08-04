@@ -2,9 +2,13 @@ services:
   - type: web
     name: youthnet-mis
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run preview
+    buildCommand: npm install && npm run build && mkdir -p logs
+    startCommand: npm run start:pm2
     envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
       - key: VITE_SUPABASE_URL
         value: https://rstdujkrsfecrfmclnwu.supabase.co
       - key: VITE_SUPABASE_ANON_KEY
