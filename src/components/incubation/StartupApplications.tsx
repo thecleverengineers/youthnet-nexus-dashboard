@@ -27,7 +27,7 @@ export const StartupApplications = () => {
     }
   });
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: "pending" | "shortlisted" | "interviewed" | "selected" | "rejected") => {
     try {
       const { error } = await supabase
         .from('startup_applications')
@@ -123,7 +123,7 @@ export const StartupApplications = () => {
                       </Button>
                       {application.application_status === 'pending' && (
                         <>
-                          <Button variant="outline" size="sm" onClick={() => updateStatus(application.id, 'approved')}>
+                          <Button variant="outline" size="sm" onClick={() => updateStatus(application.id, 'selected')}>
                             <Check className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="sm" onClick={() => updateStatus(application.id, 'rejected')}>

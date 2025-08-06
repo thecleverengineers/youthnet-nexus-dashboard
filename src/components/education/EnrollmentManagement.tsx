@@ -79,10 +79,10 @@ export function EnrollmentManagement() {
                   <Badge className={getStatusColor(enrollment.status)}>
                     {enrollment.status}
                   </Badge>
-                  {enrollment.completion_date && (
+                  {enrollment.status === 'completed' && (
                     <div className="text-xs text-muted-foreground flex items-center gap-1">
                       <Award className="h-3 w-3" />
-                      Completed: {new Date(enrollment.completion_date).toLocaleDateString()}
+                      Completed: {new Date(enrollment.updated_at).toLocaleDateString()}
                     </div>
                   )}
                 </div>

@@ -117,7 +117,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Sign in error:', error);
-        toast.error(error.message);
+        // Enhanced error messaging
+        if (error.message.includes('fetch')) {
+          toast.error('Connection failed. Please check your internet connection and try again.');
+        } else if (error.message.includes('Invalid login credentials')) {
+          toast.error('Invalid email or password. Please check your credentials.');
+        } else {
+          toast.error(error.message);
+        }
         setLoading(false);
         return false;
       }
@@ -125,9 +132,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Sign in successful:', data);
       toast.success('Signed in successfully!');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Unexpected sign in error:', error);
-      toast.error('An unexpected error occurred');
+      // Enhanced network error handling
+      if (error.message?.includes('fetch') || error.name === 'TypeError') {
+        toast.error('Network error: Unable to connect to authentication server. Please check Supabase configuration.');
+      } else {
+        toast.error('An unexpected error occurred');
+      }
       setLoading(false);
       return false;
     }

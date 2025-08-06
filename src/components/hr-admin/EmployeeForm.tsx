@@ -84,9 +84,11 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
         toast.success('Employee updated successfully!');
       } else {
         // Create new employee
+        const { data: user } = await supabase.auth.getUser();
         const { error } = await supabase
           .from('employees')
-          .insert([{
+          .insert({
+            user_id: user?.user?.id,
             employee_id: formData.employee_id,
             position: formData.position,
             department: formData.department,
@@ -100,7 +102,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
             emergency_contact_phone: formData.emergency_contact_phone,
             bank_account: formData.bank_account,
             tax_id: formData.tax_id,
-          }]);
+          });
 
         if (error) throw error;
         toast.success('Employee created successfully!');
