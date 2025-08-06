@@ -151,6 +151,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         duration: 2000,
       });
       
+      // Trigger redirect after successful login
+      setTimeout(() => {
+        const currentPath = window.location.pathname;
+        if (currentPath === '/' || currentPath === '/auth') {
+          window.location.href = '/dashboard';
+        }
+      }, 1500);
+      
       return true;
     } catch (error: any) {
       console.error('Unexpected sign in error:', error);
