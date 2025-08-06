@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers } from '@/utils/supabaseHelpers';
 import { TrendingUp, Award, Users, Clock } from 'lucide-react';
 
 interface PerformanceAnalyticsProps {
@@ -15,20 +15,21 @@ export function PerformanceAnalytics({ detailed = false }: PerformanceAnalyticsP
     queryKey: ['education-analytics'],
     queryFn: async () => {
       const [enrollmentsRes, completionsRes, programsRes] = await Promise.all([
-        supabase.from('student_enrollments').select('status, enrollment_date'),
-        supabase.from('student_enrollments').select('completion_date, grade').eq('status', 'completed'),
-        supabase.from('training_programs').select('name, duration_weeks, status')
+        supabaseHelpers.student_enrollments.select('status, enrollment_date'),
+        supabaseHelpers.student_enrollments.select('completion_date, grade').eq('status', 'completed'),
+        supabaseHelpers.training_programs.select('name, duration_weeks, status')
       ]);
 
       // Process data for charts
+      const enrollmentsData = enrollmentsRes.data || [];
       const statusData = [
-        { name: 'Active', value: enrollmentsRes.data?.filter(e => e.status === 'active').length || 0, color: '#22c55e' },
-        { name: 'Completed', value: enrollmentsRes.data?.filter(e => e.status === 'completed').length || 0, color: '#3b82f6' },
-        { name: 'Pending', value: enrollmentsRes.data?.filter(e => e.status === 'pending').length || 0, color: '#f59e0b' },
-        { name: 'Dropped', value: enrollmentsRes.data?.filter(e => e.status === 'dropped').length || 0, color: '#ef4444' }
+        { name: 'Active', value: enrollmentsData.filter((e: any) => e.status === 'active').length || 0, color: '#22c55e' },
+        { name: 'Completed', value: enrollmentsData.filter((e: any) => e.status === 'completed').length || 0, color: '#3b82f6' },
+        { name: 'Pending', value: enrollmentsData.filter((e: any) => e.status === 'pending').length || 0, color: '#f59e0b' },
+        { name: 'Dropped', value: enrollmentsData.filter((e: any) => e.status === 'dropped').length || 0, color: '#ef4444' }
       ];
 
-      const monthlyEnrollments = enrollmentsRes.data?.reduce((acc: any, enrollment) => {
+      const monthlyEnrollments = enrollmentsData.reduce((acc: any, enrollment: any) => {
         const month = new Date(enrollment.enrollment_date).toLocaleString('default', { month: 'short' });
         acc[month] = (acc[month] || 0) + 1;
         return acc;
@@ -39,13 +40,15 @@ export function PerformanceAnalytics({ detailed = false }: PerformanceAnalyticsP
         enrollments: count
       }));
 
+      const completionRate = enrollmentsData.length ? 
+        Math.round((enrollmentsData.filter((e: any) => e.status === 'completed').length / enrollmentsData.length) * 100) : 0;
+
       return {
         statusData,
         enrollmentTrend,
-        totalEnrollments: enrollmentsRes.data?.length || 0,
-        completionRate: enrollmentsRes.data?.length ? 
-          Math.round((enrollmentsRes.data.filter(e => e.status === 'completed').length / enrollmentsRes.data.length) * 100) : 0,
-        activePrograms: programsRes.data?.filter(p => p.status === 'active').length || 0
+        totalEnrollments: enrollmentsData.length || 0,
+        completionRate,
+        activePrograms: programsRes.data?.filter((p: any) => p.status === 'active').length || 0
       };
     }
   });

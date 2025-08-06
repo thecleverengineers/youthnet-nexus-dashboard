@@ -3,15 +3,14 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers } from '@/utils/supabaseHelpers';
 import { Users, TrendingUp, Calendar, Award } from 'lucide-react';
 
 export function EnrollmentManagement() {
   const { data: recentEnrollments, isLoading } = useQuery({
     queryKey: ['recent-enrollments'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('student_enrollments')
+      const { data, error } = await supabaseHelpers.student_enrollments
         .select(`
           *,
           students:student_id (
@@ -61,14 +60,14 @@ export function EnrollmentManagement() {
               No enrollments found
             </div>
           ) : (
-            recentEnrollments?.map((enrollment) => (
+            recentEnrollments?.map((enrollment: any) => (
               <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex-1">
                   <div className="font-medium">
-                    {enrollment.students?.profiles?.full_name}
+                    {enrollment.students?.profiles?.full_name || 'Unknown Student'}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {enrollment.training_programs?.name}
+                    {enrollment.training_programs?.name || 'Unknown Program'}
                   </div>
                   <div className="text-xs text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" />

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers } from '@/utils/supabaseHelpers';
 import { Plus, Search, Edit, Trash2, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,8 +23,7 @@ export function ProgramManagement() {
   const { data: programs, isLoading } = useQuery({
     queryKey: ['training-programs'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('training_programs')
+      const { data, error } = await supabaseHelpers.training_programs
         .select(`
           *,
           trainers:trainer_id (
@@ -43,9 +42,8 @@ export function ProgramManagement() {
 
   const createProgramMutation = useMutation({
     mutationFn: async (programData: any) => {
-      const { data, error } = await supabase
-        .from('training_programs')
-        .insert(programData)
+      const { data, error } = await supabaseHelpers.training_programs
+        .insert([programData])
         .select();
       
       if (error) throw error;
@@ -61,8 +59,7 @@ export function ProgramManagement() {
 
   const updateProgramMutation = useMutation({
     mutationFn: async ({ id, ...programData }: any) => {
-      const { data, error } = await supabase
-        .from('training_programs')
+      const { data, error } = await supabaseHelpers.training_programs
         .update(programData)
         .eq('id', id)
         .select();
@@ -78,8 +75,8 @@ export function ProgramManagement() {
     }
   });
 
-  const filteredPrograms = programs?.filter(program => {
-    const matchesSearch = program.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredPrograms = programs?.filter((program: any) => {
+    const matchesSearch = program.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || program.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -213,7 +210,7 @@ export function ProgramManagement() {
               No programs found
             </div>
           ) : (
-            filteredPrograms?.map((program) => (
+            filteredPrograms?.map((program: any) => (
               <div key={program.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold">{program.name}</h3>
