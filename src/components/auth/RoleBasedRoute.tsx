@@ -56,7 +56,7 @@ export const RoleBasedRoute = () => {
     );
   }
 
-  if (!profile) {
+  if (!profile && user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -64,6 +64,21 @@ export const RoleBasedRoute = () => {
           <h2 className="text-xl font-semibold text-foreground mb-2">Preparing your dashboard...</h2>
           <p className="text-muted-foreground">Setting up your personalized experience</p>
           <p className="text-xs text-muted-foreground">Loading role-based features...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user exists but no profile after loading is complete, there might be an issue
+  if (!profile && user && !loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-semibold text-foreground mb-2">Profile Setup Required</h2>
+          <p className="text-muted-foreground">We're having trouble loading your profile. Please try signing out and back in.</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Reload Page
+          </Button>
         </div>
       </div>
     );

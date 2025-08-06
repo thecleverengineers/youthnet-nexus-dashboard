@@ -35,8 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching profile:', error);
@@ -45,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const { data: retryData, error: retryError } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', user.id)
-            .single();
+            .eq('user_id', user.id)
+            .maybeSingle();
           
           if (!retryError && retryData) {
             console.log('Profile found on retry:', retryData);
