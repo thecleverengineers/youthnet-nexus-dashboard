@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,14 +18,14 @@ import {
   Settings,
   BarChart3
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { supabaseHelpers, AttendanceRecord, EmployeeTask } from '@/utils/supabaseHelpers';
 
 export const EmployeeDashboard = () => {
   const [employee, setEmployee] = useState(null);
-  const [tasks, setTasks] = useState([]);
-  const [attendance, setAttendance] = useState(null);
+  const [tasks, setTasks] = useState<EmployeeTask[]>([]);
+  const [attendance, setAttendance] = useState<AttendanceRecord | null>(null);
   const [stats, setStats] = useState({
     tasksCompleted: 0,
     tasksTotal: 0,
@@ -52,18 +51,16 @@ export const EmployeeDashboard = () => {
     try {
       // Fetch today's attendance using existing attendance_records table
       const today = format(new Date(), 'yyyy-MM-dd');
-      const { data: attendanceData } = await supabase
-        .from('attendance_records')
+      const { data: attendanceData } = await supabaseHelpers.attendance_records
         .select('*')
         .eq('employee_id', empData.id)
         .eq('date', today)
         .single();
 
-      setAttendance(attendanceData);
+      setAttendance(attendanceData as AttendanceRecord);
 
       // Fetch real employee tasks from new table
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('employee_tasks')
+      const { data: tasksData, error: tasksError } = await supabaseHelpers.employee_tasks
         .select('*')
         .eq('assigned_to', empData.id)
         .order('created_at', { ascending: false })
@@ -72,39 +69,60 @@ export const EmployeeDashboard = () => {
       if (tasksError) {
         console.log('Tasks table not accessible, using mock data');
         // Mock tasks data as fallback
-        const mockTasks = [
+        const mockTasks: EmployeeTask[] = [
           {
             id: '1',
             title: 'Complete Monthly Report',
             description: 'Prepare and submit monthly performance report',
+            assigned_to: empData.id,
+            assigned_by: 'admin',
             status: 'in_progress',
+            priority: 'medium',
             due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            created_at: new Date().toISOString()
+            estimated_hours: 8,
+            actual_hours: 4,
+            completion_percentage: 50,
+            tags: [],
+            dependencies: [],
+            ai_complexity_score: 0.5,
+            auto_assigned: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           },
           {
             id: '2',
             title: 'Team Meeting Preparation',
             description: 'Prepare agenda for weekly team meeting',
+            assigned_to: empData.id,
+            assigned_by: 'admin',
             status: 'completed',
+            priority: 'low',
             due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-            created_at: new Date().toISOString()
-          },
-          {
-            id: '3',
-            title: 'Client Presentation',
-            description: 'Create presentation for client meeting',
-            status: 'pending',
-            due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-            created_at: new Date().toISOString()
+            estimated_hours: 2,
+            actual_hours: 1.5,
+            completion_percentage: 100,
+            tags: [],
+            dependencies: [],
+            ai_complexity_score: 0.2,
+            auto_assigned: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           }
         ];
         setTasks(mockTasks);
       } else {
-        setTasks(tasksData || []);
+        const convertedTasks: EmployeeTask[] = (tasksData as any[]).map(task => ({
+          ...task,
+          priority: task.priority as 'low' | 'medium' | 'high' | 'urgent',
+          status: task.status as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+          tags: Array.isArray(task.tags) ? task.tags : [],
+          dependencies: Array.isArray(task.dependencies) ? task.dependencies : []
+        }));
+        setTasks(convertedTasks);
       }
 
       // Calculate stats from tasks data
-      const tasksToUse = tasksData || [];
+      const tasksToUse = tasks;
       const completed = tasksToUse.filter(t => t.status === 'completed').length;
       const total = tasksToUse.length;
       
@@ -256,8 +274,8 @@ export const EmployeeDashboard = () => {
           </Card>
         </div>
 
+        {/* Today's Schedule */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Today's Schedule */}
           <Card className="futuristic-card lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

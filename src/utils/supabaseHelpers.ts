@@ -133,6 +133,56 @@ export interface PerformanceReview {
   updated_at: string;
 }
 
+export interface Employee {
+  id: string;
+  employee_id: string;
+  user_id: string;
+  position?: string;
+  department?: string;
+  employment_status?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmployeeTask {
+  id: string;
+  title: string;
+  description: string;
+  assigned_to: string;
+  assigned_by: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  due_date: string;
+  estimated_hours: number;
+  actual_hours: number;
+  completion_percentage: number;
+  tags: string[];
+  dependencies: string[];
+  ai_complexity_score: number;
+  auto_assigned: boolean;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  employee_id: string;
+  date: string;
+  check_in?: string;
+  check_out?: string;
+  status: 'present' | 'absent' | 'late' | 'half_day' | 'sick_leave' | 'vacation';
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  employees?: {
+    employee_id: string;
+    profiles?: {
+      full_name?: string;
+    };
+  };
+}
+
 // Type-safe Supabase helpers
 export const supabaseHelpers = {
   students: {
@@ -188,5 +238,24 @@ export const supabaseHelpers = {
     insert: (data: Partial<PerformanceReview>[]) => (supabase as any).from('performance_reviews').insert(data),
     update: (data: Partial<PerformanceReview>) => (supabase as any).from('performance_reviews').update(data),
     delete: () => (supabase as any).from('performance_reviews').delete(),
+  },
+  employees: {
+    select: (query = '*') => (supabase as any).from('employees').select(query),
+    insert: (data: Partial<Employee>[]) => (supabase as any).from('employees').insert(data),
+    update: (data: Partial<Employee>) => (supabase as any).from('employees').update(data),
+    delete: () => (supabase as any).from('employees').delete(),
+  },
+  employee_tasks: {
+    select: (query = '*') => (supabase as any).from('employee_tasks').select(query),
+    insert: (data: Partial<EmployeeTask>[]) => (supabase as any).from('employee_tasks').insert(data),
+    update: (data: Partial<EmployeeTask>) => (supabase as any).from('employee_tasks').update(data),
+    delete: () => (supabase as any).from('employee_tasks').delete(),
+  },
+  attendance_records: {
+    select: (query = '*') => (supabase as any).from('attendance_records').select(query),
+    insert: (data: Partial<AttendanceRecord>[]) => (supabase as any).from('attendance_records').insert(data),
+    upsert: (data: Partial<AttendanceRecord>, options?: any) => (supabase as any).from('attendance_records').upsert(data, options),
+    update: (data: Partial<AttendanceRecord>) => (supabase as any).from('attendance_records').update(data),
+    delete: () => (supabase as any).from('attendance_records').delete(),
   },
 };
