@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabaseHelpers } from '@/utils/supabaseHelpers';
+import { supabase } from '@/integrations/supabase/client';
 import { Plus, Search, Edit, Users, Mail, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -40,12 +41,25 @@ export function StudentManagement() {
 
   const createStudentMutation = useMutation({
     mutationFn: async (studentData: any) => {
-      // For now, we'll create a mock student record since we can't use auth.admin.createUser
-      const mockUserId = `mock-${Date.now()}`;
-      
+      // Create a profile entry first (simulating user creation)
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .insert([{
+          user_id: `mock-${Date.now()}`, // Mock user ID since we can't create real auth users
+          full_name: studentData.full_name,
+          email: studentData.email,
+          phone: studentData.phone,
+          role: 'student'
+        }])
+        .select()
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Then create the student record
       const { data: studentRecord, error: studentError } = await supabaseHelpers.students
         .insert([{
-          user_id: mockUserId,
+          user_id: profileData.user_id,
           student_id: `STU${Date.now()}`,
           date_of_birth: studentData.date_of_birth,
           gender: studentData.gender,

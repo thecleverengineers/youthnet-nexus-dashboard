@@ -1,12 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useQuery } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabaseHelpers } from '@/utils/supabaseHelpers';
-import { Users, TrendingUp, Calendar, Award } from 'lucide-react';
+import { Users, TrendingUp, Calendar, Award, Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export function EnrollmentManagement() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: recentEnrollments, isLoading } = useQuery({
     queryKey: ['recent-enrollments'],
     queryFn: async () => {
@@ -32,6 +40,74 @@ export function EnrollmentManagement() {
     }
   });
 
+  const { data: availableStudents } = useQuery({
+    queryKey: ['available-students'],
+    queryFn: async () => {
+      const { data, error } = await supabaseHelpers.students
+        .select(`
+          *,
+          profiles:user_id (
+            full_name
+          )
+        `)
+        .eq('status', 'active');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: isDialogOpen
+  });
+
+  const { data: availablePrograms } = useQuery({
+    queryKey: ['available-programs'],
+    queryFn: async () => {
+      const { data, error } = await supabaseHelpers.training_programs
+        .select('*')
+        .eq('status', 'active');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: isDialogOpen
+  });
+
+  const createEnrollmentMutation = useMutation({
+    mutationFn: async (enrollmentData: any) => {
+      const { data, error } = await supabaseHelpers.student_enrollments
+        .insert([enrollmentData])
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recent-enrollments'] });
+      setIsDialogOpen(false);
+      toast({ title: "Enrollment created successfully" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error creating enrollment", 
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const enrollmentData = {
+      student_id: formData.get('student_id') as string,
+      program_id: formData.get('program_id') as string,
+      enrollment_date: new Date().toISOString().split('T')[0],
+      status: 'active'
+    };
+
+    createEnrollmentMutation.mutate(enrollmentData);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
@@ -44,9 +120,55 @@ export function EnrollmentManagement() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Recent Enrollments
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Recent Enrollments
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Enroll Student
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Enroll Student in Program</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Select name="student_id" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Student" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableStudents?.map((student: any) => (
+                      <SelectItem key={student.id} value={student.id}>
+                        {student.profiles?.full_name || student.student_id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select name="program_id" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Program" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availablePrograms?.map((program: any) => (
+                      <SelectItem key={program.id} value={program.id}>
+                        {program.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Button type="submit" className="w-full">
+                  Create Enrollment
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </CardTitle>
       </CardHeader>
       <CardContent>

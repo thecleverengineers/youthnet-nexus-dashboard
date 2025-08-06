@@ -24,6 +24,7 @@ import { StudentManagement } from '@/components/education/StudentManagement';
 import { ProgramManagement } from '@/components/education/ProgramManagement';
 import { EnrollmentManagement } from '@/components/education/EnrollmentManagement';
 import { PerformanceAnalytics } from '@/components/education/PerformanceAnalytics';
+import { CourseManagement } from '@/components/education/CourseManagement';
 
 export function Education() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -33,10 +34,10 @@ export function Education() {
     queryKey: ['education-stats'],
     queryFn: async () => {
       const [studentsRes, programsRes, enrollmentsRes, completionsRes] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
-        supabase.from('livelihood_programs').select('*', { count: 'exact', head: true }),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
-        supabase.from('employee_training').select('*', { count: 'exact', head: true }).eq('certification_earned', true)
+        supabase.from('students').select('*', { count: 'exact', head: true }),
+        supabase.from('training_programs').select('*', { count: 'exact', head: true }),
+        supabase.from('student_enrollments').select('*', { count: 'exact', head: true }),
+        supabase.from('student_enrollments').select('*', { count: 'exact', head: true }).eq('status', 'completed')
       ]);
 
       return {
@@ -140,10 +141,11 @@ export function Education() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="students">Students</TabsTrigger>
           <TabsTrigger value="programs">Programs</TabsTrigger>
+          <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
@@ -160,6 +162,10 @@ export function Education() {
 
         <TabsContent value="programs">
           <ProgramManagement />
+        </TabsContent>
+
+        <TabsContent value="courses">
+          <CourseManagement />
         </TabsContent>
 
         <TabsContent value="analytics">
