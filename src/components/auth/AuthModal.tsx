@@ -47,7 +47,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           onClose();
           setSignInEmail('');
           setSignInPassword('');
-          window.location.href = '/dashboard';
+          window.location.href = '/';
         }, 1000);
       }
     } catch (error) {
@@ -102,7 +102,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           onClose();
           setSignInEmail('');
           setSignInPassword('');
-          window.location.href = '/dashboard';
+          window.location.href = '/';
         }, 1000);
       } else {
         toast.error('Demo account not found. Please create demo accounts first.');

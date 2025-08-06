@@ -35,6 +35,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<RoleBasedRoute />} />
+              <Route path="/dashboard" element={<RoleBasedRoute />} />
               <Route path="/education" element={
                 <ProtectedRoute>
                   <Layout>

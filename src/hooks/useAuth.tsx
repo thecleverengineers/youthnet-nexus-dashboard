@@ -155,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTimeout(() => {
         const currentPath = window.location.pathname;
         if (currentPath === '/' || currentPath === '/auth') {
-          window.location.href = '/dashboard';
+          window.location.href = '/';
         }
       }, 1500);
       
