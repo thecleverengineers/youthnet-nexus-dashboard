@@ -3,7 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SessionManager } from '@/components/auth/SessionManager';
 import { ActivityLogs } from '@/components/auth/ActivityLogs';
 import { UserPermissions } from '@/components/auth/UserPermissions';
-import { Shield, Activity, Users, Lock } from 'lucide-react';
+import { AnnouncementManager } from '@/components/notifications/AnnouncementManager';
+import { Shield, Activity, Users, Lock, Megaphone } from 'lucide-react';
 
 export const AuthenticationManagement = () => {
   return (
@@ -19,7 +20,7 @@ export const AuthenticationManagement = () => {
       </div>
 
       <Tabs defaultValue="sessions" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="sessions" className="flex items-center gap-2">
             <Lock className="h-4 w-4" />
             Session Manager
@@ -31,6 +32,10 @@ export const AuthenticationManagement = () => {
           <TabsTrigger value="permissions" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             User Permissions
+          </TabsTrigger>
+          <TabsTrigger value="announcements" className="flex items-center gap-2">
+            <Megaphone className="h-4 w-4" />
+            Announcements
           </TabsTrigger>
         </TabsList>
 
@@ -44,6 +49,10 @@ export const AuthenticationManagement = () => {
 
         <TabsContent value="permissions" className="space-y-6">
           <UserPermissions />
+        </TabsContent>
+
+        <TabsContent value="announcements" className="space-y-6">
+          <AnnouncementManager />
         </TabsContent>
       </Tabs>
     </div>

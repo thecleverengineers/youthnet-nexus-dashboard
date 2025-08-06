@@ -3,6 +3,7 @@ import React from 'react';
 import { Bell, Search, User, Menu, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,35 +39,7 @@ export const TopNavbar = () => {
         {/* Right side */}
         <div className="flex items-center gap-3">
           {/* Notifications */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative hover-glow rounded-xl">
-                <Bell className="h-5 w-5" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-gradient-to-r from-red-500 to-pink-500 border-0 pulse-glow">
-                  3
-                </Badge>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 glass-effect border-white/10">
-              <DropdownMenuLabel className="text-gradient">Notifications</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem className="flex flex-col items-start py-3 hover:bg-white/5 rounded-lg">
-                <div className="font-medium">New placement record</div>
-                <div className="text-sm text-muted-foreground">5 candidates placed this week</div>
-                <div className="text-xs text-blue-400 mt-1">2 hours ago</div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start py-3 hover:bg-white/5 rounded-lg">
-                <div className="font-medium">Training batch completed</div>
-                <div className="text-sm text-muted-foreground">Digital Marketing batch graduation</div>
-                <div className="text-xs text-blue-400 mt-1">4 hours ago</div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex flex-col items-start py-3 hover:bg-white/5 rounded-lg">
-                <div className="font-medium">Monthly report due</div>
-                <div className="text-sm text-muted-foreground">Submit department reports by Friday</div>
-                <div className="text-xs text-blue-400 mt-1">1 day ago</div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NotificationCenter />
 
           {/* User Profile */}
           <DropdownMenu>
