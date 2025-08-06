@@ -41,9 +41,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
-        onClose();
-        setSignInEmail('');
-        setSignInPassword('');
+        // Add a small delay for smooth transition
+        setTimeout(() => {
+          onClose();
+          setSignInEmail('');
+          setSignInPassword('');
+        }, 1000);
       }
     } catch (error) {
       console.error('Sign in error:', error);
@@ -91,10 +94,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       const success = await signIn(email, password);
       if (success) {
-        onClose();
-        toast.success('Demo login successful!');
-        setSignInEmail('');
-        setSignInPassword('');
+        // Add a small delay for smooth transition
+        setTimeout(() => {
+          onClose();
+          setSignInEmail('');
+          setSignInPassword('');
+        }, 1000);
       } else {
         toast.error('Demo account not found. Please create demo accounts first.');
       }

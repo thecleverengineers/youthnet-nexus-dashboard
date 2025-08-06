@@ -130,7 +130,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('Sign in successful:', data);
-      toast.success('Signed in successfully!');
+      
+      // Get user profile for personalized welcome message
+      const userEmail = data.user?.email;
+      const userRole = data.user?.user_metadata?.role || 'user';
+      
+      // Role-specific welcome messages
+      const roleMessages = {
+        admin: `Welcome back, Administrator! Accessing your admin dashboard...`,
+        staff: `Welcome back, Staff Member! Loading your staff dashboard...`,
+        trainer: `Welcome back, Trainer! Opening your training dashboard...`,
+        student: `Welcome back, Student! Redirecting to your learning dashboard...`,
+        user: `Welcome back! Loading your personalized dashboard...`
+      };
+      
+      const welcomeMessage = roleMessages[userRole as keyof typeof roleMessages] || roleMessages.user;
+      
+      // Enhanced success toast with role information
+      toast.success(welcomeMessage, {
+        duration: 2000,
+      });
+      
       return true;
     } catch (error: any) {
       console.error('Unexpected sign in error:', error);
