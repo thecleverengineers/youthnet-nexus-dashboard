@@ -14,6 +14,7 @@ import {
   Settings,
   BarChart3,
   Package,
+  Shield,
   ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ const navigation = [
   { name: 'HR & Admin', href: '/hr-admin', icon: Users },
   { name: 'Inventory', href: '/inventory', icon: Package },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
+  { name: 'Authentication', href: '/authentication', icon: Shield },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

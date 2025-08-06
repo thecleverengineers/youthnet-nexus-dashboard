@@ -24,6 +24,8 @@ import { HRAdmin } from '@/pages/HRAdmin';
 import { Inventory } from '@/pages/Inventory';
 import { ReportsPage } from '@/pages/ReportsPage';
 import { Settings } from '@/pages/Settings';
+import { AuthPage } from '@/components/auth/AuthPage';
+import { AuthenticationManagement } from '@/pages/AuthenticationManagement';
 import NotFound from '@/pages/NotFound';
 
 function App() {
@@ -120,6 +122,14 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               } />
+              <Route path="/authentication" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <AuthenticationManagement />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/auth" element={<AuthPage />} />
               <Route path="/index" element={<Index />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
