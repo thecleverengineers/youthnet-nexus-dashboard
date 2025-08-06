@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ import {
   AlertCircle,
   Eye
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, type Employee } from '@/utils/supabaseHelpers';
 import { toast } from 'sonner';
 
 export const EmployeeLogin = () => {
@@ -35,25 +34,25 @@ export const EmployeeLogin = () => {
 
     setIsLoading(true);
     try {
-      // Query employees table directly since profiles relationship doesn't exist
-      const { data: employee, error } = await supabase
-        .from('employees')
+      // Query employees table using supabaseHelpers
+      const { data: employees, error } = await supabaseHelpers.employees
         .select('*')
         .eq('employee_id', employeeId)
-        .eq('employment_status', 'active')
-        .single();
+        .eq('employment_status', 'active');
 
-      if (error || !employee) {
+      if (error || !employees || employees.length === 0) {
         toast.error('Invalid employee ID or inactive account');
         return;
       }
+
+      const employee = employees[0] as Employee;
 
       // Mock session creation since employee_sessions table doesn't exist
       const sessionData = {
         id: employee.id,
         name: `Employee ${employee.employee_id}`, // Mock name since no profiles
         employeeId: employee.employee_id,
-        department: employee.department
+        department: employee.department || 'Unknown'
       };
 
       toast.success(`Welcome back, ${sessionData.name}!`);
@@ -64,6 +63,7 @@ export const EmployeeLogin = () => {
       // Redirect to employee dashboard
       window.location.reload();
     } catch (error: any) {
+      console.error('Login error:', error);
       toast.error('Login failed: ' + error.message);
     } finally {
       setIsLoading(false);

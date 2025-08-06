@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,7 @@ import {
   FileText,
   TrendingUp
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, type LeaveRequest, type Payroll, type PerformanceReview, type EmployeeBenefit, type EmployeeTraining } from '@/utils/supabaseHelpers';
 
 interface EmployeeDetailsProps {
   employee: any;
@@ -29,11 +28,11 @@ interface EmployeeDetailsProps {
 }
 
 export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsProps) => {
-  const [leaveRequests, setLeaveRequests] = useState([]);
-  const [payrollRecords, setPayrollRecords] = useState([]);
-  const [performanceReviews, setPerformanceReviews] = useState([]);
-  const [benefits, setBenefits] = useState([]);
-  const [training, setTraining] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [payrollRecords, setPayrollRecords] = useState<Payroll[]>([]);
+  const [performanceReviews, setPerformanceReviews] = useState<PerformanceReview[]>([]);
+  const [benefits, setBenefits] = useState<EmployeeBenefit[]>([]);
+  const [training, setTraining] = useState<EmployeeTraining[]>([]);
 
   useEffect(() => {
     fetchEmployeeData();
@@ -42,39 +41,34 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
   const fetchEmployeeData = async () => {
     try {
       // Fetch leave requests
-      const { data: leaves } = await supabase
-        .from('leave_requests')
+      const { data: leaves } = await supabaseHelpers.leave_requests
         .select('*')
         .eq('employee_id', employee.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
       // Fetch payroll records
-      const { data: payroll } = await supabase
-        .from('payroll')
+      const { data: payroll } = await supabaseHelpers.payroll
         .select('*')
         .eq('employee_id', employee.id)
         .order('pay_period_end', { ascending: false })
         .limit(5);
 
       // Fetch performance reviews
-      const { data: reviews } = await supabase
-        .from('performance_reviews')
+      const { data: reviews } = await supabaseHelpers.performance_reviews
         .select('*')
         .eq('employee_id', employee.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
       // Fetch benefits
-      const { data: empBenefits } = await supabase
-        .from('employee_benefits')
+      const { data: empBenefits } = await supabaseHelpers.employee_benefits
         .select('*')
         .eq('employee_id', employee.id)
         .eq('status', 'active');
 
       // Fetch training
-      const { data: empTraining } = await supabase
-        .from('employee_training')
+      const { data: empTraining } = await supabaseHelpers.employee_training
         .select('*')
         .eq('employee_id', employee.id)
         .order('created_at', { ascending: false })
@@ -87,6 +81,12 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
       setTraining(empTraining || []);
     } catch (error) {
       console.error('Error fetching employee data:', error);
+      // Set empty arrays as fallback
+      setLeaveRequests([]);
+      setPayrollRecords([]);
+      setPerformanceReviews([]);
+      setBenefits([]);
+      setTraining([]);
     }
   };
 
@@ -110,7 +110,7 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
             <div className="flex items-center space-x-4">
               <Avatar className="h-20 w-20 border-2 border-blue-500/30">
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-xl">
-                  {employee.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'NA'}
+                  {employee.profiles?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'NA'}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -119,10 +119,10 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
                 <p className="text-sm text-muted-foreground">{employee.employee_id}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge className={getStatusColor(employee.employment_status)}>
-                    {employee.employment_status.replace('_', ' ')}
+                    {employee.employment_status?.replace('_', ' ')}
                   </Badge>
                   <Badge variant="outline">
-                    {employee.employment_type.replace('_', ' ')}
+                    {employee.employment_type?.replace('_', ' ')}
                   </Badge>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-cyan-400" />
-                  <span>Hired: {new Date(employee.hire_date).toLocaleDateString()}</span>
+                  <span>Hired: {employee.hire_date ? new Date(employee.hire_date).toLocaleDateString() : 'Not set'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Building className="h-4 w-4 text-yellow-400" />
@@ -316,18 +316,13 @@ export const EmployeeDetails = ({ employee, onClose, onEdit }: EmployeeDetailsPr
                     <div key={review.id} className="p-4 rounded-lg bg-gray-800/50">
                       <div className="flex items-center justify-between mb-2">
                         <p className="font-medium">
-                          {new Date(review.review_period_start).toLocaleDateString()} - {new Date(review.review_period_end).toLocaleDateString()}
+                          {review.review_period}
                         </p>
-                        <Badge className={review.overall_rating === 'excellent' ? 'bg-green-500/20 text-green-400' :
-                                         review.overall_rating === 'good' ? 'bg-blue-500/20 text-blue-400' :
-                                         review.overall_rating === 'satisfactory' ? 'bg-yellow-500/20 text-yellow-400' :
-                                         'bg-red-500/20 text-red-400'}>
-                          {review.overall_rating}
+                        <Badge className="bg-blue-500/20 text-blue-400">
+                          Rating: {review.overall_rating}/5
                         </Badge>
                       </div>
-                      {review.goals_achieved && (
-                        <p className="text-sm text-muted-foreground mt-2">{review.goals_achieved}</p>
-                      )}
+                      <p className="text-sm text-muted-foreground mt-2">{review.comments}</p>
                     </div>
                   ))}
                 </div>

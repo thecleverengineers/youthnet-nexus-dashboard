@@ -140,8 +140,23 @@ export interface Employee {
   position?: string;
   department?: string;
   employment_status?: string;
+  employment_type?: string;
+  hire_date?: string;
+  salary?: number;
+  probation_end_date?: string;
+  contract_end_date?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  bank_account?: string;
+  tax_id?: string;
   created_at: string;
   updated_at: string;
+  profiles?: {
+    full_name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+  };
 }
 
 export interface EmployeeTask {
@@ -181,6 +196,67 @@ export interface AttendanceRecord {
       full_name?: string;
     };
   };
+}
+
+// Add new interfaces for additional HR tables
+export interface LeaveRequest {
+  id: string;
+  employee_id: string;
+  leave_type: string;
+  start_date: string;
+  end_date: string;
+  days_requested: number;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Payroll {
+  id: string;
+  employee_id: string;
+  pay_period_start: string;
+  pay_period_end: string;
+  gross_pay: number;
+  net_pay: number;
+  payment_status: 'pending' | 'paid';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmployeeBenefit {
+  id: string;
+  employee_id: string;
+  benefit_name: string;
+  benefit_type: string;
+  provider?: string;
+  coverage_amount?: number;
+  premium_amount?: number;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmployeeTraining {
+  id: string;
+  employee_id: string;
+  training_name: string;
+  training_type: string;
+  provider?: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  certification_earned?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Profile {
+  id: string;
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  role?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // Type-safe Supabase helpers
@@ -257,5 +333,35 @@ export const supabaseHelpers = {
     upsert: (data: Partial<AttendanceRecord>, options?: any) => (supabase as any).from('attendance_records').upsert(data, options),
     update: (data: Partial<AttendanceRecord>) => (supabase as any).from('attendance_records').update(data),
     delete: () => (supabase as any).from('attendance_records').delete(),
+  },
+  leave_requests: {
+    select: (query = '*') => (supabase as any).from('leave_requests').select(query),
+    insert: (data: Partial<LeaveRequest>[]) => (supabase as any).from('leave_requests').insert(data),
+    update: (data: Partial<LeaveRequest>) => (supabase as any).from('leave_requests').update(data),
+    delete: () => (supabase as any).from('leave_requests').delete(),
+  },
+  payroll: {
+    select: (query = '*') => (supabase as any).from('payroll').select(query),
+    insert: (data: Partial<Payroll>[]) => (supabase as any).from('payroll').insert(data),
+    update: (data: Partial<Payroll>) => (supabase as any).from('payroll').update(data),
+    delete: () => (supabase as any).from('payroll').delete(),
+  },
+  employee_benefits: {
+    select: (query = '*') => (supabase as any).from('employee_benefits').select(query),
+    insert: (data: Partial<EmployeeBenefit>[]) => (supabase as any).from('employee_benefits').insert(data),
+    update: (data: Partial<EmployeeBenefit>) => (supabase as any).from('employee_benefits').update(data),
+    delete: () => (supabase as any).from('employee_benefits').delete(),
+  },
+  employee_training: {
+    select: (query = '*') => (supabase as any).from('employee_training').select(query),
+    insert: (data: Partial<EmployeeTraining>[]) => (supabase as any).from('employee_training').insert(data),
+    update: (data: Partial<EmployeeTraining>) => (supabase as any).from('employee_training').update(data),
+    delete: () => (supabase as any).from('employee_training').delete(),
+  },
+  profiles: {
+    select: (query = '*') => (supabase as any).from('profiles').select(query),
+    insert: (data: Partial<Profile>[]) => (supabase as any).from('profiles').insert(data),
+    update: (data: Partial<Profile>) => (supabase as any).from('profiles').update(data),
+    delete: () => (supabase as any).from('profiles').delete(),
   },
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers } from '@/utils/supabaseHelpers';
 import { toast } from 'sonner';
 
 interface EmployeeFormProps {
@@ -45,8 +44,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
     try {
       if (employee) {
         // Update existing employee
-        const { error: empError } = await supabase
-          .from('employees')
+        const { error: empError } = await supabaseHelpers.employees
           .update({
             employee_id: formData.employee_id,
             position: formData.position,
@@ -68,8 +66,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
 
         // Update profile if user_id exists
         if (employee.user_id) {
-          const { error: profileError } = await supabase
-            .from('profiles')
+          const { error: profileError } = await supabaseHelpers.profiles
             .update({
               full_name: formData.full_name,
               email: formData.email,
@@ -83,12 +80,11 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
 
         toast.success('Employee updated successfully!');
       } else {
-        // Create new employee
-        const { data: user } = await supabase.auth.getUser();
-        const { error } = await supabase
-          .from('employees')
-          .insert({
-            user_id: user?.user?.id,
+        // Create new employee - get mock user ID for demo
+        const mockUserId = crypto.randomUUID();
+        const { error } = await supabaseHelpers.employees
+          .insert([{
+            user_id: mockUserId,
             employee_id: formData.employee_id,
             position: formData.position,
             department: formData.department,
@@ -102,7 +98,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
             emergency_contact_phone: formData.emergency_contact_phone,
             bank_account: formData.bank_account,
             tax_id: formData.tax_id,
-          });
+          }]);
 
         if (error) throw error;
         toast.success('Employee created successfully!');
@@ -110,7 +106,8 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
 
       onSuccess();
     } catch (error: any) {
-      toast.error(error.message);
+      console.error('Error saving employee:', error);
+      toast.error(error.message || 'Failed to save employee');
     } finally {
       setLoading(false);
     }
