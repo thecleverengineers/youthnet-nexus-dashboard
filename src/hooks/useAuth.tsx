@@ -24,18 +24,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
 
-  const refreshProfile = async () => {
-    if (!user) {
+  const refreshProfile = async (userToFetch?: User) => {
+    const currentUser = userToFetch || user;
+    if (!currentUser) {
       setProfile(null);
       return;
     }
     
     try {
-      console.log('Fetching profile for user:', user.id);
+      console.log('Fetching profile for user:', currentUser.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .maybeSingle();
       
       if (error) {
@@ -45,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const { data: retryData, error: retryError } = await supabase
             .from('profiles')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', currentUser.id)
             .maybeSingle();
           
           if (!retryError && retryData) {
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setProfile(retryData);
           } else {
             console.error('Profile still not found after retry:', retryError);
+            setProfile(null);
           }
         }, 2000);
       } else {
@@ -61,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error in refreshProfile:', error);
+      setProfile(null);
     }
   };
 
@@ -74,17 +77,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Auth state changed:', event, session);
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
       
       // Refresh profile when user changes
-      if (session?.user && event === 'SIGNED_IN') {
+      if (session?.user) {
         // Small delay to ensure the database trigger has completed
         setTimeout(() => {
-          refreshProfile();
-        }, 1000);
+          refreshProfile(session.user);
+        }, 500);
       } else {
         setProfile(null);
       }
+      
+      setLoading(false);
     });
 
     // Then get initial session
@@ -92,11 +96,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Initial session:', session);
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
       
       if (session?.user) {
-        refreshProfile();
+        refreshProfile(session.user);
       }
+      
+      setLoading(false);
     });
 
     return () => {
