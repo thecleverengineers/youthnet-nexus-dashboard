@@ -199,6 +199,48 @@ export type Database = {
           },
         ]
       }
+      data_change_history: {
+        Row: {
+          after_data: Json | null
+          before_data: Json | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          operation: string
+          record_id: string
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          after_data?: Json | null
+          before_data?: Json | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          operation: string
+          record_id: string
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          after_data?: Json | null
+          before_data?: Json | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          operation?: string
+          record_id?: string
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       education_courses: {
         Row: {
           course_code: string
@@ -481,6 +523,57 @@ export type Database = {
         }
         Relationships: []
       }
+      error_logs: {
+        Row: {
+          created_at: string
+          error_message: string
+          error_stack: string | null
+          error_type: string
+          id: string
+          ip_address: unknown | null
+          page_url: string | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          user_action: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message: string
+          error_stack?: string | null
+          error_type: string
+          id?: string
+          ip_address?: unknown | null
+          page_url?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          user_action?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string
+          error_stack?: string | null
+          error_type?: string
+          id?: string
+          ip_address?: unknown | null
+          page_url?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          user_action?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       job_applications: {
         Row: {
           applicant_email: string
@@ -720,6 +813,48 @@ export type Database = {
           status?: string | null
           stock_quantity?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      login_attempts: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          email: string
+          failure_reason: string | null
+          id: string
+          ip_address: unknown | null
+          success: boolean
+          user_agent: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          email: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown | null
+          success: boolean
+          user_agent?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          email?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown | null
+          success?: boolean
+          user_agent?: string | null
         }
         Relationships: []
       }
@@ -1091,6 +1226,33 @@ export type Database = {
           student_id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      system_metrics: {
+        Row: {
+          id: string
+          metric_name: string
+          metric_unit: string | null
+          metric_value: number
+          recorded_at: string
+          tags: Json | null
+        }
+        Insert: {
+          id?: string
+          metric_name: string
+          metric_unit?: string | null
+          metric_value: number
+          recorded_at?: string
+          tags?: Json | null
+        }
+        Update: {
+          id?: string
+          metric_name?: string
+          metric_unit?: string | null
+          metric_value?: number
+          recorded_at?: string
+          tags?: Json | null
         }
         Relationships: []
       }
