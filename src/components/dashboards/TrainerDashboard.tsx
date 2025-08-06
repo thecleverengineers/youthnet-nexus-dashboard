@@ -13,12 +13,12 @@ import {
   LogOut
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, Trainer, TrainingProgram } from '@/utils/supabaseHelpers';
 
 export const TrainerDashboard = () => {
   const { user, profile, signOut } = useAuth();
-  const [trainerData, setTrainerData] = useState(null);
-  const [programs, setPrograms] = useState([]);
+  const [trainerData, setTrainerData] = useState<Trainer | null>(null);
+  const [programs, setPrograms] = useState<TrainingProgram[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,8 +30,7 @@ export const TrainerDashboard = () => {
   const loadTrainerData = async () => {
     try {
       // Fetch trainer record
-      const { data: trainer } = await supabase
-        .from('trainers')
+      const { data: trainer } = await supabaseHelpers.trainers
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -39,8 +38,7 @@ export const TrainerDashboard = () => {
       setTrainerData(trainer);
 
       // Fetch training programs
-      const { data: programData } = await supabase
-        .from('training_programs')
+      const { data: programData } = await supabaseHelpers.training_programs
         .select(`
           *,
           student_enrollments(count)

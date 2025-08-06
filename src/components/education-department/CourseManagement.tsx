@@ -5,33 +5,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Users } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, EducationCourse } from '@/utils/supabaseHelpers';
 import { useToast } from '@/hooks/use-toast';
 import { CourseForm } from './CourseForm';
 
 export const CourseManagement = () => {
   const [showForm, setShowForm] = useState(false);
-  const [editingCourse, setEditingCourse] = useState(null);
+  const [editingCourse, setEditingCourse] = useState<EducationCourse | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: courses, isLoading } = useQuery({
     queryKey: ['education-courses'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('education_courses')
+      const { data, error } = await supabaseHelpers.education_courses
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as EducationCourse[];
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (courseId: string) => {
-      const { error } = await supabase
-        .from('education_courses')
+      const { error } = await supabaseHelpers.education_courses
         .delete()
         .eq('id', courseId);
       
@@ -53,7 +51,7 @@ export const CourseManagement = () => {
     },
   });
 
-  const handleEdit = (course: any) => {
+  const handleEdit = (course: EducationCourse) => {
     setEditingCourse(course);
     setShowForm(true);
   };

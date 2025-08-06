@@ -6,11 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, TrainingProgram } from '@/utils/supabaseHelpers';
 import { toast } from 'sonner';
 
 interface CourseFormProps {
-  course?: any;
+  course?: TrainingProgram;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -32,8 +32,7 @@ export const CourseForm = ({ course, onClose, onSuccess }: CourseFormProps) => {
     try {
       if (course) {
         // Update existing course
-        const { error } = await supabase
-          .from('training_programs')
+        const { error } = await supabaseHelpers.training_programs
           .update(formData)
           .eq('id', course.id);
 
@@ -41,8 +40,7 @@ export const CourseForm = ({ course, onClose, onSuccess }: CourseFormProps) => {
         toast.success('Course updated successfully!');
       } else {
         // Create new course
-        const { error } = await supabase
-          .from('training_programs')
+        const { error } = await supabaseHelpers.training_programs
           .insert([formData]);
 
         if (error) throw error;

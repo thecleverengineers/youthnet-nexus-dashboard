@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { UserPlus, Search, Filter } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, EducationCourse, Student, CourseEnrollment } from '@/utils/supabaseHelpers';
 import { useToast } from '@/hooks/use-toast';
 
 export const StudentAssignment = () => {
@@ -23,22 +23,20 @@ export const StudentAssignment = () => {
   const { data: courses } = useQuery({
     queryKey: ['education-courses'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('education_courses')
+      const { data, error } = await supabaseHelpers.education_courses
         .select('*')
         .eq('status', 'active')
         .order('course_name');
       
       if (error) throw error;
-      return data;
+      return data as EducationCourse[];
     },
   });
 
   const { data: students } = useQuery({
     queryKey: ['students'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('students')
+      const { data, error } = await supabaseHelpers.students
         .select(`
           *,
           profiles:user_id(full_name, email)
@@ -46,15 +44,14 @@ export const StudentAssignment = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as Student[];
     },
   });
 
   const { data: enrollments, isLoading } = useQuery({
     queryKey: ['course-enrollments'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('course_enrollments')
+      const { data, error } = await supabaseHelpers.course_enrollments
         .select(`
           *,
           students(
@@ -66,14 +63,13 @@ export const StudentAssignment = () => {
         .order('enrollment_date', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as CourseEnrollment[];
     },
   });
 
   const assignMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase
-        .from('course_enrollments')
+      const { error } = await supabaseHelpers.course_enrollments
         .insert([data]);
       
       if (error) throw error;
@@ -165,7 +161,7 @@ export const StudentAssignment = () => {
                 <SelectContent>
                   {students?.map((student) => (
                     <SelectItem key={student.id} value={student.id}>
-                      {student.profiles?.full_name} ({student.student_id})
+                      {(student as any).profiles?.full_name} ({student.student_id})
                     </SelectItem>
                   ))}
                 </SelectContent>

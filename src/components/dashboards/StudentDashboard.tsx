@@ -15,12 +15,12 @@ import {
   LogOut
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, Student, StudentEnrollment } from '@/utils/supabaseHelpers';
 
 export const StudentDashboard = () => {
   const { user, profile, signOut } = useAuth();
-  const [studentData, setStudentData] = useState(null);
-  const [enrollments, setEnrollments] = useState([]);
+  const [studentData, setStudentData] = useState<Student | null>(null);
+  const [enrollments, setEnrollments] = useState<StudentEnrollment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,8 +32,7 @@ export const StudentDashboard = () => {
   const loadStudentData = async () => {
     try {
       // Fetch student record
-      const { data: student } = await supabase
-        .from('students')
+      const { data: student } = await supabaseHelpers.students
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -41,8 +40,7 @@ export const StudentDashboard = () => {
       setStudentData(student);
 
       // Fetch enrollments
-      const { data: enrollmentData } = await supabase
-        .from('student_enrollments')
+      const { data: enrollmentData } = await supabaseHelpers.student_enrollments
         .select(`
           *,
           training_programs(name, duration_weeks)
