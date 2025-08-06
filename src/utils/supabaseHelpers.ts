@@ -6,6 +6,12 @@ export interface Student {
   id: string;
   user_id: string;
   student_id: string;
+  date_of_birth?: string;
+  gender?: string;
+  education_level?: string;
+  emergency_contact?: string;
+  emergency_phone?: string;
+  status?: 'pending' | 'active' | 'completed' | 'dropped';
   created_at: string;
   updated_at: string;
 }
@@ -79,6 +85,54 @@ export interface CourseEnrollment {
   };
 }
 
+// Add interfaces for HR Admin tables
+export interface PayrollCycle {
+  id: string;
+  cycle_name: string;
+  start_date: string;
+  end_date: string;
+  pay_date: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PayrollEntry {
+  id: string;
+  employee_id: string;
+  cycle_id: string;
+  basic_salary: number;
+  overtime_hours: number;
+  overtime_rate: number;
+  bonuses: number;
+  deductions: number;
+  net_pay: number;
+  ai_risk_score: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PerformanceReview {
+  id: string;
+  employee_id: string;
+  reviewer_id: string;
+  review_period: string;
+  overall_rating: number;
+  technical_skills: number;
+  communication: number;
+  leadership: number;
+  teamwork: number;
+  innovation: number;
+  ai_generated_insights: string;
+  skill_assessment: any;
+  development_goals: string[];
+  achievements: string[];
+  areas_for_improvement: string[];
+  comments: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Type-safe Supabase helpers
 export const supabaseHelpers = {
   students: {
@@ -116,5 +170,23 @@ export const supabaseHelpers = {
     insert: (data: Partial<CourseEnrollment>[]) => (supabase as any).from('course_enrollments').insert(data),
     update: (data: Partial<CourseEnrollment>) => (supabase as any).from('course_enrollments').update(data),
     delete: () => (supabase as any).from('course_enrollments').delete(),
+  },
+  payroll_cycles: {
+    select: (query = '*') => (supabase as any).from('payroll_cycles').select(query),
+    insert: (data: Partial<PayrollCycle>[]) => (supabase as any).from('payroll_cycles').insert(data),
+    update: (data: Partial<PayrollCycle>) => (supabase as any).from('payroll_cycles').update(data),
+    delete: () => (supabase as any).from('payroll_cycles').delete(),
+  },
+  payroll_entries: {
+    select: (query = '*') => (supabase as any).from('payroll_entries').select(query),
+    insert: (data: Partial<PayrollEntry>[]) => (supabase as any).from('payroll_entries').insert(data),
+    update: (data: Partial<PayrollEntry>) => (supabase as any).from('payroll_entries').update(data),
+    delete: () => (supabase as any).from('payroll_entries').delete(),
+  },
+  performance_reviews: {
+    select: (query = '*') => (supabase as any).from('performance_reviews').select(query),
+    insert: (data: Partial<PerformanceReview>[]) => (supabase as any).from('performance_reviews').insert(data),
+    update: (data: Partial<PerformanceReview>) => (supabase as any).from('performance_reviews').update(data),
+    delete: () => (supabase as any).from('performance_reviews').delete(),
   },
 };
