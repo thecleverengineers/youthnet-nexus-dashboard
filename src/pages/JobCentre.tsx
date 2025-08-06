@@ -27,7 +27,7 @@ export function JobCentre() {
       const [jobPostingsRes, applicationsRes, placementsRes, employersRes] = await Promise.all([
         supabase.from('job_postings').select('*', { count: 'exact', head: true }),
         supabase.from('job_applications').select('*', { count: 'exact', head: true }),
-        supabase.from('job_applications').select('*', { count: 'exact', head: true }).eq('status', 'selected'),
+        supabase.from('job_applications').select('*', { count: 'exact', head: true }).eq('application_status', 'selected'),
         supabase.from('job_postings').select('company', { count: 'exact', head: true })
       ]);
 

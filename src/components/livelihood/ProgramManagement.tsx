@@ -108,12 +108,12 @@ export const ProgramManagement = () => {
                 <TableRow key={program.id}>
                   <TableCell className="font-medium">{program.program_name}</TableCell>
                   <TableCell>{program.focus_area}</TableCell>
-                  <TableCell>{program.duration_weeks} weeks</TableCell>
+                  <TableCell>{program.duration_months} months</TableCell>
                   <TableCell>{program.max_participants || 'No limit'}</TableCell>
                   <TableCell>${program.budget}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(program.program_status)}>
-                      {program.program_status}
+                    <Badge className={getStatusColor(program.status)}>
+                      {program.status}
                     </Badge>
                   </TableCell>
                   <TableCell>

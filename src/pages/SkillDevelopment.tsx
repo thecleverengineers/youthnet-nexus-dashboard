@@ -25,9 +25,9 @@ export function SkillDevelopment() {
     queryKey: ['skill-development-stats'],
     queryFn: async () => {
       const [skillAssessmentsRes, certificationsRes, activeTrainingsRes] = await Promise.all([
-        supabase.from('skill_assessments').select('*', { count: 'exact', head: true }),
-        supabase.from('certifications').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
-        supabase.from('training_programs').select('*', { count: 'exact', head: true }).eq('status', 'active')
+        supabase.from('employee_training').select('*', { count: 'exact', head: true }),
+        supabase.from('employee_training').select('*', { count: 'exact', head: true }).eq('certification_earned', true),
+        supabase.from('employee_training').select('*', { count: 'exact', head: true }).eq('status', 'enrolled')
       ]);
 
       return {

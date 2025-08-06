@@ -33,10 +33,10 @@ export function Education() {
     queryKey: ['education-stats'],
     queryFn: async () => {
       const [studentsRes, programsRes, enrollmentsRes, completionsRes] = await Promise.all([
-        supabase.from('students').select('*', { count: 'exact', head: true }),
-        supabase.from('training_programs').select('*', { count: 'exact', head: true }),
-        supabase.from('student_enrollments').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-        supabase.from('student_enrollments').select('*', { count: 'exact', head: true }).eq('status', 'completed')
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
+        supabase.from('livelihood_programs').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
+        supabase.from('employee_training').select('*', { count: 'exact', head: true }).eq('certification_earned', true)
       ]);
 
       return {

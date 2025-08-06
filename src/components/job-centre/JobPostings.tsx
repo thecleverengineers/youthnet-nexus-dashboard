@@ -116,10 +116,10 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
                       <span>{job.salary_range}</span>
                     </div>
                   )}
-                  {job.job_type && (
+                  {job.employment_type && (
                     <div className="flex items-center gap-1">
                       <Briefcase className="h-4 w-4 text-muted-foreground" />
-                      <span className="capitalize">{job.job_type}</span>
+                      <span className="capitalize">{job.employment_type}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1">
@@ -128,9 +128,9 @@ export function JobPostings({ detailed = false }: JobPostingsProps) {
                   </div>
                 </div>
 
-                {job.closing_date && (
+                {job.application_deadline && (
                   <div className="text-xs text-muted-foreground mb-3">
-                    Closing: {new Date(job.closing_date).toLocaleDateString()}
+                    Closing: {new Date(job.application_deadline).toLocaleDateString()}
                   </div>
                 )}
 

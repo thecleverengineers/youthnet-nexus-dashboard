@@ -3,12 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export function useDashboardData() {
-  const studentsQuery = useQuery({
-    queryKey: ['students-count'],
+  const profilesQuery = useQuery({
+    queryKey: ['profiles-count'],
     queryFn: async () => {
       const { count } = await supabase
-        .from('students')
-        .select('*', { count: 'exact', head: true });
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'student');
       return count || 0;
     },
   });
@@ -17,8 +18,9 @@ export function useDashboardData() {
     queryKey: ['trainers-count'],
     queryFn: async () => {
       const { count } = await supabase
-        .from('trainers')
-        .select('*', { count: 'exact', head: true });
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'trainer');
       return count || 0;
     },
   });
@@ -29,18 +31,18 @@ export function useDashboardData() {
       const { count } = await supabase
         .from('job_applications')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'selected');
+        .eq('application_status', 'selected');
       return count || 0;
     },
   });
 
-  const incubationProjectsQuery = useQuery({
-    queryKey: ['incubation-projects-count'],
+  const startupProjectsQuery = useQuery({
+    queryKey: ['startup-projects-count'],
     queryFn: async () => {
       const { count } = await supabase
-        .from('incubation_projects')
+        .from('startup_applications')
         .select('*', { count: 'exact', head: true })
-        .in('status', ['development', 'testing', 'launched']);
+        .in('application_status', ['approved', 'in_progress', 'completed']);
       return count || 0;
     },
   });
@@ -48,14 +50,10 @@ export function useDashboardData() {
   const departmentStatsQuery = useQuery({
     queryKey: ['department-stats'],
     queryFn: async () => {
-      // Get student counts by enrollment status
-      const { data: enrollments } = await supabase
-        .from('student_enrollments')
-        .select(`
-          status,
-          program_id,
-          training_programs(name)
-        `);
+      // Get employee counts by department
+      const { data: employees } = await supabase
+        .from('employees')
+        .select('department, employment_status');
 
       // Process data for department performance chart
       const departmentData = [
@@ -66,13 +64,20 @@ export function useDashboardData() {
         { name: 'Incubation', students: 0, completion: 95 },
       ];
 
-      if (enrollments) {
-        // Count students by department (simplified)
-        departmentData[0].students = enrollments.filter(e => e.status === 'active').length;
-        departmentData[1].students = Math.floor(departmentData[0].students * 0.7);
-        departmentData[2].students = Math.floor(departmentData[0].students * 0.5);
-        departmentData[3].students = Math.floor(departmentData[0].students * 0.3);
-        departmentData[4].students = Math.floor(departmentData[0].students * 0.1);
+      if (employees) {
+        // Count employees by department
+        const deptCounts = employees.reduce((acc: any, emp) => {
+          if (emp.employment_status === 'active') {
+            acc[emp.department] = (acc[emp.department] || 0) + 1;
+          }
+          return acc;
+        }, {});
+
+        departmentData[0].students = deptCounts['Education'] || 0;
+        departmentData[1].students = deptCounts['Skill Development'] || 0;
+        departmentData[2].students = deptCounts['Job Centre'] || 0;
+        departmentData[3].students = deptCounts['Career Development'] || 0;
+        departmentData[4].students = deptCounts['Incubation'] || 0;
       }
 
       return departmentData;
@@ -86,10 +91,10 @@ export function useDashboardData() {
       const { data: applications } = await supabase
         .from('job_applications')
         .select(`
-          status,
+          application_status,
           job_postings(company, title)
         `)
-        .eq('status', 'selected');
+        .eq('application_status', 'selected');
 
       // Mock placement distribution data
       return [
@@ -103,12 +108,12 @@ export function useDashboardData() {
   });
 
   return {
-    studentsCount: studentsQuery.data || 0,
+    studentsCount: profilesQuery.data || 0,
     trainersCount: trainersQuery.data || 0,
     jobPlacements: jobApplicationsQuery.data || 0,
-    incubationProjects: incubationProjectsQuery.data || 0,
+    incubationProjects: startupProjectsQuery.data || 0,
     departmentData: departmentStatsQuery.data || [],
     placementData: placementDataQuery.data || [],
-    loading: studentsQuery.isLoading || trainersQuery.isLoading || jobApplicationsQuery.isLoading || incubationProjectsQuery.isLoading,
+    loading: profilesQuery.isLoading || trainersQuery.isLoading || jobApplicationsQuery.isLoading || startupProjectsQuery.isLoading,
   };
 }

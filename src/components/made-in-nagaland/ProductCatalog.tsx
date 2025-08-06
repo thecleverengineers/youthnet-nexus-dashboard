@@ -111,8 +111,8 @@ export const ProductCatalog = () => {
                   <TableCell>${product.price}</TableCell>
                   <TableCell>{product.stock_quantity}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(product.certification_status)}>
-                      {product.certification_status}
+                    <Badge className={getStatusColor(product.status)}>
+                      {product.status}
                     </Badge>
                   </TableCell>
                   <TableCell>

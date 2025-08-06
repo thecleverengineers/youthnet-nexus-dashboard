@@ -28,6 +28,7 @@ import { EmployeeDetails } from './EmployeeDetails';
 interface Employee {
   id: string;
   employee_id: string;
+  user_id: string | null;
   position: string;
   department: string;
   employment_status: 'active' | 'probation' | 'on_leave' | 'inactive' | 'terminated';
