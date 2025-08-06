@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,15 +24,32 @@ import { EmployeeCard } from './EmployeeCard';
 import { EmployeeForm } from './EmployeeForm';
 import { EmployeeDetails } from './EmployeeDetails';
 
+// Mock employee interface since employees table doesn't exist yet
+interface Employee {
+  id: string;
+  employee_id: string;
+  position: string;
+  department: string;
+  employment_status: 'active' | 'probation' | 'on_leave' | 'inactive' | 'terminated';
+  employment_type: string;
+  hire_date: string;
+  salary: number | null;
+  profiles?: {
+    full_name: string;
+    email: string;
+    phone: string;
+  };
+}
+
 export const EmployeeManagement = () => {
-  const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -42,18 +60,8 @@ export const EmployeeManagement = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('employees')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email,
-            phone
-          )
-        `);
-
-      if (error) throw error;
+      // Mock empty data since employees table doesn't exist yet
+      const data: Employee[] = [];
 
       console.log('Fetched employees:', data);
       setEmployees(data || []);
@@ -78,24 +86,6 @@ export const EmployeeManagement = () => {
 
   useEffect(() => {
     fetchEmployees();
-    
-    // Set up real-time subscription for employees table
-    const channel = supabase
-      .channel('employees-changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'employees' }, () => {
-        fetchEmployees();
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'employees' }, () => {
-        fetchEmployees();
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'employees' }, () => {
-        fetchEmployees();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const filteredEmployees = employees.filter(employee => {
@@ -110,12 +100,12 @@ export const EmployeeManagement = () => {
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
-  const handleEdit = (employee) => {
+  const handleEdit = (employee: Employee) => {
     setSelectedEmployee(employee);
     setShowForm(true);
   };
 
-  const handleView = (employee) => {
+  const handleView = (employee: Employee) => {
     setSelectedEmployee(employee);
     setShowDetails(true);
   };
