@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, Asset } from '@/utils/supabaseHelpers';
 import { Plus, Edit, Trash2, Package } from 'lucide-react';
 import { AssetForm } from './AssetForm';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,22 +15,20 @@ export const AssetManagement = () => {
   const { toast } = useToast();
 
   const { data: assets, isLoading, refetch } = useQuery({
-    queryKey: ['inventory_items'],
+    queryKey: ['assets'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_items')
+      const { data, error } = await supabaseHelpers.assets
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Asset[];
     }
   });
 
   const deleteAsset = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('inventory_items')
+      const { error } = await supabaseHelpers.assets
         .delete()
         .eq('id', id);
 

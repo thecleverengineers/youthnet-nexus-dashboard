@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers } from '@/utils/supabaseHelpers';
 import { useToast } from '@/hooks/use-toast';
 
 interface AssetFormProps {
@@ -21,8 +21,7 @@ export const AssetForm = ({ onSuccess, onCancel }: AssetFormProps) => {
 
   const onSubmit = async (data: any) => {
     try {
-      const { error } = await supabase
-        .from('inventory_items')
+      const { error } = await supabaseHelpers.assets
         .insert([{
           name: data.name,
           category: data.category,
@@ -34,7 +33,7 @@ export const AssetForm = ({ onSuccess, onCancel }: AssetFormProps) => {
           purchase_date: data.purchase_date,
           purchase_price: parseFloat(data.purchase_price) || 0,
           current_value: parseFloat(data.current_value) || 0,
-          status: data.status || 'available'
+          status: data.status || 'active'
         }]);
 
       if (error) throw error;

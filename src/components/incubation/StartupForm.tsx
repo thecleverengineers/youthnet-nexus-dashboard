@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers } from '@/utils/supabaseHelpers';
 import { useToast } from '@/hooks/use-toast';
 
 interface StartupFormProps {
@@ -20,14 +20,13 @@ export const StartupForm = ({ onSuccess, onCancel }: StartupFormProps) => {
 
   const onSubmit = async (data: any) => {
     try {
-      const { error } = await supabase
-        .from('startup_applications')
+      const { error } = await supabaseHelpers.startup_applications
         .insert([{
           business_name: data.business_name,
           business_idea: data.business_idea,
           industry: data.industry,
-          team_size: parseInt(data.team_size) || null,
-          funding_required: parseFloat(data.funding_required) || null,
+          team_size: parseInt(data.team_size) || 0,
+          funding_required: parseFloat(data.funding_required) || 0,
           notes: data.notes
         }]);
 

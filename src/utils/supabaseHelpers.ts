@@ -250,11 +250,119 @@ export interface EmployeeTraining {
 
 export interface Profile {
   id: string;
+  user_id: string;
   full_name?: string;
   email?: string;
   phone?: string;
   address?: string;
   role?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Additional interfaces needed for the application
+export interface Asset {
+  id: string;
+  name: string;
+  category: string;
+  description?: string;
+  brand?: string;
+  model?: string;
+  serial_number?: string;
+  location?: string;
+  purchase_date?: string;
+  purchase_price?: number;
+  current_value?: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StockItem {
+  id: string;
+  item_name: string;
+  category: string;
+  quantity: number;
+  unit?: string;
+  reorder_level?: number;
+  supplier?: string;
+  unit_cost?: number;
+  location?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JobPosting {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description?: string;
+  requirements?: string;
+  salary_range?: string;
+  employment_type: string;
+  status: string;
+  posted_date: string;
+  application_deadline?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JobApplication {
+  id: string;
+  job_posting_id: string;
+  applicant_name: string;
+  applicant_email: string;
+  applicant_phone?: string;
+  resume_url?: string;
+  cover_letter?: string;
+  application_status: string;
+  applied_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StartupApplication {
+  id: string;
+  business_name: string;
+  business_idea: string;
+  industry: string;
+  team_size: number;
+  funding_required: number;
+  notes?: string;
+  application_status: string;
+  submitted_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LivelihoodProgram {
+  id: string;
+  program_name: string;
+  focus_area: string;
+  target_demographic?: string;
+  duration_months?: number;
+  max_participants?: number;
+  budget?: number;
+  expected_outcomes?: string;
+  status: string;
+  start_date?: string;
+  end_date?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LocalProduct {
+  id: string;
+  product_name: string;
+  category: string;
+  description?: string;
+  producer_name: string;
+  producer_contact?: string;
+  price?: number;
+  stock_quantity: number;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -363,5 +471,47 @@ export const supabaseHelpers = {
     insert: (data: Partial<Profile>[]) => (supabase as any).from('profiles').insert(data),
     update: (data: Partial<Profile>) => (supabase as any).from('profiles').update(data),
     delete: () => (supabase as any).from('profiles').delete(),
+  },
+  assets: {
+    select: (query = '*') => (supabase as any).from('assets').select(query),
+    insert: (data: Partial<Asset>[]) => (supabase as any).from('assets').insert(data),
+    update: (data: Partial<Asset>) => (supabase as any).from('assets').update(data),
+    delete: () => (supabase as any).from('assets').delete(),
+  },
+  stock_items: {
+    select: (query = '*') => (supabase as any).from('stock_items').select(query),
+    insert: (data: Partial<StockItem>[]) => (supabase as any).from('stock_items').insert(data),
+    update: (data: Partial<StockItem>) => (supabase as any).from('stock_items').update(data),
+    delete: () => (supabase as any).from('stock_items').delete(),
+  },
+  job_postings: {
+    select: (query = '*') => (supabase as any).from('job_postings').select(query),
+    insert: (data: Partial<JobPosting>[]) => (supabase as any).from('job_postings').insert(data),
+    update: (data: Partial<JobPosting>) => (supabase as any).from('job_postings').update(data),
+    delete: () => (supabase as any).from('job_postings').delete(),
+  },
+  job_applications: {
+    select: (query = '*') => (supabase as any).from('job_applications').select(query),
+    insert: (data: Partial<JobApplication>[]) => (supabase as any).from('job_applications').insert(data),
+    update: (data: Partial<JobApplication>) => (supabase as any).from('job_applications').update(data),
+    delete: () => (supabase as any).from('job_applications').delete(),
+  },
+  startup_applications: {
+    select: (query = '*') => (supabase as any).from('startup_applications').select(query),
+    insert: (data: Partial<StartupApplication>[]) => (supabase as any).from('startup_applications').insert(data),
+    update: (data: Partial<StartupApplication>) => (supabase as any).from('startup_applications').update(data),
+    delete: () => (supabase as any).from('startup_applications').delete(),
+  },
+  livelihood_programs: {
+    select: (query = '*') => (supabase as any).from('livelihood_programs').select(query),
+    insert: (data: Partial<LivelihoodProgram>[]) => (supabase as any).from('livelihood_programs').insert(data),
+    update: (data: Partial<LivelihoodProgram>) => (supabase as any).from('livelihood_programs').update(data),
+    delete: () => (supabase as any).from('livelihood_programs').delete(),
+  },
+  local_products: {
+    select: (query = '*') => (supabase as any).from('local_products').select(query),
+    insert: (data: Partial<LocalProduct>[]) => (supabase as any).from('local_products').insert(data),
+    update: (data: Partial<LocalProduct>) => (supabase as any).from('local_products').update(data),
+    delete: () => (supabase as any).from('local_products').delete(),
   },
 };

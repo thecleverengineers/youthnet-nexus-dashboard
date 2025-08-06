@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers } from '@/utils/supabaseHelpers';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProgramFormProps {
@@ -20,16 +20,15 @@ export const ProgramForm = ({ onSuccess, onCancel }: ProgramFormProps) => {
 
   const onSubmit = async (data: any) => {
     try {
-      const { error } = await supabase
-        .from('livelihood_programs')
+      const { error } = await supabaseHelpers.livelihood_programs
         .insert([{
           program_name: data.program_name,
           focus_area: data.focus_area,
           target_demographic: data.target_demographic,
-          duration_weeks: parseInt(data.duration_weeks) || null,
+          duration_months: parseInt(data.duration_weeks) || null,
           max_participants: parseInt(data.max_participants) || null,
           budget: parseFloat(data.budget) || null,
-          expected_outcomes: data.expected_outcomes ? data.expected_outcomes.split(',').map((s: string) => s.trim()) : []
+          expected_outcomes: data.expected_outcomes
         }]);
 
       if (error) throw error;
@@ -75,7 +74,7 @@ export const ProgramForm = ({ onSuccess, onCancel }: ProgramFormProps) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="duration_weeks">Duration (weeks)</Label>
+              <Label htmlFor="duration_weeks">Duration (months)</Label>
               <Input id="duration_weeks" type="number" {...register('duration_weeks')} />
             </div>
             <div>

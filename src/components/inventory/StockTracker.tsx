@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseHelpers, StockItem } from '@/utils/supabaseHelpers';
 import { Package, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
@@ -16,18 +16,19 @@ export const StockTracker = () => {
   const { toast } = useToast();
 
   const { data: inventory, isLoading, refetch } = useQuery({
-    queryKey: ['inventory_stock'],
+    queryKey: ['stock_items'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select('id, name, category, current_value, status')
-        .order('name');
+      const { data, error } = await supabaseHelpers.stock_items
+        .select('*')
+        .order('item_name');
 
       if (error) throw error;
-      return data?.map(item => ({
-        ...item,
-        stock_quantity: Math.floor(Math.random() * 100) + 1, // Mock stock data
-        min_threshold: 10,
+      return (data as StockItem[])?.map(item => ({
+        id: item.id,
+        name: item.item_name,
+        category: item.category,
+        stock_quantity: item.quantity,
+        min_threshold: item.reorder_level || 10,
         max_threshold: 50
       }));
     }
