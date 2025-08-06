@@ -50,6 +50,60 @@ export type Database = {
         }
         Relationships: []
       }
+      announcements: {
+        Row: {
+          attachments: Json | null
+          content: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          priority: string | null
+          published_at: string | null
+          status: string | null
+          target_departments: string[] | null
+          target_roles: string[] | null
+          title: string
+          type: string | null
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          attachments?: Json | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          priority?: string | null
+          published_at?: string | null
+          status?: string | null
+          target_departments?: string[] | null
+          target_roles?: string[] | null
+          title: string
+          type?: string | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          attachments?: Json | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          priority?: string | null
+          published_at?: string | null
+          status?: string | null
+          target_departments?: string[] | null
+          target_roles?: string[] | null
+          title?: string
+          type?: string | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Relationships: []
+      }
       assets: {
         Row: {
           brand: string | null
@@ -293,6 +347,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_logs: {
+        Row: {
+          clicked_at: string | null
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          external_id: string | null
+          id: string
+          opened_at: string | null
+          recipient_email: string
+          recipient_name: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          template_id: string | null
+          variables_used: Json | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          external_id?: string | null
+          id?: string
+          opened_at?: string | null
+          recipient_email: string
+          recipient_name?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          template_id?: string | null
+          variables_used?: Json | null
+        }
+        Update: {
+          clicked_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          external_id?: string | null
+          id?: string
+          opened_at?: string | null
+          recipient_email?: string
+          recipient_name?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          template_id?: string | null
+          variables_used?: Json | null
+        }
+        Relationships: []
+      }
+      email_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          html_content: string
+          id: string
+          name: string
+          status: string | null
+          subject: string
+          text_content: string | null
+          type: string | null
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          html_content: string
+          id?: string
+          name: string
+          status?: string | null
+          subject: string
+          text_content?: string | null
+          type?: string | null
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          html_content?: string
+          id?: string
+          name?: string
+          status?: string | null
+          subject?: string
+          text_content?: string | null
+          type?: string | null
+          updated_at?: string
+          variables?: Json | null
+        }
+        Relationships: []
       }
       employee_benefits: {
         Row: {
@@ -855,6 +1002,99 @@ export type Database = {
           ip_address?: unknown | null
           success?: boolean
           user_agent?: string | null
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_frequency: string | null
+          email_notifications: boolean | null
+          id: string
+          notification_types: Json | null
+          push_notifications: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          sms_notifications: boolean | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_frequency?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          notification_types?: Json | null
+          push_notifications?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sms_notifications?: boolean | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_frequency?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          notification_types?: Json | null
+          push_notifications?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sms_notifications?: boolean | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          priority: string | null
+          read: boolean | null
+          title: string
+          type: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          priority?: string | null
+          read?: boolean | null
+          title: string
+          type?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          priority?: string | null
+          read?: boolean | null
+          title?: string
+          type?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
