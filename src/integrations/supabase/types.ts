@@ -295,6 +295,341 @@ export type Database = {
         }
         Relationships: []
       }
+      document_access_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          document_id: string
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          document_id: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          document_id?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_access_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_categories: {
+        Row: {
+          allowed_file_types: string[] | null
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          max_file_size_mb: number | null
+          name: string
+          requires_approval: boolean | null
+          retention_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          allowed_file_types?: string[] | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          max_file_size_mb?: number | null
+          name: string
+          requires_approval?: boolean | null
+          retention_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          allowed_file_types?: string[] | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          max_file_size_mb?: number | null
+          name?: string
+          requires_approval?: boolean | null
+          retention_days?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      document_permissions: {
+        Row: {
+          created_at: string
+          document_id: string
+          expires_at: string | null
+          granted_at: string
+          granted_by: string | null
+          id: string
+          permission_type: string
+          role: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          permission_type: string
+          role?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          permission_type?: string
+          role?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_permissions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_signatures: {
+        Row: {
+          certificate_info: Json | null
+          created_at: string
+          document_id: string
+          id: string
+          is_valid: boolean | null
+          signature_data: string
+          signature_hash: string
+          signature_location: string | null
+          signature_reason: string | null
+          signature_type: string | null
+          signed_at: string
+          signer_id: string
+          verification_details: Json | null
+        }
+        Insert: {
+          certificate_info?: Json | null
+          created_at?: string
+          document_id: string
+          id?: string
+          is_valid?: boolean | null
+          signature_data: string
+          signature_hash: string
+          signature_location?: string | null
+          signature_reason?: string | null
+          signature_type?: string | null
+          signed_at?: string
+          signer_id: string
+          verification_details?: Json | null
+        }
+        Update: {
+          certificate_info?: Json | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          is_valid?: boolean | null
+          signature_data?: string
+          signature_hash?: string
+          signature_location?: string | null
+          signature_reason?: string | null
+          signature_type?: string | null
+          signed_at?: string
+          signer_id?: string
+          verification_details?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_workflows: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_step: number | null
+          document_id: string
+          id: string
+          initiated_at: string
+          initiated_by: string | null
+          status: string | null
+          total_steps: number
+          updated_at: string
+          workflow_data: Json | null
+          workflow_name: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number | null
+          document_id: string
+          id?: string
+          initiated_at?: string
+          initiated_by?: string | null
+          status?: string | null
+          total_steps: number
+          updated_at?: string
+          workflow_data?: Json | null
+          workflow_name: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number | null
+          document_id?: string
+          id?: string
+          initiated_at?: string
+          initiated_by?: string | null
+          status?: string | null
+          total_steps?: number
+          updated_at?: string
+          workflow_data?: Json | null
+          workflow_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_workflows_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          access_count: number | null
+          approved_at: string | null
+          approved_by: string | null
+          category_id: string | null
+          checksum: string | null
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          file_extension: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          is_latest_version: boolean | null
+          last_accessed_at: string | null
+          metadata: Json | null
+          parent_document_id: string | null
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          version: number | null
+          visibility: string | null
+        }
+        Insert: {
+          access_count?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          category_id?: string | null
+          checksum?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          file_extension: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          is_latest_version?: boolean | null
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          parent_document_id?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: number | null
+          visibility?: string | null
+        }
+        Update: {
+          access_count?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          category_id?: string | null
+          checksum?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          file_extension?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          is_latest_version?: boolean | null
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          parent_document_id?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: number | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "document_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       education_courses: {
         Row: {
           course_code: string
