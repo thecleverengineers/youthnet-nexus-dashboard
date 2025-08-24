@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabaseHelpers } from '@/utils/supabaseHelpers';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface EmployeeFormProps {
@@ -44,14 +44,14 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
     try {
       if (employee) {
         // Update existing employee
-        const { error: empError } = await supabaseHelpers.employees
+        const { error: empError } = await supabase
+          .from('employees')
           .update({
-            employee_id: formData.employee_id,
             position: formData.position,
             department: formData.department,
             employment_status: formData.employment_status,
             employment_type: formData.employment_type,
-            hire_date: formData.hire_date,
+            hire_date: formData.hire_date || null,
             salary: formData.salary ? parseFloat(formData.salary) : null,
             probation_end_date: formData.probation_end_date || null,
             contract_end_date: formData.contract_end_date || null,
@@ -66,31 +66,72 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
 
         // Update profile if user_id exists
         if (employee.user_id) {
-          const { error: profileError } = await supabaseHelpers.profiles
+          const { error: profileError } = await supabase
+            .from('profiles')
             .update({
               full_name: formData.full_name,
               email: formData.email,
               phone: formData.phone,
               address: formData.address,
             })
-            .eq('id', employee.user_id);
+            .eq('user_id', employee.user_id);
 
           if (profileError) throw profileError;
         }
 
         toast.success('Employee updated successfully!');
       } else {
-        // Create new employee - get mock user ID for demo
-        const mockUserId = crypto.randomUUID();
-        const { error } = await supabaseHelpers.employees
+        // First, create or find profile
+        let userId = null;
+        
+        // Check if profile with email exists
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('email', formData.email)
+          .maybeSingle();
+        
+        if (existingProfile?.user_id) {
+          userId = existingProfile.user_id;
+          // Update existing profile
+          await supabase
+            .from('profiles')
+            .update({
+              full_name: formData.full_name,
+              phone: formData.phone,
+              address: formData.address,
+            })
+            .eq('user_id', userId);
+        } else {
+          // Create new profile with a generated UUID
+          const newUserId = crypto.randomUUID();
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([{
+              user_id: newUserId,
+              full_name: formData.full_name,
+              email: formData.email,
+              phone: formData.phone,
+              address: formData.address,
+              role: 'staff'
+            }]);
+          
+          if (profileError) throw profileError;
+          userId = newUserId;
+        }
+        
+        // Create new employee linked to profile
+        const employeeId = formData.employee_id || `EMP${Date.now()}`;
+        const { error } = await supabase
+          .from('employees')
           .insert([{
-            user_id: mockUserId,
-            employee_id: formData.employee_id,
+            employee_id: employeeId,
+            user_id: userId,
             position: formData.position,
             department: formData.department,
             employment_status: formData.employment_status,
             employment_type: formData.employment_type,
-            hire_date: formData.hire_date,
+            hire_date: formData.hire_date || null,
             salary: formData.salary ? parseFloat(formData.salary) : null,
             probation_end_date: formData.probation_end_date || null,
             contract_end_date: formData.contract_end_date || null,
