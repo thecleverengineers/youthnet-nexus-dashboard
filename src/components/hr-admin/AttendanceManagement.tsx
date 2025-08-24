@@ -104,19 +104,8 @@ export const AttendanceManagement = () => {
 
       if (error) {
         console.error('Error fetching attendance records:', error);
-        // Use mock data as fallback
-        const mockRecords: AttendanceRecord[] = [
-          {
-            id: '1',
-            employee_id: 'emp-001',
-            date: format(new Date(), 'yyyy-MM-dd'),
-            check_in: new Date().toISOString(),
-            status: 'present',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ];
-        setAttendanceRecords(mockRecords);
+        toast.error('Failed to fetch attendance records');
+        setAttendanceRecords([]);
       } else {
         setAttendanceRecords((data as any[]) || []);
       }

@@ -19,6 +19,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { EmployeeCard } from './EmployeeCard';
 import { EmployeeForm } from './EmployeeForm';
@@ -97,6 +98,38 @@ export const EmployeeManagement = () => {
     }
   };
 
+  const exportEmployeeData = async () => {
+    try {
+      const csvContent = `Employee ID,Name,Email,Position,Department,Status,Hire Date
+${employees.map(emp => 
+  `${emp.employee_id},${emp.profiles?.full_name || ''},${emp.profiles?.email || ''},${emp.position},${emp.department},${emp.employment_status},${emp.hire_date || ''}`
+).join('\n')}`;
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `employees-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      // Log export
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from('export_logs').insert({
+        export_type: 'employees',
+        export_format: 'csv',
+        exported_by: user?.id,
+        export_data: { count: employees.length }
+      });
+
+      toast.success('Employee data exported successfully');
+    } catch (error: any) {
+      toast.error('Failed to export data');
+    }
+  };
+
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -156,7 +189,7 @@ export const EmployeeManagement = () => {
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
-              <Button variant="outline" className="hover:bg-green-500/20">
+              <Button variant="outline" className="hover:bg-green-500/20" onClick={exportEmployeeData}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>

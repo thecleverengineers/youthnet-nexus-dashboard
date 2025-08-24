@@ -869,6 +869,7 @@ export type Database = {
           actual_hours: number | null
           ai_complexity_score: number | null
           assigned_by: string | null
+          assigned_to: string | null
           assigned_to_name: string | null
           auto_assigned: boolean | null
           completion_percentage: number | null
@@ -880,6 +881,8 @@ export type Database = {
           employee_id: string | null
           estimated_hours: number | null
           id: string
+          overtime_hours: number | null
+          overtime_rate: number | null
           priority: string | null
           status: string | null
           tags: string[] | null
@@ -890,6 +893,7 @@ export type Database = {
           actual_hours?: number | null
           ai_complexity_score?: number | null
           assigned_by?: string | null
+          assigned_to?: string | null
           assigned_to_name?: string | null
           auto_assigned?: boolean | null
           completion_percentage?: number | null
@@ -901,6 +905,8 @@ export type Database = {
           employee_id?: string | null
           estimated_hours?: number | null
           id?: string
+          overtime_hours?: number | null
+          overtime_rate?: number | null
           priority?: string | null
           status?: string | null
           tags?: string[] | null
@@ -911,6 +917,7 @@ export type Database = {
           actual_hours?: number | null
           ai_complexity_score?: number | null
           assigned_by?: string | null
+          assigned_to?: string | null
           assigned_to_name?: string | null
           auto_assigned?: boolean | null
           completion_percentage?: number | null
@@ -922,6 +929,8 @@ export type Database = {
           employee_id?: string | null
           estimated_hours?: number | null
           id?: string
+          overtime_hours?: number | null
+          overtime_rate?: number | null
           priority?: string | null
           status?: string | null
           tags?: string[] | null
@@ -1105,6 +1114,44 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      export_logs: {
+        Row: {
+          created_at: string
+          export_data: Json | null
+          export_format: string
+          export_type: string
+          exported_by: string | null
+          file_path: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          export_data?: Json | null
+          export_format: string
+          export_type: string
+          exported_by?: string | null
+          file_path?: string | null
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          export_data?: Json | null
+          export_format?: string
+          export_type?: string
+          exported_by?: string | null
+          file_path?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_logs_exported_by_fkey"
+            columns: ["exported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       hr_reports: {
         Row: {
@@ -1548,50 +1595,102 @@ export type Database = {
         }
         Relationships: []
       }
+      payroll_cycles: {
+        Row: {
+          created_at: string
+          cycle_name: string
+          end_date: string
+          id: string
+          pay_date: string
+          start_date: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_name: string
+          end_date: string
+          id?: string
+          pay_date: string
+          start_date: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_name?: string
+          end_date?: string
+          id?: string
+          pay_date?: string
+          start_date?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payroll_entries: {
         Row: {
+          ai_risk_score: number | null
           base_salary: number | null
           bonuses: number | null
           created_at: string
+          cycle_id: string | null
           deductions: number | null
           employee_id: string | null
           id: string
           net_pay: number | null
+          overtime_hours: number | null
           overtime_pay: number | null
+          overtime_rate: number | null
           period_end: string
           period_start: string
           status: string | null
           updated_at: string
         }
         Insert: {
+          ai_risk_score?: number | null
           base_salary?: number | null
           bonuses?: number | null
           created_at?: string
+          cycle_id?: string | null
           deductions?: number | null
           employee_id?: string | null
           id?: string
           net_pay?: number | null
+          overtime_hours?: number | null
           overtime_pay?: number | null
+          overtime_rate?: number | null
           period_end: string
           period_start: string
           status?: string | null
           updated_at?: string
         }
         Update: {
+          ai_risk_score?: number | null
           base_salary?: number | null
           bonuses?: number | null
           created_at?: string
+          cycle_id?: string | null
           deductions?: number | null
           employee_id?: string | null
           id?: string
           net_pay?: number | null
+          overtime_hours?: number | null
           overtime_pay?: number | null
+          overtime_rate?: number | null
           period_end?: string
           period_start?: string
           status?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payroll_entries_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payroll_entries_employee_id_fkey"
             columns: ["employee_id"]
@@ -1605,49 +1704,76 @@ export type Database = {
         Row: {
           achievements: string | null
           areas_for_improvement: string | null
+          communication: number | null
           created_at: string
           department: string | null
           employee_id: string | null
+          employee_name: string | null
           goals: string | null
           id: string
+          innovation: number | null
+          leadership: number | null
           overall_rating: number | null
           period_end: string
           period_start: string
           position: string | null
+          problem_solving: number | null
+          review_period: string | null
           reviewer_id: string | null
+          reviewer_name: string | null
           status: string | null
+          teamwork: number | null
+          technical_skills: number | null
           updated_at: string
         }
         Insert: {
           achievements?: string | null
           areas_for_improvement?: string | null
+          communication?: number | null
           created_at?: string
           department?: string | null
           employee_id?: string | null
+          employee_name?: string | null
           goals?: string | null
           id?: string
+          innovation?: number | null
+          leadership?: number | null
           overall_rating?: number | null
           period_end: string
           period_start: string
           position?: string | null
+          problem_solving?: number | null
+          review_period?: string | null
           reviewer_id?: string | null
+          reviewer_name?: string | null
           status?: string | null
+          teamwork?: number | null
+          technical_skills?: number | null
           updated_at?: string
         }
         Update: {
           achievements?: string | null
           areas_for_improvement?: string | null
+          communication?: number | null
           created_at?: string
           department?: string | null
           employee_id?: string | null
+          employee_name?: string | null
           goals?: string | null
           id?: string
+          innovation?: number | null
+          leadership?: number | null
           overall_rating?: number | null
           period_end?: string
           period_start?: string
           position?: string | null
+          problem_solving?: number | null
+          review_period?: string | null
           reviewer_id?: string | null
+          reviewer_name?: string | null
           status?: string | null
+          teamwork?: number | null
+          technical_skills?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -2091,7 +2217,38 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      attendance_statistics: {
+        Row: {
+          absent_days: number | null
+          attendance_rate: number | null
+          employee_id: string | null
+          late_days: number | null
+          present_days: number | null
+          total_days: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_statistics: {
+        Row: {
+          avg_completion: number | null
+          completed_tasks: number | null
+          employee_id: string | null
+          in_progress_tasks: number | null
+          pending_tasks: number | null
+          total_actual_hours: number | null
+          total_estimated_hours: number | null
+          total_tasks: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

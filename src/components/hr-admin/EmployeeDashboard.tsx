@@ -67,49 +67,8 @@ export const EmployeeDashboard = () => {
         .limit(5);
 
       if (tasksError) {
-        console.log('Tasks table not accessible, using mock data');
-        // Mock tasks data as fallback
-        const mockTasks: EmployeeTask[] = [
-          {
-            id: '1',
-            title: 'Complete Monthly Report',
-            description: 'Prepare and submit monthly performance report',
-            assigned_to: empData.id,
-            assigned_by: 'admin',
-            status: 'in_progress',
-            priority: 'medium',
-            due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            estimated_hours: 8,
-            actual_hours: 4,
-            completion_percentage: 50,
-            tags: [],
-            dependencies: [],
-            ai_complexity_score: 0.5,
-            auto_assigned: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: '2',
-            title: 'Team Meeting Preparation',
-            description: 'Prepare agenda for weekly team meeting',
-            assigned_to: empData.id,
-            assigned_by: 'admin',
-            status: 'completed',
-            priority: 'low',
-            due_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-            estimated_hours: 2,
-            actual_hours: 1.5,
-            completion_percentage: 100,
-            tags: [],
-            dependencies: [],
-            ai_complexity_score: 0.2,
-            auto_assigned: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ];
-        setTasks(mockTasks);
+        console.log('No tasks found for employee');
+        setTasks([]);
       } else {
         const convertedTasks: EmployeeTask[] = (tasksData as any[]).map(task => ({
           ...task,

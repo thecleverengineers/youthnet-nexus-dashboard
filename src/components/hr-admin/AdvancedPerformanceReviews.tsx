@@ -44,73 +44,98 @@ export function AdvancedPerformanceReviews() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Mock data for demonstration
-  const mockReviews = [
-    {
-      id: '1',
-      employee_id: 'emp1',
-      reviewer_id: 'mgr1',
-      employee_name: 'John Smith',
-      reviewer_name: 'Sarah Johnson',
-      review_period: '2024-Q1',
-      overall_rating: 4.2,
-      technical_skills: 4.5,
-      communication: 3.8,
-      leadership: 4.0,
-      teamwork: 4.3,
-      innovation: 4.1,
-      status: 'completed',
-      created_at: '2024-03-15'
-    },
-    {
-      id: '2', 
-      employee_id: 'emp2',
-      reviewer_id: 'mgr2',
-      employee_name: 'Alice Cooper',
-      reviewer_name: 'Mike Davis',
-      review_period: '2024-Q1',
-      overall_rating: 3.8,
-      technical_skills: 4.0,
-      communication: 4.2,
-      leadership: 3.5,
-      teamwork: 4.0,
-      innovation: 3.6,
-      status: 'draft',
-      created_at: '2024-03-10'
-    }
-  ];
-
-  const { data: performanceReviews } = useQuery({
+  // Fetch real performance reviews from database
+  const { data: performanceReviews, isLoading: reviewsLoading } = useQuery({
     queryKey: ['performance-reviews'],
     queryFn: async () => {
-      try {
-        const { data, error } = await supabaseHelpers.performance_reviews.select('*');
-        if (error) throw error;
-        return data || mockReviews;
-      } catch (error) {
-        return mockReviews;
+      const { data, error } = await supabaseHelpers.performance_reviews.select(`
+        *,
+        employee:employee_id (
+          id,
+          employee_id,
+          position,
+          department,
+          profiles:user_id (
+            full_name,
+            email
+          )
+        ),
+        reviewer:reviewer_id (
+          id,
+          employee_id,
+          profiles:user_id (
+            full_name
+          )
+        )
+      `);
+      
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
       }
+      
+      // Transform data to match expected format
+      return (data || []).map((review: any) => ({
+        ...review,
+        employee_name: review.employee?.profiles?.full_name || 'Unknown',
+        reviewer_name: review.reviewer?.profiles?.full_name || 'Unknown',
+        technical_skills: review.technical_skills || 0,
+        communication: review.communication || 0,
+        leadership: review.leadership || 0,
+        teamwork: review.teamwork || 0,
+        innovation: review.innovation || 0,
+      }));
     },
   });
 
   const { data: reviewAnalytics } = useQuery({
-    queryKey: ['review-analytics'],
+    queryKey: ['review-analytics', performanceReviews],
     queryFn: async () => {
-      const reviews = performanceReviews || mockReviews;
-      const avgRating = reviews.reduce((sum: number, review: any) => sum + review.overall_rating, 0) / reviews.length;
+      const reviews = performanceReviews || [];
+      if (reviews.length === 0) {
+        return {
+          totalReviews: 0,
+          averageRating: 0,
+          completedReviews: 0,
+          pendingReviews: 0,
+          skillBreakdown: []
+        };
+      }
+
+      const avgRating = reviews.reduce((sum: number, review: any) => 
+        sum + (review.overall_rating || 0), 0) / reviews.length;
+      
+      // Calculate real skill averages
+      const skillTotals = {
+        technical: 0,
+        communication: 0,
+        leadership: 0,
+        teamwork: 0,
+        innovation: 0
+      };
+
+      reviews.forEach((review: any) => {
+        skillTotals.technical += review.technical_skills || 0;
+        skillTotals.communication += review.communication || 0;
+        skillTotals.leadership += review.leadership || 0;
+        skillTotals.teamwork += review.teamwork || 0;
+        skillTotals.innovation += review.innovation || 0;
+      });
+
+      const skillBreakdown = [
+        { skill: 'Technical', average: skillTotals.technical / reviews.length },
+        { skill: 'Communication', average: skillTotals.communication / reviews.length },
+        { skill: 'Leadership', average: skillTotals.leadership / reviews.length },
+        { skill: 'Teamwork', average: skillTotals.teamwork / reviews.length },
+        { skill: 'Innovation', average: skillTotals.innovation / reviews.length },
+      ].map(s => ({ ...s, average: Number(s.average.toFixed(2)) }));
       
       return {
         totalReviews: reviews.length,
         averageRating: Number(avgRating.toFixed(1)),
         completedReviews: reviews.filter((r: any) => r.status === 'completed').length,
         pendingReviews: reviews.filter((r: any) => r.status === 'draft').length,
-        skillBreakdown: [
-          { skill: 'Technical', average: 4.25 },
-          { skill: 'Communication', average: 4.0 },
-          { skill: 'Leadership', average: 3.75 },
-          { skill: 'Teamwork', average: 4.15 },
-          { skill: 'Innovation', average: 3.85 },
-        ]
+        skillBreakdown
       };
     },
     enabled: !!performanceReviews
@@ -118,15 +143,16 @@ export function AdvancedPerformanceReviews() {
 
   const createReviewMutation = useMutation({
     mutationFn: async (reviewData: any) => {
-      try {
-        const { data, error } = await supabaseHelpers.performance_reviews
-          .insert([reviewData]);
-        if (error) throw error;
-        return data;
-      } catch (error) {
-        // Mock success for demo
-        return [{ ...reviewData, id: Date.now().toString() }];
-      }
+      const { data, error } = await supabaseHelpers.performance_reviews
+        .insert([{
+          ...reviewData,
+          status: 'draft'
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['performance-reviews'] });
@@ -134,6 +160,13 @@ export function AdvancedPerformanceReviews() {
       setReviewData({});
       toast({ title: 'Performance review created successfully' });
     },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Failed to create review',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
   });
 
   const generateAIInsights = (skillAssessment: SkillAssessment) => {
