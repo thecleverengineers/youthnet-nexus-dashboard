@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 // Helper to parse various date formats like dd/mm/yyyy or dd-mm-yyyy into YYYY-MM-DD
 function parseToISODate(input?: string): string | null {
@@ -47,32 +48,30 @@ export const StaffDataImport = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== 'text/csv' && !selectedFile.name.endsWith('.csv')) {
-        toast.error('Please select a CSV file');
+      const isExcel = selectedFile.name.endsWith('.xlsx') || selectedFile.name.endsWith('.xls');
+      if (!isExcel) {
+        toast.error('Please select an Excel file (.xlsx or .xls)');
         return;
       }
       setFile(selectedFile);
-      previewCSV(selectedFile);
+      previewExcel(selectedFile);
     }
   };
 
-  const previewCSV = (file: File) => {
+  const previewExcel = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      const csv = e.target?.result as string;
-      const lines = csv.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',').map(h => h.trim());
-      const preview = lines.slice(1, 6).map(line => {
-        const values = line.split(',').map(v => v.trim());
-        const obj: any = {};
-        headers.forEach((header, index) => {
-          obj[header] = values[index] || '';
-        });
-        return obj;
-      });
+      const data = e.target?.result;
+      const workbook = XLSX.read(data, { type: 'binary' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Take first 5 rows for preview
+      const preview = jsonData.slice(0, 5);
       setPreviewData(preview);
     };
-    reader.readAsText(file);
+    reader.readAsBinaryString(file);
   };
 
   const processImport = async () => {
@@ -84,24 +83,17 @@ export const StaffDataImport = () => {
     try {
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const csv = e.target?.result as string;
-        const lines = csv.split('\n').filter(line => line.trim());
-        const headers = lines[0].split(',').map(h => h.trim());
-
-        const emailIdx = headers.indexOf('email');
-        const hireIdx = headers.indexOf('hire_date');
-        const positionIdx = headers.indexOf('position');
-        const departmentIdx = headers.indexOf('department');
-        const employeeIdIdx = headers.indexOf('employee_id');
-        const fullNameIdx = headers.indexOf('full_name') >= 0 ? headers.indexOf('full_name') : headers.indexOf('name');
-        const salaryIdx = headers.indexOf('salary');
+        const data = e.target?.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
         // Build set of emails to resolve existing profiles in one query
         const emailSet = new Set<string>();
-        for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(',').map(v => v.trim());
-          const email = emailIdx >= 0 ? values[emailIdx] : '';
-          if (email) emailSet.add(email.toLowerCase());
+        for (const row of jsonData) {
+          const email = (row as any).email;
+          if (email) emailSet.add(String(email).toLowerCase());
         }
 
         const emailToUserId = new Map<string, string>();
@@ -120,21 +112,29 @@ export const StaffDataImport = () => {
         let failed = 0;
         const errors: string[] = [];
 
-        for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(',').map(v => v.trim());
+        let i = 0;
+        for (const row of jsonData) {
+          i++;
           try {
-            setUploadProgress((i / (lines.length - 1)) * 100);
+            setUploadProgress((i / jsonData.length) * 100);
 
-            const email = emailIdx >= 0 ? values[emailIdx] : '';
-            const fullName = fullNameIdx >= 0 ? values[fullNameIdx] : '';
-            const linkedUserId = email ? emailToUserId.get(email.toLowerCase()) : undefined;
+            const email = (row as any).email || '';
+            const fullName = (row as any).full_name || (row as any).name || '';
+            const linkedUserId = email ? emailToUserId.get(String(email).toLowerCase()) : undefined;
 
             let hireDate: string | undefined;
-            if (hireIdx >= 0) {
-              const raw = values[hireIdx];
-              const iso = parseToISODate(raw);
-              if (iso) hireDate = iso;
-              else if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) hireDate = raw; // already ISO
+            const rawDate = (row as any).hire_date;
+            if (rawDate) {
+              // Handle Excel date serial number
+              if (typeof rawDate === 'number') {
+                const excelEpoch = new Date(1899, 11, 30);
+                const date = new Date(excelEpoch.getTime() + rawDate * 86400000);
+                hireDate = date.toISOString().split('T')[0];
+              } else {
+                const iso = parseToISODate(String(rawDate));
+                if (iso) hireDate = iso;
+                else if (/^\d{4}-\d{2}-\d{2}$/.test(String(rawDate))) hireDate = String(rawDate);
+              }
             }
 
             // If no linked profile exists and we have email/name, create one
@@ -156,12 +156,12 @@ export const StaffDataImport = () => {
             }
 
             const employeeData: any = {
-              employee_id: employeeIdIdx >= 0 && values[employeeIdIdx] ? values[employeeIdIdx] : `EMP${Date.now()}${i}`,
-              position: positionIdx >= 0 ? (values[positionIdx] || 'Staff') : 'Staff',
-              department: departmentIdx >= 0 ? (values[departmentIdx] || 'General') : 'General',
+              employee_id: (row as any).employee_id || `EMP${Date.now()}${i}`,
+              position: (row as any).position || 'Staff',
+              department: (row as any).department || 'General',
               employment_status: 'active',
               employment_type: 'full_time',
-              salary: salaryIdx >= 0 && values[salaryIdx] ? parseFloat(values[salaryIdx]) : undefined,
+              salary: (row as any).salary ? parseFloat((row as any).salary) : undefined,
             };
 
             if (hireDate) employeeData.hire_date = hireDate;
@@ -175,12 +175,12 @@ export const StaffDataImport = () => {
             successful++;
           } catch (error: any) {
             failed++;
-            errors.push(`Row ${i + 1}: ${error.message || 'Unknown error'}`);
+            errors.push(`Row ${i}: ${error.message || 'Unknown error'}`);
           }
         }
 
         setImportResults({
-          total: lines.length - 1,
+          total: jsonData.length,
           successful,
           failed,
           errors: errors.slice(0, 5)
@@ -189,7 +189,7 @@ export const StaffDataImport = () => {
         toast.success(`Import completed! ${successful} successful, ${failed} failed`);
       };
       
-      reader.readAsText(file);
+      reader.readAsBinaryString(file);
     } catch (error: any) {
       toast.error(`Import failed: ${error.message}`);
     } finally {
@@ -198,16 +198,51 @@ export const StaffDataImport = () => {
   };
 
   const downloadTemplate = () => {
-    const csvContent = 'employee_id,full_name,email,position,department,hire_date,salary\nEMP001,John Doe,john@example.com,Developer,IT,2024-01-01,50000\nEMP002,Jane Smith,jane@example.com,Manager,HR,2024-01-02,60000';
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.setAttribute('hidden', '');
-    a.setAttribute('href', url);
-    a.setAttribute('download', 'staff_import_template.csv');
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    // Create a new workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Sample data for the template
+    const templateData = [
+      {
+        employee_id: 'EMP001',
+        full_name: 'John Doe',
+        email: 'john@example.com',
+        position: 'Developer',
+        department: 'IT',
+        hire_date: '01-01-2024',
+        salary: 50000
+      },
+      {
+        employee_id: 'EMP002',
+        full_name: 'Jane Smith',
+        email: 'jane@example.com',
+        position: 'Manager',
+        department: 'HR',
+        hire_date: '02-01-2024',
+        salary: 60000
+      }
+    ];
+    
+    // Convert data to worksheet
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    
+    // Set column widths for better visibility
+    const colWidths = [
+      { wch: 12 }, // employee_id
+      { wch: 20 }, // full_name
+      { wch: 25 }, // email
+      { wch: 15 }, // position
+      { wch: 15 }, // department
+      { wch: 12 }, // hire_date
+      { wch: 10 }  // salary
+    ];
+    ws['!cols'] = colWidths;
+    
+    // Append worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Staff Data');
+    
+    // Write the file
+    XLSX.writeFile(wb, 'staff_import_template.xlsx');
   };
 
   const clearFile = () => {
@@ -234,7 +269,7 @@ export const StaffDataImport = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-muted-foreground">
-                Import staff data from CSV files to quickly populate your employee database
+                Import staff data from Excel files to quickly populate your employee database
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 User linking: if an email matches an existing profile, the employee will be linked automatically. Otherwise, user_id is left empty to avoid foreign key issues. Dates accept dd-mm-yyyy or dd/mm/yyyy.
@@ -263,17 +298,17 @@ export const StaffDataImport = () => {
           >
             <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-lg font-medium mb-2">
-              {file ? file.name : 'Click to select CSV file'}
+              {file ? file.name : 'Click to select Excel file'}
             </p>
             <p className="text-sm text-muted-foreground">
-              Supported format: CSV files only
+              Supported formats: .xlsx, .xls
             </p>
           </div>
           
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept=".xlsx,.xls"
             onChange={handleFileSelect}
             className="hidden"
           />
