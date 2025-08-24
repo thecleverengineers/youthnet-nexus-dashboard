@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { 
   Plus, 
@@ -16,7 +17,9 @@ import {
   Activity,
   Download,
   Upload,
-  RefreshCw
+  RefreshCw,
+  FileSpreadsheet,
+  Zap
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -24,6 +27,8 @@ import { toast } from 'sonner';
 import { EmployeeCard } from './EmployeeCard';
 import { EmployeeForm } from './EmployeeForm';
 import { EmployeeDetails } from './EmployeeDetails';
+import { StaffDataImport } from './StaffDataImport';
+import { QuickStaffImport } from './QuickStaffImport';
 
 // Mock employee interface since employees table doesn't exist yet
 interface Employee {
@@ -51,6 +56,7 @@ export const EmployeeManagement = () => {
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [stats, setStats] = useState({
     total: 0,
@@ -193,7 +199,11 @@ ${employees.map(emp =>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
-              <Button variant="outline" className="hover:bg-blue-500/20">
+              <Button 
+                variant="outline" 
+                className="hover:bg-blue-500/20"
+                onClick={() => setShowImport(true)}
+              >
                 <Upload className="h-4 w-4 mr-2" />
                 Import
               </Button>
@@ -388,6 +398,58 @@ ${employees.map(emp =>
               }}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImport} onOpenChange={setShowImport}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-blue-400" />
+              Import Employee Data
+            </DialogTitle>
+          </DialogHeader>
+          <Tabs defaultValue="quick" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="quick" className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                Quick Import
+              </TabsTrigger>
+              <TabsTrigger value="csv" className="flex items-center gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                CSV Import
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="quick" className="mt-4">
+              <QuickStaffImport />
+              <div className="mt-4 flex justify-end">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowImport(false);
+                    fetchEmployees();
+                  }}
+                >
+                  Close & Refresh
+                </Button>
+              </div>
+            </TabsContent>
+            <TabsContent value="csv" className="mt-4">
+              <StaffDataImport />
+              <div className="mt-4 flex justify-end">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowImport(false);
+                    fetchEmployees();
+                  }}
+                >
+                  Close & Refresh
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>

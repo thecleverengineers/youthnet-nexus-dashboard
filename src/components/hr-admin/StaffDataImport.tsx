@@ -15,7 +15,6 @@ import {
   Eye,
   Trash2
 } from 'lucide-react';
-import { supabaseHelpers } from '@/utils/supabaseHelpers';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -127,6 +126,7 @@ export const StaffDataImport = () => {
             setUploadProgress((i / (lines.length - 1)) * 100);
 
             const email = emailIdx >= 0 ? values[emailIdx] : '';
+            const fullName = fullNameIdx >= 0 ? values[fullNameIdx] : '';
             const linkedUserId = email ? emailToUserId.get(email.toLowerCase()) : undefined;
 
             let hireDate: string | undefined;
@@ -137,19 +137,39 @@ export const StaffDataImport = () => {
               else if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) hireDate = raw; // already ISO
             }
 
+            // If no linked profile exists and we have email/name, create one
+            let userId = linkedUserId;
+            if (!userId && email && fullName) {
+              const newUserId = crypto.randomUUID();
+              const { error: profileError } = await supabase
+                .from('profiles')
+                .insert([{
+                  user_id: newUserId,
+                  full_name: fullName,
+                  email: email,
+                  role: 'staff'
+                }]);
+              
+              if (!profileError) {
+                userId = newUserId;
+              }
+            }
+
             const employeeData: any = {
               employee_id: employeeIdIdx >= 0 && values[employeeIdIdx] ? values[employeeIdIdx] : `EMP${Date.now()}${i}`,
-              position: positionIdx >= 0 ? (values[positionIdx] || '') : '',
-              department: departmentIdx >= 0 ? (values[departmentIdx] || '') : '',
+              position: positionIdx >= 0 ? (values[positionIdx] || 'Staff') : 'Staff',
+              department: departmentIdx >= 0 ? (values[departmentIdx] || 'General') : 'General',
               employment_status: 'active',
               employment_type: 'full_time',
               salary: salaryIdx >= 0 && values[salaryIdx] ? parseFloat(values[salaryIdx]) : undefined,
             };
 
             if (hireDate) employeeData.hire_date = hireDate;
-            if (linkedUserId) employeeData.user_id = linkedUserId;
+            if (userId) employeeData.user_id = userId;
 
-            const { error: empError } = await supabaseHelpers.employees.insert([employeeData]);
+            const { error: empError } = await supabase
+              .from('employees')
+              .insert([employeeData]);
             if (empError) throw empError;
 
             successful++;
