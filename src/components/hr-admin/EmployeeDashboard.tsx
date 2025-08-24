@@ -18,7 +18,7 @@ import {
   Settings,
   BarChart3
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, subDays, startOfWeek } from 'date-fns';
 import { toast } from 'sonner';
 import { supabaseHelpers, AttendanceRecord, EmployeeTask } from '@/utils/supabaseHelpers';
 
@@ -51,13 +51,13 @@ export const EmployeeDashboard = () => {
     try {
       // Fetch today's attendance using existing attendance_records table
       const today = format(new Date(), 'yyyy-MM-dd');
-      const { data: attendanceData } = await supabaseHelpers.attendance_records
+      const { data: todayAttendance } = await supabaseHelpers.attendance_records
         .select('*')
         .eq('employee_id', empData.id)
         .eq('date', today)
         .single();
 
-      setAttendance(attendanceData as AttendanceRecord);
+      setAttendance(todayAttendance as AttendanceRecord);
 
       // Fetch real employee tasks from new table
       const { data: tasksData, error: tasksError } = await supabaseHelpers.employee_tasks
@@ -126,11 +126,40 @@ export const EmployeeDashboard = () => {
       const completed = tasksToUse.filter(t => t.status === 'completed').length;
       const total = tasksToUse.length;
       
+      // Calculate real attendance rate for the employee
+      const { data: attendanceData } = await supabaseHelpers.attendance_records
+        .select('*')
+        .eq('employee_id', empData.id)
+        .gte('date', format(subDays(new Date(), 30), 'yyyy-MM-dd'));
+      
+      const attendanceRate = attendanceData && attendanceData.length > 0
+        ? (attendanceData.filter((a: any) => a.status === 'present').length / attendanceData.length * 100)
+        : 0;
+
+      // Calculate hours this week
+      const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+      const { data: weekAttendance } = await supabaseHelpers.attendance_records
+        .select('*')
+        .eq('employee_id', empData.id)
+        .gte('date', format(weekStart, 'yyyy-MM-dd'));
+
+      let hoursThisWeek = 0;
+      if (weekAttendance) {
+        weekAttendance.forEach((record: any) => {
+          if (record.check_in && record.check_out) {
+            const checkIn = new Date(`2000-01-01T${record.check_in}`);
+            const checkOut = new Date(`2000-01-01T${record.check_out}`);
+            const hours = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
+            hoursThisWeek += hours;
+          }
+        });
+      }
+
       setStats({
         tasksCompleted: completed,
         tasksTotal: total,
-        attendanceRate: 95, // Mock data
-        hoursThisWeek: 32.5 // Mock data
+        attendanceRate: Math.round(attendanceRate),
+        hoursThisWeek: Math.round(hoursThisWeek * 10) / 10
       });
 
     } catch (error) {

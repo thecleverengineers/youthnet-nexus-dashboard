@@ -820,14 +820,60 @@ export type Database = {
           },
         ]
       }
+      employee_sessions: {
+        Row: {
+          created_at: string
+          employee_id: string | null
+          ended_at: string | null
+          id: string
+          ip_address: unknown | null
+          is_active: boolean | null
+          session_token: string
+          started_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          employee_id?: string | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          session_token: string
+          started_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          session_token?: string
+          started_at?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_sessions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_tasks: {
         Row: {
           actual_hours: number | null
           ai_complexity_score: number | null
           assigned_by: string | null
+          assigned_to_name: string | null
           auto_assigned: boolean | null
           completion_percentage: number | null
           created_at: string
+          department: string | null
           dependencies: string[] | null
           description: string | null
           due_date: string | null
@@ -844,9 +890,11 @@ export type Database = {
           actual_hours?: number | null
           ai_complexity_score?: number | null
           assigned_by?: string | null
+          assigned_to_name?: string | null
           auto_assigned?: boolean | null
           completion_percentage?: number | null
           created_at?: string
+          department?: string | null
           dependencies?: string[] | null
           description?: string | null
           due_date?: string | null
@@ -863,9 +911,11 @@ export type Database = {
           actual_hours?: number | null
           ai_complexity_score?: number | null
           assigned_by?: string | null
+          assigned_to_name?: string | null
           auto_assigned?: boolean | null
           completion_percentage?: number | null
           created_at?: string
+          department?: string | null
           dependencies?: string[] | null
           description?: string | null
           due_date?: string | null
@@ -1055,6 +1105,50 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      hr_reports: {
+        Row: {
+          created_at: string
+          date_range_end: string | null
+          date_range_start: string | null
+          department: string | null
+          generated_by: string | null
+          id: string
+          report_data: Json
+          report_name: string
+          report_type: string
+        }
+        Insert: {
+          created_at?: string
+          date_range_end?: string | null
+          date_range_start?: string | null
+          department?: string | null
+          generated_by?: string | null
+          id?: string
+          report_data: Json
+          report_name: string
+          report_type: string
+        }
+        Update: {
+          created_at?: string
+          date_range_end?: string | null
+          date_range_start?: string | null
+          department?: string | null
+          generated_by?: string | null
+          id?: string
+          report_data?: Json
+          report_name?: string
+          report_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_reports_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       job_applications: {
         Row: {
@@ -1512,12 +1606,14 @@ export type Database = {
           achievements: string | null
           areas_for_improvement: string | null
           created_at: string
+          department: string | null
           employee_id: string | null
           goals: string | null
           id: string
           overall_rating: number | null
           period_end: string
           period_start: string
+          position: string | null
           reviewer_id: string | null
           status: string | null
           updated_at: string
@@ -1526,12 +1622,14 @@ export type Database = {
           achievements?: string | null
           areas_for_improvement?: string | null
           created_at?: string
+          department?: string | null
           employee_id?: string | null
           goals?: string | null
           id?: string
           overall_rating?: number | null
           period_end: string
           period_start: string
+          position?: string | null
           reviewer_id?: string | null
           status?: string | null
           updated_at?: string
@@ -1540,12 +1638,14 @@ export type Database = {
           achievements?: string | null
           areas_for_improvement?: string | null
           created_at?: string
+          department?: string | null
           employee_id?: string | null
           goals?: string | null
           id?: string
           overall_rating?: number | null
           period_end?: string
           period_start?: string
+          position?: string | null
           reviewer_id?: string | null
           status?: string | null
           updated_at?: string
