@@ -20,6 +20,7 @@ import { EducationDepartment } from '@/pages/EducationDepartment';
 import { Incubation } from '@/pages/Incubation';
 import { MadeInNagaland } from '@/pages/MadeInNagaland';
 import { LivelihoodIncubator } from '@/pages/LivelihoodIncubator';
+import { Environment } from '@/pages/Environment';
 import { HRAdmin } from '@/pages/HRAdmin';
 import { Inventory } from '@/pages/Inventory';
 import { ReportsPage } from '@/pages/ReportsPage';
@@ -91,6 +92,13 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <LivelihoodIncubator />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/environment" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Environment />
                   </Layout>
                 </ProtectedRoute>
               } />

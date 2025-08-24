@@ -15,20 +15,27 @@ import {
   BarChart3,
   Package,
   Shield,
+  Trees,
   ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
+  // Education Programs
   { name: 'Education', href: '/education', icon: GraduationCap },
-  { name: 'Skill Development', href: '/skill-development', icon: Users },
-  { name: 'Job Centre', href: '/job-centre', icon: Briefcase },
-  { name: 'Career Centre', href: '/career-centre', icon: MessageSquare },
   { name: 'Education Dept', href: '/education-department', icon: BookOpen },
-  { name: 'Incubation', href: '/incubation', icon: Lightbulb },
+  // Environment Programs
+  { name: 'Environment', href: '/environment', icon: Trees },
+  // Entrepreneurship Programs
+  { name: 'Incubation Centre', href: '/incubation', icon: Lightbulb },
   { name: 'Made in Nagaland', href: '/made-in-nagaland', icon: ShoppingBag },
   { name: 'Livelihood Incubator', href: '/livelihood-incubator', icon: Building2 },
+  // Employment and Livelihood
+  { name: 'Job Centre', href: '/job-centre', icon: Briefcase },
+  { name: 'Career Centre', href: '/career-centre', icon: MessageSquare },
+  { name: 'Skill Development', href: '/skill-development', icon: Users },
+  // Administration
   { name: 'HR & Admin', href: '/hr-admin', icon: Users },
   { name: 'Inventory', href: '/inventory', icon: Package },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
