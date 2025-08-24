@@ -67,12 +67,12 @@ export const EmployeeCard = ({ employee, onEdit, onView }: EmployeeCardProps) =>
           <div className="flex items-center space-x-3">
             <Avatar className="h-12 w-12 border-2 border-blue-500/30">
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                {employee.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'NA'}
+                {employee.profiles?.full_name?.split(' ').map(n => n[0]).join('') || employee.employee_id.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
               <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
-                {employee.profiles?.full_name || 'Unknown'}
+                {employee.profiles?.full_name || `Employee ${employee.employee_id}`}
               </h3>
               <p className="text-sm text-muted-foreground">{employee.employee_id}</p>
               <div className="flex items-center gap-2 mt-1">
@@ -82,6 +82,11 @@ export const EmployeeCard = ({ employee, onEdit, onView }: EmployeeCardProps) =>
                 <Badge className={getTypeColor(employee.employment_type)}>
                   {employee.employment_type.replace('_', ' ')}
                 </Badge>
+                {!employee.profiles && (
+                  <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                    No Profile
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -117,15 +122,19 @@ export const EmployeeCard = ({ employee, onEdit, onView }: EmployeeCardProps) =>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Mail className="h-4 w-4 text-purple-400" />
-            <span>{employee.profiles?.email || 'No email'}</span>
+            <span className={!employee.profiles?.email ? 'text-amber-400' : ''}>
+              {employee.profiles?.email || 'No linked profile'}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Phone className="h-4 w-4 text-orange-400" />
-            <span>{employee.profiles?.phone || 'No phone'}</span>
+            <span className={!employee.profiles?.phone ? 'text-gray-500' : ''}>
+              {employee.profiles?.phone || 'No phone'}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4 text-cyan-400" />
-            <span>Hired: {new Date(employee.hire_date).toLocaleDateString()}</span>
+            <span>Hired: {employee.hire_date ? new Date(employee.hire_date).toLocaleDateString() : 'Not set'}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <DollarSign className="h-4 w-4 text-emerald-400" />
