@@ -136,7 +136,7 @@ export interface PerformanceReview {
 export interface Employee {
   id: string;
   employee_id: string;
-  user_id: string;
+  user_id?: string;
   position?: string;
   department?: string;
   employment_status?: string;

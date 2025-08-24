@@ -16,8 +16,26 @@ import {
   Trash2
 } from 'lucide-react';
 import { supabaseHelpers } from '@/utils/supabaseHelpers';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Helper to parse various date formats like dd/mm/yyyy or dd-mm-yyyy into YYYY-MM-DD
+function parseToISODate(input?: string): string | null {
+  if (!input) return null;
+  const str = input.trim();
+  // Replace various separators with '-'
+  const norm = str.replace(/[\.\/]/g, '-').replace(/\s+/g, '');
+  // Expecting d-m-yyyy
+  const match = norm.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (!match) return null;
+  const d = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  const y = parseInt(match[3], 10);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const mm = String(m).padStart(2, '0');
+  const dd = String(d).padStart(2, '0');
+  return `${y}-${mm}-${dd}`;
+}
 export const StaffDataImport = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -70,6 +88,34 @@ export const StaffDataImport = () => {
         const csv = e.target?.result as string;
         const lines = csv.split('\n').filter(line => line.trim());
         const headers = lines[0].split(',').map(h => h.trim());
+
+        const emailIdx = headers.indexOf('email');
+        const hireIdx = headers.indexOf('hire_date');
+        const positionIdx = headers.indexOf('position');
+        const departmentIdx = headers.indexOf('department');
+        const employeeIdIdx = headers.indexOf('employee_id');
+        const fullNameIdx = headers.indexOf('full_name') >= 0 ? headers.indexOf('full_name') : headers.indexOf('name');
+        const salaryIdx = headers.indexOf('salary');
+
+        // Build set of emails to resolve existing profiles in one query
+        const emailSet = new Set<string>();
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim());
+          const email = emailIdx >= 0 ? values[emailIdx] : '';
+          if (email) emailSet.add(email.toLowerCase());
+        }
+
+        const emailToUserId = new Map<string, string>();
+        if (emailSet.size > 0) {
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('user_id,email');
+          if (!profilesError && profilesData) {
+            for (const p of profilesData as any[]) {
+              if (p.email && p.user_id) emailToUserId.set(String(p.email).toLowerCase(), String(p.user_id));
+            }
+          }
+        }
         
         let successful = 0;
         let failed = 0;
@@ -77,50 +123,39 @@ export const StaffDataImport = () => {
 
         for (let i = 1; i < lines.length; i++) {
           const values = lines[i].split(',').map(v => v.trim());
-          
           try {
             setUploadProgress((i / (lines.length - 1)) * 100);
-            
-            // Mock profile creation since profiles table might not exist
-            const profileData = {
-              id: crypto.randomUUID(),
-              full_name: values[headers.indexOf('full_name')] || values[headers.indexOf('name')] || '',
-              email: values[headers.indexOf('email')] || '',
-              role: 'staff'
-            };
 
-            // Try to insert into profiles table
-            const { error: profileError } = await supabaseHelpers.profiles
-              .insert([profileData]);
+            const email = emailIdx >= 0 ? values[emailIdx] : '';
+            const linkedUserId = email ? emailToUserId.get(email.toLowerCase()) : undefined;
 
-            if (profileError) {
-              console.warn('Profile insert failed:', profileError);
-              // Continue without failing the whole import
+            let hireDate: string | undefined;
+            if (hireIdx >= 0) {
+              const raw = values[hireIdx];
+              const iso = parseToISODate(raw);
+              if (iso) hireDate = iso;
+              else if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) hireDate = raw; // already ISO
             }
 
-            // Mock employee creation
-            const employeeData = {
-              user_id: profileData.id,
-              employee_id: values[headers.indexOf('employee_id')] || `EMP${Date.now()}${i}`,
-              position: values[headers.indexOf('position')] || '',
-              department: values[headers.indexOf('department')] || '',
+            const employeeData: any = {
+              employee_id: employeeIdIdx >= 0 && values[employeeIdIdx] ? values[employeeIdIdx] : `EMP${Date.now()}${i}`,
+              position: positionIdx >= 0 ? (values[positionIdx] || '') : '',
+              department: departmentIdx >= 0 ? (values[departmentIdx] || '') : '',
               employment_status: 'active',
               employment_type: 'full_time',
-              hire_date: values[headers.indexOf('hire_date')] || new Date().toISOString().split('T')[0],
-              salary: values[headers.indexOf('salary')] ? parseFloat(values[headers.indexOf('salary')]) : null,
+              salary: salaryIdx >= 0 && values[salaryIdx] ? parseFloat(values[salaryIdx]) : undefined,
             };
 
-            const { error: empError } = await supabaseHelpers.employees
-              .insert([employeeData]);
+            if (hireDate) employeeData.hire_date = hireDate;
+            if (linkedUserId) employeeData.user_id = linkedUserId;
 
-            if (empError) {
-              throw empError;
-            }
+            const { error: empError } = await supabaseHelpers.employees.insert([employeeData]);
+            if (empError) throw empError;
 
             successful++;
           } catch (error: any) {
             failed++;
-            errors.push(`Row ${i + 1}: ${error.message}`);
+            errors.push(`Row ${i + 1}: ${error.message || 'Unknown error'}`);
           }
         }
 
@@ -128,9 +163,9 @@ export const StaffDataImport = () => {
           total: lines.length - 1,
           successful,
           failed,
-          errors: errors.slice(0, 5) // Show only first 5 errors
+          errors: errors.slice(0, 5)
         });
-        
+
         toast.success(`Import completed! ${successful} successful, ${failed} failed`);
       };
       
@@ -177,9 +212,14 @@ export const StaffDataImport = () => {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
-            <p className="text-muted-foreground">
-              Import staff data from CSV files to quickly populate your employee database
-            </p>
+            <div>
+              <p className="text-muted-foreground">
+                Import staff data from CSV files to quickly populate your employee database
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                User linking: if an email matches an existing profile, the employee will be linked automatically. Otherwise, user_id is left empty to avoid foreign key issues. Dates accept dd-mm-yyyy or dd/mm/yyyy.
+              </p>
+            </div>
             <Button onClick={downloadTemplate} variant="outline" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Download Template
