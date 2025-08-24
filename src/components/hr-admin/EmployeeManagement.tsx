@@ -61,13 +61,25 @@ export const EmployeeManagement = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      // Mock empty data since employees table doesn't exist yet
-      const data: Employee[] = [];
+      // Fetch real data from database
+      const { data, error } = await supabase
+        .from('employees')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            email,
+            phone
+          )
+        `)
+        .order('created_at', { ascending: false });
 
-      console.log('Fetched employees:', data);
-      setEmployees(data || []);
+      if (error) throw error;
+
+      console.log('Fetched employees from database:', data);
+      setEmployees((data as any) || []);
       
-      // Calculate stats
+      // Calculate stats from real database data
       const stats = data?.reduce((acc, emp) => {
         acc.total++;
         if (emp.employment_status === 'active') acc.active++;
