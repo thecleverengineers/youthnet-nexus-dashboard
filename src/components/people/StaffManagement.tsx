@@ -7,11 +7,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, Eye, Mail, Phone, Calendar, Building, DollarSign } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Mail, Phone, Calendar, Building, DollarSign, CheckSquare, Square } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +22,8 @@ export const StaffManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewStaff, setViewStaff] = useState<any>(null);
   const [editingStaff, setEditingStaff] = useState<any>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
@@ -192,6 +196,30 @@ export const StaffManagement = () => {
     }
   });
 
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff-management'] });
+      toast({ title: `${selectedIds.length} staff members deleted successfully` });
+      setSelectedIds([]);
+      setShowDeleteConfirm(false);
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error deleting staff members', 
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  });
+
   const filteredStaff = staff.filter(employee => {
     const matchesSearch = 
       employee.employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -271,6 +299,29 @@ export const StaffManagement = () => {
 
   // Get unique departments for filter
   const departments = [...new Set(staff.map(s => s.department).filter(Boolean))];
+
+  // Selection handlers
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(filteredStaff.map(s => s.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds([...selectedIds, id]);
+    } else {
+      setSelectedIds(selectedIds.filter(sid => sid !== id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length > 0) {
+      setShowDeleteConfirm(true);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -524,6 +575,35 @@ export const StaffManagement = () => {
             </Select>
           </div>
 
+          {/* Selection Bar */}
+          {filteredStaff.length > 0 && (
+            <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-4">
+                <Checkbox
+                  checked={selectedIds.length === filteredStaff.length && filteredStaff.length > 0}
+                  onCheckedChange={handleSelectAll}
+                />
+                <span className="text-sm text-muted-foreground">
+                  {selectedIds.length > 0 
+                    ? `${selectedIds.length} of ${filteredStaff.length} selected`
+                    : 'Select all'
+                  }
+                </span>
+              </div>
+              {selectedIds.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Selected ({selectedIds.length})
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Staff Grid */}
           {isLoading ? (
             <div className="text-center py-8">Loading staff...</div>
@@ -538,6 +618,10 @@ export const StaffManagement = () => {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
+                        <Checkbox
+                          checked={selectedIds.includes(employee.id)}
+                          onCheckedChange={(checked) => handleSelectOne(employee.id, checked as boolean)}
+                        />
                         <Avatar className="h-10 w-10">
                           <AvatarFallback className="bg-gradient-to-br from-green-500 to-teal-600 text-white">
                             {employee.profiles?.full_name?.split(' ').map(n => n[0]).join('') || employee.employee_id.substring(0, 2).toUpperCase()}
@@ -700,6 +784,27 @@ export const StaffManagement = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {selectedIds.length} Staff Members?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the selected staff members and their associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => bulkDeleteMutation.mutate(selectedIds)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
