@@ -24,7 +24,25 @@ serve(async (req) => {
     if (listErr) throw listErr;
     const already = existing.users.find((u) => u.email?.toLowerCase() === String(email).toLowerCase());
     if (already) {
-      return new Response(JSON.stringify({ ok: true, message: 'User already exists', user_id: already.id }), { status: 200 });
+      // Update existing user to confirm email and set password
+      const { error: updateErr } = await admin.auth.admin.updateUserById(already.id, {
+        email_confirm: true,
+        password: password,
+        user_metadata: { role: 'admin', full_name: full_name || 'Administrator' },
+      });
+      if (updateErr) throw updateErr;
+      
+      // Ensure profile exists
+      const { error: profileErr } = await admin.from('profiles').upsert({
+        user_id: already.id,
+        full_name: full_name || 'Administrator',
+        email,
+        role: 'admin',
+        status: 'active',
+      }, { onConflict: 'user_id' });
+      if (profileErr) console.error('Profile upsert error:', profileErr);
+      
+      return new Response(JSON.stringify({ ok: true, message: 'User updated and confirmed', user_id: already.id }), { status: 200 });
     }
 
     // Create user with confirmed email and admin role metadata
