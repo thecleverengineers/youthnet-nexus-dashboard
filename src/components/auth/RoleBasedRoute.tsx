@@ -42,7 +42,7 @@ export const RoleBasedRoute = () => {
             
             <Alert>
               <AlertDescription>
-                Please sign in to access your personalized dashboard. Use the demo accounts for testing.
+                Please sign in to access your personalized dashboard.
               </AlertDescription>
             </Alert>
             

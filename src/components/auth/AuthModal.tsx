@@ -143,50 +143,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
-              {/* Demo Login Options */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground text-center">Demo Login</h3>
-                
-                <Alert>
-                  <AlertDescription className="text-xs">
-                    First click "Create Demo Accounts", then use the role buttons below to login instantly.
-                  </AlertDescription>
-                </Alert>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCreateDemoAccounts}
-                  disabled={loading}
-                  className="w-full text-xs border-primary/30 hover:bg-primary/10"
-                >
-                  {loading ? 'Creating Accounts...' : 'Create Demo Accounts'}
-                </Button>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  {demoUsers.map((user) => (
-                    <Button
-                      key={user.email}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDemoLogin(user.email, user.password)}
-                      disabled={loading}
-                      className="text-xs hover:bg-primary/10 border-primary/30 transition-colors"
-                    >
-                      {user.role}
-                    </Button>
-                  ))}
-                </div>
-                
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-muted" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or sign in manually</span>
-                  </div>
-                </div>
-              </div>
 
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
