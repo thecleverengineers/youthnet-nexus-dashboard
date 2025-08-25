@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { UserPlus, Search, Filter } from 'lucide-react';
-import { supabaseHelpers, EducationCourse, Student, CourseEnrollment } from '@/utils/supabaseHelpers';
+import { UserPlus, Search } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export const StudentAssignment = () => {
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -19,58 +19,85 @@ export const StudentAssignment = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
+  // Fetch courses
   const { data: courses } = useQuery({
     queryKey: ['education-courses'],
     queryFn: async () => {
-      const { data, error } = await supabaseHelpers.education_courses
+      const { data, error } = await supabase
+        .from('education_courses')
         .select('*')
         .eq('status', 'active')
         .order('course_name');
       
       if (error) throw error;
-      return data as EducationCourse[];
+      return data;
     },
   });
 
+  // Fetch students
   const { data: students } = useQuery({
     queryKey: ['students'],
     queryFn: async () => {
-      const { data, error } = await supabaseHelpers.students
-        .select(`
-          *,
-          profiles:user_id(full_name, email)
-        `)
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'student')
+        .order('full_name');
       
       if (error) throw error;
-      return data as Student[];
+      return data;
     },
   });
 
+  // Fetch course enrollments
   const { data: enrollments, isLoading } = useQuery({
     queryKey: ['course-enrollments'],
     queryFn: async () => {
-      const { data, error } = await supabaseHelpers.course_enrollments
+      const { data, error } = await supabase
+        .from('course_enrollments')
         .select(`
           *,
-          students(
-            student_id,
-            profiles:user_id(full_name, email)
-          ),
-          education_courses(course_name, course_code)
+          education_courses (
+            course_name,
+            course_code,
+            department
+          )
         `)
         .order('enrollment_date', { ascending: false });
       
       if (error) throw error;
-      return data as CourseEnrollment[];
+      
+      // Fetch student details separately for each enrollment
+      const enrichedData = await Promise.all(
+        (data || []).map(async (enrollment) => {
+          const { data: studentData } = await supabase
+            .from('profiles')
+            .select('full_name, email, student_id')
+            .eq('user_id', enrollment.student_id)
+            .single();
+          
+          return {
+            ...enrollment,
+            student: studentData,
+            course: enrollment.education_courses
+          };
+        })
+      );
+      
+      return enrichedData;
     },
   });
 
   const assignMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabaseHelpers.course_enrollments
-        .insert([data]);
+      const { error } = await supabase
+        .from('course_enrollments')
+        .insert([{
+          ...data,
+          enrolled_by: user?.id
+        }]);
       
       if (error) throw error;
     },
@@ -84,10 +111,11 @@ export const StudentAssignment = () => {
         description: "Student has been successfully assigned to the course.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Assignment error:', error);
       toast({
         title: "Error",
-        description: "Failed to assign student. Please try again.",
+        description: error.message || "Failed to assign student. Please try again.",
         variant: "destructive",
       });
     },
@@ -112,8 +140,8 @@ export const StudentAssignment = () => {
   };
 
   const filteredEnrollments = enrollments?.filter(enrollment =>
-    enrollment.students?.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    enrollment.education_courses?.course_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    enrollment.student?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    enrollment.course?.course_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -160,8 +188,8 @@ export const StudentAssignment = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {students?.map((student) => (
-                    <SelectItem key={student.id} value={student.id}>
-                      {(student as any).profiles?.full_name} ({student.student_id})
+                    <SelectItem key={student.user_id} value={student.user_id}>
+                      {student.full_name} {student.student_id && `(${student.student_id})`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -220,13 +248,13 @@ export const StudentAssignment = () => {
                 <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
                     <div className="font-medium">
-                      {enrollment.students?.profiles?.full_name}
+                      {enrollment.student?.full_name}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {enrollment.students?.student_id} • {enrollment.students?.profiles?.email}
+                      {enrollment.student?.student_id} • {enrollment.student?.email}
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
-                      Course: {enrollment.education_courses?.course_name} ({enrollment.education_courses?.course_code})
+                      Course: {enrollment.course?.course_name} ({enrollment.course?.course_code})
                     </div>
                     {enrollment.assignment_reason && (
                       <div className="text-sm text-gray-500 mt-1">
