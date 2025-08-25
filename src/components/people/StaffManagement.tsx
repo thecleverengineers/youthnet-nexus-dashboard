@@ -59,7 +59,7 @@ export const StaffManagement = () => {
               .from('profiles')
               .select('full_name, email, phone, address')
               .eq('user_id', employee.user_id)
-              .single();
+              .maybeSingle();
             
             return { ...employee, profiles: profile || undefined };
           }
@@ -199,11 +199,15 @@ export const StaffManagement = () => {
   // Bulk delete mutation
   const bulkDeleteMutation = useMutation({
     mutationFn: async (ids: string[]) => {
-      const { error } = await supabase
-        .from('employees')
-        .delete()
-        .in('id', ids);
-      if (error) throw error;
+      const chunkSize = 50; // keep URL under limits
+      for (let i = 0; i < ids.length; i += chunkSize) {
+        const chunk = ids.slice(i, i + chunkSize);
+        const { error } = await supabase
+          .from('employees')
+          .delete()
+          .in('id', chunk);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-management'] });
@@ -581,7 +585,7 @@ export const StaffManagement = () => {
               <div className="flex items-center gap-4">
                 <Checkbox
                   checked={selectedIds.length === filteredStaff.length && filteredStaff.length > 0}
-                  onCheckedChange={handleSelectAll}
+                  onCheckedChange={(val) => handleSelectAll(Boolean(val))}
                 />
                 <span className="text-sm text-muted-foreground">
                   {selectedIds.length > 0 
