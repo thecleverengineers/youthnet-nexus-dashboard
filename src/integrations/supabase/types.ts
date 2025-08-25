@@ -1859,6 +1859,170 @@ export type Database = {
         }
         Relationships: []
       }
+      skill_assessment_students: {
+        Row: {
+          assessment_id: string
+          assigned_at: string
+          assigned_by: string | null
+          completed_at: string | null
+          id: string
+          next_assessment_date: string | null
+          progress: number | null
+          score: number | null
+          status: string | null
+          student_id: string
+          trainer_id: string
+        }
+        Insert: {
+          assessment_id: string
+          assigned_at?: string
+          assigned_by?: string | null
+          completed_at?: string | null
+          id?: string
+          next_assessment_date?: string | null
+          progress?: number | null
+          score?: number | null
+          status?: string | null
+          student_id: string
+          trainer_id: string
+        }
+        Update: {
+          assessment_id?: string
+          assigned_at?: string
+          assigned_by?: string | null
+          completed_at?: string | null
+          id?: string
+          next_assessment_date?: string | null
+          progress?: number | null
+          score?: number | null
+          status?: string | null
+          student_id?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_assessment_students_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "skill_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_assessment_students_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "skill_assessment_students_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "skill_assessment_students_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_assessment_trainers: {
+        Row: {
+          assessment_id: string
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          trainer_id: string
+        }
+        Insert: {
+          assessment_id: string
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          trainer_id: string
+        }
+        Update: {
+          assessment_id?: string
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_assessment_trainers_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "skill_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_assessment_trainers_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "skill_assessment_trainers_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_assessments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          level: string | null
+          max_score: number | null
+          passing_score: number | null
+          skill_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          level?: string | null
+          max_score?: number | null
+          passing_score?: number | null
+          skill_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          level?: string | null
+          max_score?: number | null
+          passing_score?: number | null
+          skill_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_assessments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       startup_applications: {
         Row: {
           application_status: string | null
