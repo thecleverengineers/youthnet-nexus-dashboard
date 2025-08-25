@@ -56,14 +56,13 @@ export const StudentManagement = () => {
               .eq('user_id', student.user_id)
               .single();
             
-            return { ...student, profiles: profile };
+            return { ...student, profiles: profile || undefined };
           }
-          return student;
+          return { ...student, profiles: undefined };
         })
       );
 
-      if (error) throw error;
-      return data || [];
+      return studentsWithProfiles;
     }
   });
 
