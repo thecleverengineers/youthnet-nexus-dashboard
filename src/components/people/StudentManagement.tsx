@@ -118,7 +118,8 @@ export const StudentManagement = () => {
             email: data.email,
             phone: data.phone,
             address: data.address,
-            role: 'student'
+            role: 'student',
+            student_id: data.student_id
           });
 
         if (profileError) throw profileError;
@@ -130,7 +131,8 @@ export const StudentManagement = () => {
             full_name: data.full_name,
             phone: data.phone,
             address: data.address,
-            role: 'student'
+            role: 'student',
+            student_id: data.student_id
           })
           .eq('user_id', userId);
           
@@ -199,7 +201,8 @@ export const StudentManagement = () => {
             full_name: data.full_name,
             email: data.email,
             phone: data.phone,
-            address: data.address
+            address: data.address,
+            student_id: data.student_id
           })
           .eq('user_id', student.user_id);
 

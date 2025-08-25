@@ -41,47 +41,25 @@ export const AuthPage = () => {
       
       // Check if input is not an email format (likely an ID)
       if (!input.includes('@')) {
-        // Try to find the user by their ID in the respective tables
-        const { data: profiles } = await supabase
+        // Try to find the user by their ID in the profiles table
+        const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select('email')
-          .or(`employee_id.eq.${input},trainer_id.eq.${input},student_id.eq.${input}`);
+          .or(`employee_id.eq.${input},trainer_id.eq.${input},student_id.eq.${input}`)
+          .maybeSingle();
         
-        // Also check in the employees, trainers, and students tables
-        if (!profiles || profiles.length === 0) {
-          // Try employees table
-          const { data: employees } = await supabase
-            .from('employees')
-            .select('profiles!inner(email)')
-            .eq('employee_id', input);
-          
-          if (employees && employees.length > 0) {
-            email = employees[0].profiles.email;
-          } else {
-            // Try trainers table
-            const { data: trainers } = await supabase
-              .from('trainers')
-              .select('profiles!inner(email)')
-              .eq('trainer_id', input);
-            
-            if (trainers && trainers.length > 0) {
-              email = trainers[0].profiles.email;
-            } else {
-              // Try students table
-              const { data: students } = await supabase
-                .from('students')
-                .select('profiles!inner(email)')
-                .eq('student_id', input);
-              
-              if (students && students.length > 0) {
-                email = students[0].profiles.email;
-              } else {
-                throw new Error('User ID not found');
-              }
-            }
-          }
-        } else {
-          email = profiles[0].email;
+        if (profileError) {
+          throw new Error('Error finding user');
+        }
+        
+        if (!profiles) {
+          throw new Error('User ID not found');
+        }
+        
+        email = profiles.email || '';
+        
+        if (!email) {
+          throw new Error('No email associated with this ID');
         }
       }
 
@@ -197,16 +175,16 @@ export const AuthPage = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-emailOrId">Email or ID</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <IdCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="Enter your email"
+                        id="login-emailOrId"
+                        type="text"
+                        placeholder="Enter your email or ID (e.g., EMP001, TRN001, STU001)"
                         className="pl-10"
-                        value={loginData.email}
-                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                        value={loginData.emailOrId}
+                        onChange={(e) => setLoginData({ ...loginData, emailOrId: e.target.value })}
                         required
                       />
                     </div>

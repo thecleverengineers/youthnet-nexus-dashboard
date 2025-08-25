@@ -113,7 +113,8 @@ export const TrainerManagement = () => {
             email: data.email,
             phone: data.phone,
             address: data.address,
-            role: 'trainer'
+            role: 'trainer',
+            trainer_id: data.trainer_id
           });
 
         if (profileError) throw profileError;
@@ -125,7 +126,8 @@ export const TrainerManagement = () => {
             full_name: data.full_name,
             phone: data.phone,
             address: data.address,
-            role: 'trainer'
+            role: 'trainer',
+            trainer_id: data.trainer_id
           })
           .eq('user_id', userId);
           
@@ -186,7 +188,8 @@ export const TrainerManagement = () => {
             full_name: data.full_name,
             email: data.email,
             phone: data.phone,
-            address: data.address
+            address: data.address,
+            trainer_id: data.trainer_id
           })
           .eq('user_id', trainer.user_id);
 

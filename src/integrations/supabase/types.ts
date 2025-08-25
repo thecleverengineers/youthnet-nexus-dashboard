@@ -1800,6 +1800,7 @@ export type Database = {
           created_at: string
           email: string | null
           email_verified: boolean | null
+          employee_id: string | null
           full_name: string | null
           id: string
           last_login: string | null
@@ -1808,6 +1809,8 @@ export type Database = {
           phone: string | null
           role: string | null
           status: string | null
+          student_id: string | null
+          trainer_id: string | null
           two_factor_enabled: boolean | null
           updated_at: string
           user_id: string
@@ -1818,6 +1821,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           email_verified?: boolean | null
+          employee_id?: string | null
           full_name?: string | null
           id?: string
           last_login?: string | null
@@ -1826,6 +1830,8 @@ export type Database = {
           phone?: string | null
           role?: string | null
           status?: string | null
+          student_id?: string | null
+          trainer_id?: string | null
           two_factor_enabled?: boolean | null
           updated_at?: string
           user_id: string
@@ -1836,6 +1842,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           email_verified?: boolean | null
+          employee_id?: string | null
           full_name?: string | null
           id?: string
           last_login?: string | null
@@ -1844,6 +1851,8 @@ export type Database = {
           phone?: string | null
           role?: string | null
           status?: string | null
+          student_id?: string | null
+          trainer_id?: string | null
           two_factor_enabled?: boolean | null
           updated_at?: string
           user_id?: string

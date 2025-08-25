@@ -83,7 +83,8 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
               email: formData.email,
               phone: formData.phone,
               address: formData.address,
-              role: 'staff'
+              role: 'staff',
+              employee_id: employee.employee_id
             });
             
           if (createProfileError) {
@@ -212,7 +213,8 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
               email: formData.email,
               phone: formData.phone,
               address: formData.address,
-              role: 'staff'
+              role: 'staff',
+              employee_id: formData.employee_id || `EMP${Date.now()}`
             });
           
           if (profileError) {
