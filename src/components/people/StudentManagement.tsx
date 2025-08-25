@@ -32,8 +32,10 @@ export const StudentManagement = () => {
     education_level: 'secondary',
     date_of_birth: '',
     emergency_contact: '',
-    emergency_phone: ''
+    emergency_phone: '',
+    password: ''
   });
+  const [resetPassword, setResetPassword] = useState(false);
 
   // Fetch students with profiles
   const { data: students = [], isLoading } = useQuery({
@@ -69,24 +71,71 @@ export const StudentManagement = () => {
   // Create student mutation
   const createStudentMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      // Generate a unique user_id
-      const userId = crypto.randomUUID();
+      // Validate password for new student
+      if (!data.password || data.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
       
-      // First create a profile
-      const { data: profile, error: profileError } = await supabase
+      // Create the auth user with email and password
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            full_name: data.full_name,
+            role: 'student'
+          },
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          throw new Error('A user with this email already exists');
+        }
+        throw authError;
+      }
+      
+      if (!authData.user) {
+        throw new Error('Failed to create user account');
+      }
+      
+      const userId = authData.user.id;
+      
+      // Check if profile was auto-created, if not create it
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .insert({
-          user_id: userId,
-          full_name: data.full_name,
-          email: data.email,
-          phone: data.phone,
-          address: data.address,
-          role: 'student'
-        })
-        .select()
-        .single();
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (!existingProfile) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: userId,
+            full_name: data.full_name,
+            email: data.email,
+            phone: data.phone,
+            address: data.address,
+            role: 'student'
+          });
 
-      if (profileError) throw profileError;
+        if (profileError) throw profileError;
+      } else {
+        // Update the existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: data.full_name,
+            phone: data.phone,
+            address: data.address,
+            role: 'student'
+          })
+          .eq('user_id', userId);
+          
+        if (updateError) console.error('Error updating profile:', updateError);
+      }
 
       // Then create the student
       const { data: student, error: studentError } = await supabase
@@ -217,8 +266,10 @@ export const StudentManagement = () => {
       education_level: 'secondary',
       date_of_birth: '',
       emergency_contact: '',
-      emergency_phone: ''
+      emergency_phone: '',
+      password: ''
     });
+    setResetPassword(false);
   };
 
   const handleEdit = (student: any) => {
@@ -234,8 +285,10 @@ export const StudentManagement = () => {
       education_level: student.education_level || 'secondary',
       date_of_birth: student.date_of_birth || '',
       emergency_contact: student.emergency_contact || '',
-      emergency_phone: student.emergency_phone || ''
+      emergency_phone: student.emergency_phone || '',
+      password: ''
     });
+    setResetPassword(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -447,6 +500,52 @@ export const StudentManagement = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Password fields */}
+                  {!editingStudent && (
+                    <div>
+                      <Label htmlFor="password">Password *</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="Set login password (min 6 characters)"
+                        required={!editingStudent}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        The email will be used as login ID
+                      </p>
+                    </div>
+                  )}
+                  {editingStudent && (
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="reset_password"
+                          checked={resetPassword}
+                          onChange={(e) => setResetPassword(e.target.checked)}
+                          className="rounded border-gray-300"
+                        />
+                        <Label htmlFor="reset_password" className="cursor-pointer">
+                          Reset Password
+                        </Label>
+                      </div>
+                      {resetPassword && (
+                        <div>
+                          <Label htmlFor="new_password">New Password</Label>
+                          <Input
+                            id="new_password"
+                            type="password"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            placeholder="Enter new password (min 6 characters)"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex justify-end gap-2">
                     <Button

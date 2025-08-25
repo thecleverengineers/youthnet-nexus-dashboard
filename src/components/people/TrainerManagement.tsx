@@ -27,8 +27,10 @@ export const TrainerManagement = () => {
     phone: '',
     address: '',
     specialization: '',
-    experience_years: 0
+    experience_years: 0,
+    password: ''
   });
+  const [resetPassword, setResetPassword] = useState(false);
 
   // Fetch trainers with profiles
   const { data: trainers = [], isLoading } = useQuery({
@@ -64,21 +66,71 @@ export const TrainerManagement = () => {
   // Create trainer mutation
   const createTrainerMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const userId = crypto.randomUUID();
+      // Validate password for new trainer
+      if (!data.password || data.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
       
-      // First create a profile
-      const { error: profileError } = await supabase
+      // Create the auth user with email and password
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            full_name: data.full_name,
+            role: 'trainer'
+          },
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          throw new Error('A user with this email already exists');
+        }
+        throw authError;
+      }
+      
+      if (!authData.user) {
+        throw new Error('Failed to create user account');
+      }
+      
+      const userId = authData.user.id;
+      
+      // Check if profile was auto-created, if not create it
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .insert({
-          user_id: userId,
-          full_name: data.full_name,
-          email: data.email,
-          phone: data.phone,
-          address: data.address,
-          role: 'trainer'
-        });
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (!existingProfile) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: userId,
+            full_name: data.full_name,
+            email: data.email,
+            phone: data.phone,
+            address: data.address,
+            role: 'trainer'
+          });
 
-      if (profileError) throw profileError;
+        if (profileError) throw profileError;
+      } else {
+        // Update the existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: data.full_name,
+            phone: data.phone,
+            address: data.address,
+            role: 'trainer'
+          })
+          .eq('user_id', userId);
+          
+        if (updateError) console.error('Error updating profile:', updateError);
+      }
 
       // Then create the trainer
       const { data: trainer, error: trainerError } = await supabase
@@ -196,8 +248,10 @@ export const TrainerManagement = () => {
       phone: '',
       address: '',
       specialization: '',
-      experience_years: 0
+      experience_years: 0,
+      password: ''
     });
+    setResetPassword(false);
   };
 
   const handleEdit = (trainer: any) => {
@@ -209,8 +263,10 @@ export const TrainerManagement = () => {
       phone: trainer.profiles?.phone || '',
       address: trainer.profiles?.address || '',
       specialization: trainer.specialization || '',
-      experience_years: trainer.experience_years || 0
+      experience_years: trainer.experience_years || 0,
+      password: ''
     });
+    setResetPassword(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -349,6 +405,52 @@ export const TrainerManagement = () => {
                       rows={2}
                     />
                   </div>
+
+                  {/* Password fields */}
+                  {!editingTrainer && (
+                    <div>
+                      <Label htmlFor="password">Password *</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="Set login password (min 6 characters)"
+                        required={!editingTrainer}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        The email will be used as login ID
+                      </p>
+                    </div>
+                  )}
+                  {editingTrainer && (
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="reset_password"
+                          checked={resetPassword}
+                          onChange={(e) => setResetPassword(e.target.checked)}
+                          className="rounded border-gray-300"
+                        />
+                        <Label htmlFor="reset_password" className="cursor-pointer">
+                          Reset Password
+                        </Label>
+                      </div>
+                      {resetPassword && (
+                        <div>
+                          <Label htmlFor="new_password">New Password</Label>
+                          <Input
+                            id="new_password"
+                            type="password"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            placeholder="Enter new password (min 6 characters)"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex justify-end gap-2">
                     <Button
