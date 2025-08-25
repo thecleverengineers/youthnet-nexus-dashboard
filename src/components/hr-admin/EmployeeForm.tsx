@@ -34,6 +34,8 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
     email: employee?.profiles?.email || '',
     phone: employee?.profiles?.phone || '',
     address: employee?.profiles?.address || '',
+    // Auth data (only for new staff)
+    password: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -149,44 +151,78 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
         
         toast.success('Employee updated successfully!');
       } else {
-        // First, create or find profile
-        let userId = null;
+        // Create new staff member
         
-        // Check if profile with email exists
+        // Validate password for new staff
+        if (!formData.password || formData.password.length < 6) {
+          throw new Error('Password must be at least 6 characters long');
+        }
+        
+        // First, create the auth user with email and password
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.full_name,
+              role: 'staff'
+            },
+            emailRedirectTo: `${window.location.origin}/`
+          }
+        });
+        
+        if (authError) {
+          if (authError.message.includes('already registered')) {
+            throw new Error('A user with this email already exists');
+          }
+          throw authError;
+        }
+        
+        if (!authData.user) {
+          throw new Error('Failed to create user account');
+        }
+        
+        const userId = authData.user.id;
+        
+        // Check if profile was auto-created (by trigger), if not create it
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('user_id')
-          .eq('email', formData.email)
+          .eq('user_id', userId)
           .maybeSingle();
         
-        if (existingProfile?.user_id) {
-          userId = existingProfile.user_id;
-          // Update existing profile
-          await supabase
-            .from('profiles')
-            .update({
-              full_name: formData.full_name,
-              email: formData.email,
-              phone: formData.phone,
-              address: formData.address,
-            })
-            .eq('user_id', userId);
-        } else {
-          // Create new profile with a generated UUID
-          const newUserId = crypto.randomUUID();
+        if (!existingProfile) {
+          // Create profile if it doesn't exist
           const { error: profileError } = await supabase
             .from('profiles')
-            .insert([{
-              user_id: newUserId,
+            .insert({
+              user_id: userId,
               full_name: formData.full_name,
               email: formData.email,
               phone: formData.phone,
               address: formData.address,
               role: 'staff'
-            }]);
+            });
           
-          if (profileError) throw profileError;
-          userId = newUserId;
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+            // Don't throw here, continue with employee creation
+          }
+        } else {
+          // Update the existing profile with additional info
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({
+              full_name: formData.full_name,
+              phone: formData.phone,
+              address: formData.address,
+              role: 'staff'
+            })
+            .eq('user_id', userId);
+            
+          if (updateError) {
+            console.error('Error updating profile:', updateError);
+          }
         }
         
         // Create new employee linked to profile
@@ -267,6 +303,22 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               />
             </div>
+            {!employee && (
+              <div>
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Set login password for staff member"
+                  required={!employee}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  The email will be used as login ID
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
