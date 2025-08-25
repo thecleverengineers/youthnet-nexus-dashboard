@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, Eye, Mail, Phone, Calendar, Building, DollarSign } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Mail, Phone, Calendar, Building, DollarSign, Upload } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { EmployeeForm } from '@/components/hr-admin/EmployeeForm';
+import { StaffDataImport } from '@/components/hr-admin/StaffDataImport';
 
 export const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,6 +25,7 @@ export const StaffManagement = () => {
   const [editingStaff, setEditingStaff] = useState<any>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
@@ -369,6 +371,14 @@ export const StaffManagement = () => {
           <div className="flex items-center justify-between">
             <CardTitle>Staff Management</CardTitle>
             <div className="flex gap-2">
+              <Button 
+                onClick={() => setShowImportDialog(true)}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Import Excel
+              </Button>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <Button 
                   onClick={() => {
@@ -678,6 +688,16 @@ export const StaffManagement = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Excel Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Import Staff Data from Excel</DialogTitle>
+          </DialogHeader>
+          <StaffDataImport />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
