@@ -332,7 +332,7 @@ export const StaffManagement = () => {
   return (
     <div className="space-y-6">
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <Card className="futuristic-card">
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-foreground">{staff.length}</div>
@@ -349,6 +349,22 @@ export const StaffManagement = () => {
         </Card>
         <Card className="futuristic-card">
           <CardContent className="p-6">
+            <div className="text-2xl font-bold text-amber-400">
+              {staff.filter(s => s.employment_status === 'on_leave').length}
+            </div>
+            <p className="text-sm text-muted-foreground">On Leave</p>
+          </CardContent>
+        </Card>
+        <Card className="futuristic-card">
+          <CardContent className="p-6">
+            <div className="text-2xl font-bold text-yellow-400">
+              {staff.filter(s => s.employment_status === 'probation').length}
+            </div>
+            <p className="text-sm text-muted-foreground">Probation</p>
+          </CardContent>
+        </Card>
+        <Card className="futuristic-card">
+          <CardContent className="p-6">
             <div className="text-2xl font-bold text-blue-400">
               {staff.filter(s => s.employment_type === 'full_time').length}
             </div>
@@ -357,7 +373,7 @@ export const StaffManagement = () => {
         </Card>
         <Card className="futuristic-card">
           <CardContent className="p-6">
-            <div className="text-2xl font-bold text-amber-400">
+            <div className="text-2xl font-bold text-purple-400">
               {staff.filter(s => !s.profiles).length}
             </div>
             <p className="text-sm text-muted-foreground">Without Profile</p>
