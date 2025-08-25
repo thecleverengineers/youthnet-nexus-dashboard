@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, Lock, User, Phone, MapPin } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone, MapPin, IdCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,7 @@ export const AuthPage = () => {
   const navigate = useNavigate();
 
   const [loginData, setLoginData] = useState({
-    email: '',
+    emailOrId: '',
     password: ''
   });
 
@@ -36,8 +36,57 @@ export const AuthPage = () => {
     setError('');
 
     try {
+      const input = loginData.emailOrId.trim();
+      let email = input;
+      
+      // Check if input is not an email format (likely an ID)
+      if (!input.includes('@')) {
+        // Try to find the user by their ID in the respective tables
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('email')
+          .or(`employee_id.eq.${input},trainer_id.eq.${input},student_id.eq.${input}`);
+        
+        // Also check in the employees, trainers, and students tables
+        if (!profiles || profiles.length === 0) {
+          // Try employees table
+          const { data: employees } = await supabase
+            .from('employees')
+            .select('profiles!inner(email)')
+            .eq('employee_id', input);
+          
+          if (employees && employees.length > 0) {
+            email = employees[0].profiles.email;
+          } else {
+            // Try trainers table
+            const { data: trainers } = await supabase
+              .from('trainers')
+              .select('profiles!inner(email)')
+              .eq('trainer_id', input);
+            
+            if (trainers && trainers.length > 0) {
+              email = trainers[0].profiles.email;
+            } else {
+              // Try students table
+              const { data: students } = await supabase
+                .from('students')
+                .select('profiles!inner(email)')
+                .eq('student_id', input);
+              
+              if (students && students.length > 0) {
+                email = students[0].profiles.email;
+              } else {
+                throw new Error('User ID not found');
+              }
+            }
+          }
+        } else {
+          email = profiles[0].email;
+        }
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
-        email: loginData.email,
+        email: email,
         password: loginData.password,
       });
 
@@ -55,9 +104,15 @@ export const AuthPage = () => {
         });
         navigate('/');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Login error:', err);
-      setError('An unexpected error occurred');
+      const errorMessage = err.message || 'An unexpected error occurred';
+      setError(errorMessage);
+      toast({
+        title: "Login Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
