@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -16,10 +17,41 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const { signIn, signUp, createDemoAccounts, loading } = useAuth();
+  const { signIn, signUp, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   
-  // Sign In Form
+  // Admin setup helpers
+  const [showAdminSetup, setShowAdminSetup] = useState(false);
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
+  
+  useEffect(() => {
+    // Show setup button only if no admin exists
+    const checkAdmin = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+        .limit(1);
+      if (!data || data.length === 0) setShowAdminSetup(true);
+    };
+    checkAdmin();
+  }, []);
+  
+  const createAdminNow = async () => {
+    try {
+      setCreatingAdmin(true);
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        body: { email: 'ahibimail@gmail.com', password: 'Kites@123', full_name: 'Admin User' },
+      });
+      if (error) throw error;
+      toast.success('Admin user created', { duration: 500 });
+      setShowAdminSetup(false);
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to create admin');
+    } finally {
+      setCreatingAdmin(false);
+    }
+  };
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
   
@@ -88,45 +120,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
-  // Demo users with credentials
-  const demoUsers = [
-    { email: 'admin@youthnet.in', password: 'admin123', role: 'Admin', color: 'red' },
-    { email: 'staff@youthnet.in', password: 'staff123', role: 'Staff', color: 'blue' },
-    { email: 'trainer@youthnet.in', password: 'trainer123', role: 'Trainer', color: 'purple' },
-    { email: 'student@youthnet.in', password: 'student123', role: 'Student', color: 'green' },
-  ];
-
-  const handleDemoLogin = async (email: string, password: string) => {
-    console.log('Demo login attempt for:', email);
-    setSignInEmail(email);
-    setSignInPassword(password);
-    
-    try {
-      const success = await signIn(email, password);
-      if (success) {
-        toast.success('Demo login successful! Redirecting...');
-        // Close modal and redirect
-        setTimeout(() => {
-          onClose();
-          setSignInEmail('');
-          setSignInPassword('');
-          window.location.href = '/';
-        }, 1000);
-      } else {
-        toast.error('Demo account not found. Please create demo accounts first.');
-      }
-    } catch (error) {
-      console.error('Demo login error:', error);
-      toast.error('Demo account not found. Please create demo accounts first.');
-    }
-  };
-
-  const handleCreateDemoAccounts = async () => {
-    const success = await createDemoAccounts();
-    if (success) {
-      toast.success('Demo accounts created! You can now use the demo login buttons.');
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -192,6 +185,14 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   {loading ? 'Signing In...' : 'Sign In'}
                 </Button>
               </form>
+              {showAdminSetup && (
+                <div className="mt-3">
+                  <Button type="button" variant="outline" className="w-full text-xs" onClick={createAdminNow} disabled={creatingAdmin || loading}>
+                    {creatingAdmin ? 'Creating Admin...' : 'Initialize Admin (One-time)'}
+                  </Button>
+                  <p className="text-[11px] text-muted-foreground mt-1 text-center">Creates admin ahibimail@gmail.com</p>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
