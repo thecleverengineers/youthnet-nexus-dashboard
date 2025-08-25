@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { EmployeeForm } from '@/components/hr-admin/EmployeeForm';
 import { StaffDataImport } from '@/components/hr-admin/StaffDataImport';
+import { EmployeeDetails } from '@/components/hr-admin/EmployeeDetails';
 
 export const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,6 +27,7 @@ export const StaffManagement = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
@@ -533,36 +535,39 @@ export const StaffManagement = () => {
                           <p className="text-sm text-muted-foreground">{employee.employee_id}</p>
                         </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setViewStaff(employee)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            handleEdit(employee);
-                            setIsDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm('Are you sure you want to delete this staff member?')) {
-                              deleteStaffMutation.mutate(employee.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setViewStaff(employee);
+                        setShowDetailsDialog(true);
+                      }}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        handleEdit(employee);
+                        setIsDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this staff member?')) {
+                          deleteStaffMutation.mutate(employee.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                     </div>
 
                     <div className="space-y-2 text-sm">
@@ -604,85 +609,25 @@ export const StaffManagement = () => {
         </CardContent>
       </Card>
 
-      {/* View Staff Dialog */}
-      <Dialog open={!!viewStaff} onOpenChange={() => setViewStaff(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Staff Member Details</DialogTitle>
-          </DialogHeader>
-          {viewStaff && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="bg-gradient-to-br from-green-500 to-teal-600 text-white text-xl">
-                    {viewStaff.profiles?.full_name?.split(' ').map(n => n[0]).join('') || viewStaff.employee_id.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-xl font-semibold">
-                    {viewStaff.profiles?.full_name || `Staff ${viewStaff.employee_id}`}
-                  </h3>
-                  <p className="text-muted-foreground">{viewStaff.employee_id}</p>
-                  <div className="flex gap-2 mt-1">
-                    <Badge className={getStatusColor(viewStaff.employment_status)}>
-                      {viewStaff.employment_status?.replace('_', ' ') || 'Unknown'}
-                    </Badge>
-                    <Badge className={getTypeColor(viewStaff.employment_type)}>
-                      {viewStaff.employment_type?.replace('_', ' ') || 'Unknown'}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Email</Label>
-                  <p className="text-muted-foreground">
-                    {viewStaff.profiles?.email || 'Not provided'}
-                  </p>
-                </div>
-                <div>
-                  <Label>Phone</Label>
-                  <p className="text-muted-foreground">
-                    {viewStaff.profiles?.phone || 'Not provided'}
-                  </p>
-                </div>
-                <div>
-                  <Label>Position</Label>
-                  <p className="text-muted-foreground">
-                    {viewStaff.position || 'Not specified'}
-                  </p>
-                </div>
-                <div>
-                  <Label>Department</Label>
-                  <p className="text-muted-foreground">
-                    {viewStaff.department || 'Not specified'}
-                  </p>
-                </div>
-                <div>
-                  <Label>Hire Date</Label>
-                  <p className="text-muted-foreground">
-                    {viewStaff.hire_date ? new Date(viewStaff.hire_date).toLocaleDateString() : 'Not set'}
-                  </p>
-                </div>
-                <div>
-                  <Label>Salary</Label>
-                  <p className="text-muted-foreground">
-                    ${viewStaff.salary?.toLocaleString() || 'Not specified'}
-                  </p>
-                </div>
-              </div>
-
-              {viewStaff.profiles?.address && (
-                <div>
-                  <Label>Address</Label>
-                  <p className="text-muted-foreground">{viewStaff.profiles.address}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* View Staff Details Dialog */}
+      {viewStaff && (
+        <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <EmployeeDetails
+              employee={viewStaff}
+              onClose={() => {
+                setShowDetailsDialog(false);
+                setViewStaff(null);
+              }}
+              onEdit={() => {
+                setShowDetailsDialog(false);
+                handleEdit(viewStaff);
+                setIsDialogOpen(true);
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Bulk Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
