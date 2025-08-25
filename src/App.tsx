@@ -21,7 +21,6 @@ import { Incubation } from '@/pages/Incubation';
 import { MadeInNagaland } from '@/pages/MadeInNagaland';
 import { LivelihoodIncubator } from '@/pages/LivelihoodIncubator';
 import { Environment } from '@/pages/Environment';
-import { PeopleManagement } from '@/pages/PeopleManagement';
 import { HRAdmin } from '@/pages/HRAdmin';
 import { Inventory } from '@/pages/Inventory';
 import { ReportsPage } from '@/pages/ReportsPage';
@@ -100,13 +99,6 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <Environment />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/people" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <PeopleManagement />
                   </Layout>
                 </ProtectedRoute>
               } />
