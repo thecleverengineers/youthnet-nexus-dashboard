@@ -3,17 +3,17 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, Eye, Mail, Phone, Calendar, Building, DollarSign, CheckSquare, Square } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Mail, Phone, Calendar, Building, DollarSign } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { EmployeeForm } from '@/components/hr-admin/EmployeeForm';
 
 export const StaffManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -368,173 +368,42 @@ export const StaffManagement = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Staff Management</CardTitle>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
+            <div className="flex gap-2">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Button 
+                  onClick={() => {
+                    setEditingStaff(null);
+                    resetForm();
+                    setIsDialogOpen(true);
+                  }}
+                  className="flex items-center gap-2"
+                >
                   <Plus className="h-4 w-4" />
                   Add Staff Member
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingStaff ? 'Edit Staff Member' : 'Add New Staff Member'}
-                  </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="employee_id">Employee ID</Label>
-                      <Input
-                        id="employee_id"
-                        value={formData.employee_id}
-                        onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="hire_date">Hire Date</Label>
-                      <Input
-                        id="hire_date"
-                        type="date"
-                        value={formData.hire_date}
-                        onChange={(e) => setFormData({ ...formData, hire_date: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="full_name">Full Name</Label>
-                    <Input
-                      id="full_name"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="position">Position</Label>
-                      <Input
-                        id="position"
-                        value={formData.position}
-                        onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="department">Department</Label>
-                      <Input
-                        id="department"
-                        value={formData.department}
-                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="employment_status">Employment Status</Label>
-                      <Select 
-                        value={formData.employment_status} 
-                        onValueChange={(value) => setFormData({ ...formData, employment_status: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="probation">Probation</SelectItem>
-                          <SelectItem value="on_leave">On Leave</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
-                          <SelectItem value="terminated">Terminated</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="employment_type">Employment Type</Label>
-                      <Select 
-                        value={formData.employment_type} 
-                        onValueChange={(value) => setFormData({ ...formData, employment_type: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="full_time">Full Time</SelectItem>
-                          <SelectItem value="part_time">Part Time</SelectItem>
-                          <SelectItem value="contract">Contract</SelectItem>
-                          <SelectItem value="intern">Intern</SelectItem>
-                          <SelectItem value="consultant">Consultant</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="salary">Salary</Label>
-                    <Input
-                      id="salary"
-                      type="number"
-                      value={formData.salary}
-                      onChange={(e) => setFormData({ ...formData, salary: parseFloat(e.target.value) || 0 })}
-                      min="0"
-                      step="100"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="address">Address</Label>
-                    <Textarea
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setIsDialogOpen(false);
-                        setEditingStaff(null);
-                        resetForm();
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit">
-                      {editingStaff ? 'Update' : 'Create'} Staff Member
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingStaff ? 'Edit Staff Member' : 'Add New Staff Member'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <EmployeeForm 
+                    employee={editingStaff}
+                    onSuccess={() => {
+                      queryClient.invalidateQueries({ queryKey: ['staff-management'] });
+                      setIsDialogOpen(false);
+                      setEditingStaff(null);
+                      resetForm();
+                    }}
+                    onCancel={() => {
+                      setIsDialogOpen(false);
+                      setEditingStaff(null);
+                      resetForm();
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
