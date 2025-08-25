@@ -64,60 +64,89 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
 
         if (empError) throw empError;
 
-        // Ensure profile exists and is linked
-        let userIdForUpdate = employee.user_id as string | null;
-
-        if (!userIdForUpdate) {
-          // Try to find profile by email
-          const { data: existingProfile, error: findProfileError } = await supabase
+        // Handle profile - either update existing or create new
+        let profileUserId = employee.user_id;
+        
+        if (!profileUserId) {
+          // No user_id linked, create new profile
+          profileUserId = crypto.randomUUID();
+          
+          // Create new profile
+          const { error: createProfileError } = await supabase
             .from('profiles')
-            .select('user_id')
-            .eq('email', formData.email)
-            .maybeSingle();
-
-          if (findProfileError) throw findProfileError;
-
-          if (existingProfile?.user_id) {
-            userIdForUpdate = existingProfile.user_id;
-          } else {
-            // Create new profile
-            const newUserId = crypto.randomUUID();
-            const { error: insertProfileError } = await supabase
-              .from('profiles')
-              .insert([
-                {
-                  user_id: newUserId,
-                  full_name: formData.full_name,
-                  email: formData.email,
-                  phone: formData.phone,
-                  address: formData.address,
-                  role: 'staff',
-                },
-              ]);
-            if (insertProfileError) throw insertProfileError;
-            userIdForUpdate = newUserId;
+            .insert({
+              user_id: profileUserId,
+              full_name: formData.full_name,
+              email: formData.email,
+              phone: formData.phone,
+              address: formData.address,
+              role: 'staff'
+            });
+            
+          if (createProfileError) {
+            console.error('Error creating profile:', createProfileError);
+            throw createProfileError;
           }
-
-          // Link employee to the profile
+          
+          // Link the profile to employee
           const { error: linkError } = await supabase
             .from('employees')
-            .update({ user_id: userIdForUpdate })
+            .update({ user_id: profileUserId })
             .eq('id', employee.id);
-          if (linkError) throw linkError;
+            
+          if (linkError) {
+            console.error('Error linking profile to employee:', linkError);
+            throw linkError;
+          }
+        } else {
+          // User ID exists, check if profile exists
+          const { data: existingProfile, error: checkError } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('user_id', profileUserId)
+            .maybeSingle();
+            
+          if (checkError) {
+            console.error('Error checking profile:', checkError);
+            throw checkError;
+          }
+          
+          if (!existingProfile) {
+            // Profile doesn't exist, create it
+            const { error: createProfileError } = await supabase
+              .from('profiles')
+              .insert({
+                user_id: profileUserId,
+                full_name: formData.full_name,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                role: 'staff'
+              });
+              
+            if (createProfileError) {
+              console.error('Error creating profile:', createProfileError);
+              throw createProfileError;
+            }
+          } else {
+            // Profile exists, update it
+            const { error: updateProfileError } = await supabase
+              .from('profiles')
+              .update({
+                full_name: formData.full_name,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+              })
+              .eq('user_id', profileUserId);
+              
+            if (updateProfileError) {
+              console.error('Error updating profile:', updateProfileError);
+              throw updateProfileError;
+            }
+          }
         }
-
-        // Update profile details
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            full_name: formData.full_name,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address,
-          })
-          .eq('user_id', (userIdForUpdate || employee.user_id) as string);
-
-        if (profileError) throw profileError;
+        
         toast.success('Employee updated successfully!');
       } else {
         // First, create or find profile
