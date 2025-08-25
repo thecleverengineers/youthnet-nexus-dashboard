@@ -38,6 +38,7 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [resetPassword, setResetPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,6 +148,16 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
               throw updateProfileError;
             }
           }
+        }
+        
+        // Handle password reset if requested
+        if (resetPassword && formData.password && formData.password.length >= 6 && formData.email) {
+          // Note: Password reset via admin API requires service role key which is not available in frontend
+          // Alternative approach: We could implement this via an Edge Function with proper authorization
+          toast.info('Password reset feature requires additional backend configuration. Please implement an Edge Function for secure password resets.');
+          
+          // For now, just log the intention
+          console.log('Password reset requested for:', formData.email);
         }
         
         toast.success('Employee updated successfully!');
@@ -317,6 +328,37 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
                 <p className="text-xs text-muted-foreground mt-1">
                   The email will be used as login ID
                 </p>
+              </div>
+            )}
+            {employee && (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="reset_password"
+                    checked={resetPassword}
+                    onChange={(e) => setResetPassword(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="reset_password" className="cursor-pointer">
+                    Reset Password
+                  </Label>
+                </div>
+                {resetPassword && (
+                  <div>
+                    <Label htmlFor="new_password">New Password</Label>
+                    <Input
+                      id="new_password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Enter new password (min 6 characters)"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Leave empty to keep current password
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
