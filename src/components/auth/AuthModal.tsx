@@ -41,14 +41,22 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       const success = await signIn(signInEmail, signInPassword);
       if (success) {
-        toast.success('Signed in successfully! Redirecting...');
+        toast.success('🎉 Welcome back!', {
+          description: 'Successfully signed in to YouthNet',
+          duration: 500,
+          style: {
+            background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%)',
+            color: 'white',
+            border: '1px solid hsl(var(--primary))',
+          },
+        });
         // Close modal and redirect
         setTimeout(() => {
           onClose();
           setSignInEmail('');
           setSignInPassword('');
           window.location.href = '/';
-        }, 1000);
+        }, 600);
       }
     } catch (error) {
       console.error('Sign in error:', error);

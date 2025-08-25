@@ -142,18 +142,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Role-specific welcome messages
       const roleMessages = {
-        admin: `Welcome back, Administrator! Accessing your admin dashboard...`,
-        staff: `Welcome back, Staff Member! Loading your staff dashboard...`,
-        trainer: `Welcome back, Trainer! Opening your training dashboard...`,
-        student: `Welcome back, Student! Redirecting to your learning dashboard...`,
-        user: `Welcome back! Loading your personalized dashboard...`
+        admin: 'Administrator Dashboard',
+        staff: 'Staff Dashboard',
+        trainer: 'Trainer Dashboard',
+        student: 'Student Dashboard',
+        user: 'Dashboard'
       };
       
-      const welcomeMessage = roleMessages[userRole as keyof typeof roleMessages] || roleMessages.user;
+      const roleLabel = roleMessages[userRole as keyof typeof roleMessages] || roleMessages.user;
       
-      // Enhanced success toast with role information
-      toast.success(welcomeMessage, {
-        duration: 2000,
+      // Enhanced success toast with beautiful styling
+      toast.success('🎉 Welcome Back!', {
+        description: `Redirecting to ${roleLabel}...`,
+        duration: 500,
+        style: {
+          background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%)',
+          color: 'white',
+          border: '1px solid hsl(var(--primary))',
+        },
       });
       
       // Trigger redirect after successful login
@@ -205,9 +211,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Sign up successful:', data);
       
       if (data.user && !data.session) {
-        toast.success('Account created! Please check your email to verify your account.');
+        toast.success('🎊 Account Created!', {
+          description: 'Please check your email to verify your account',
+          duration: 500,
+          style: {
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: 'white',
+            border: '1px solid #059669',
+          },
+        });
       } else {
-        toast.success('Account created successfully!');
+        toast.success('🎊 Welcome to YouthNet!', {
+          description: 'Your account has been created successfully',
+          duration: 500,
+          style: {
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: 'white',
+            border: '1px solid #059669',
+          },
+        });
       }
       
       setLoading(false);
