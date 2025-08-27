@@ -36,6 +36,39 @@ function parseToISODate(input?: string): string | null {
   const dd = String(d).padStart(2, '0');
   return `${y}-${mm}-${dd}`;
 }
+function normalizeRow(row: any) {
+  const get = (keys: string[]) => {
+    for (const k of keys) {
+      // Try exact, lower, and upper case variants
+      if (row[k] !== undefined) return row[k];
+      if (row[k.toLowerCase()] !== undefined) return row[k.toLowerCase()];
+      if (row[k.toUpperCase()] !== undefined) return row[k.toUpperCase()];
+    }
+    return undefined;
+  };
+
+  return {
+    full_name: get(['Full Name', 'full_name', 'name']),
+    email: get(['Email', 'email']),
+    phone: get(['Phone', 'phone']),
+    address: get(['Address', 'address']),
+    password: get(['Password', 'password']),
+    employee_id: get(['Employee ID', 'employee_id', 'EmployeeId']),
+    position: get(['Position', 'position']),
+    department: get(['Department', 'department']),
+    status: get(['Status', 'status']),
+    type: get(['Type', 'type']),
+    salary: get(['Salary (Annual)', 'salary', 'annual_salary']),
+    bank_account: get(['Bank Account', 'bank_account']),
+    tax_id: get(['Tax ID', 'tax_id']),
+    hire_date: get(['Hire Date', 'hire_date']),
+    probation_end_date: get(['Probation End Date', 'probation_end_date']),
+    contract_end_date: get(['Contract End Date', 'contract_end_date']),
+    emergency_contact_name: get(['Emergency Contact Name', 'emergency_contact_name']),
+    emergency_contact_phone: get(['Emergency Contact Phone', 'emergency_contact_phone']),
+  } as any;
+}
+
 export const StaffDataImport = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -87,26 +120,61 @@ export const StaffDataImport = () => {
         const workbook = XLSX.read(data, { type: 'binary' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+const rawRows = XLSX.utils.sheet_to_json(worksheet);
 
-        // Build set of emails to resolve existing profiles in one query
+        // Normalize headers/keys to a consistent shape
+        const jsonData = (rawRows as any[]).map(normalizeRow);
+
+        // Build sets for batch lookups
         const emailSet = new Set<string>();
+        const employeeIdSet = new Set<string>();
         for (const row of jsonData) {
-          const email = (row as any).email;
-          if (email) emailSet.add(String(email).toLowerCase());
+          if (row.email) emailSet.add(String(row.email).toLowerCase());
+          if (row.employee_id) employeeIdSet.add(String(row.employee_id));
         }
 
+        // Resolve existing profiles by email
         const emailToUserId = new Map<string, string>();
         if (emailSet.size > 0) {
-          const { data: profilesData, error: profilesError } = await supabase
+          const { data: profilesData } = await supabase
             .from('profiles')
-            .select('user_id,email');
-          if (!profilesError && profilesData) {
+            .select('user_id,email')
+            .in('email', Array.from(emailSet));
+          if (profilesData) {
             for (const p of profilesData as any[]) {
               if (p.email && p.user_id) emailToUserId.set(String(p.email).toLowerCase(), String(p.user_id));
             }
           }
         }
+
+        // Resolve existing employees by employee_id
+        const employeeIdToRowId = new Map<string, string>();
+        if (employeeIdSet.size > 0) {
+          const { data: employeesData } = await supabase
+            .from('employees')
+            .select('id, employee_id')
+            .in('employee_id', Array.from(employeeIdSet));
+          if (employeesData) {
+            for (const e of employeesData as any[]) {
+              if (e.employee_id && e.id) employeeIdToRowId.set(String(e.employee_id), String(e.id));
+            }
+          }
+        }
+        
+        // Date helper
+        const toISO = (val: any): string | undefined => {
+          if (!val && val !== 0) return undefined;
+          if (typeof val === 'number') {
+            const excelEpoch = new Date(1899, 11, 30);
+            const date = new Date(excelEpoch.getTime() + val * 86400000);
+            return date.toISOString().split('T')[0];
+          }
+          const s = String(val).trim();
+          const iso = parseToISODate(s);
+          if (iso) return iso;
+          if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+          return undefined;
+        };
         
         let successful = 0;
         let failed = 0;
@@ -118,59 +186,83 @@ export const StaffDataImport = () => {
           try {
             setUploadProgress((i / jsonData.length) * 100);
 
-            const email = (row as any).email || '';
-            const fullName = (row as any).full_name || (row as any).name || '';
-            const linkedUserId = email ? emailToUserId.get(String(email).toLowerCase()) : undefined;
+            const email = row.email ? String(row.email) : '';
+            const fullName = row.full_name ? String(row.full_name) : '';
+            const lowerEmail = email.toLowerCase();
 
-            let hireDate: string | undefined;
-            const rawDate = (row as any).hire_date;
-            if (rawDate) {
-              // Handle Excel date serial number
-              if (typeof rawDate === 'number') {
-                const excelEpoch = new Date(1899, 11, 30);
-                const date = new Date(excelEpoch.getTime() + rawDate * 86400000);
-                hireDate = date.toISOString().split('T')[0];
-              } else {
-                const iso = parseToISODate(String(rawDate));
-                if (iso) hireDate = iso;
-                else if (/^\d{4}-\d{2}-\d{2}$/.test(String(rawDate))) hireDate = String(rawDate);
+            // Ensure user in auth + profile if password provided; else link/create profile only
+            let userId: string | undefined = lowerEmail ? emailToUserId.get(lowerEmail) : undefined;
+
+            if (email && row.password) {
+              const { data, error } = await supabase.functions.invoke('upsert-user-with-profile', {
+                body: {
+                  email,
+                  password: String(row.password),
+                  full_name: fullName || 'Staff User',
+                  phone: row.phone ? String(row.phone) : undefined,
+                  address: row.address ? String(row.address) : undefined,
+                  role: 'staff',
+                  status: row.status ? String(row.status) : 'active',
+                },
+              });
+              if (error) throw error;
+              userId = data?.user_id || userId;
+              if (userId && lowerEmail && !emailToUserId.has(lowerEmail)) {
+                emailToUserId.set(lowerEmail, userId);
               }
-            }
-
-            // If no linked profile exists and we have email/name, create one
-            let userId = linkedUserId;
-            if (!userId && email && fullName) {
+            } else if (!userId && email && fullName) {
               const newUserId = crypto.randomUUID();
-              const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([{
-                  user_id: newUserId,
-                  full_name: fullName,
-                  email: email,
-                  role: 'staff'
-                }]);
-              
-              if (!profileError) {
+              const { error: profileErr } = await supabase.from('profiles').insert({
+                user_id: newUserId,
+                full_name: fullName,
+                email,
+                phone: row.phone ? String(row.phone) : null,
+                address: row.address ? String(row.address) : null,
+                role: 'staff',
+                status: row.status ? String(row.status) : 'active',
+              });
+              if (!profileErr) {
                 userId = newUserId;
+                emailToUserId.set(lowerEmail, newUserId);
               }
             }
 
+            // Build employee payload
+            const employeeId = row.employee_id ? String(row.employee_id) : `EMP${Date.now()}${i}`;
             const employeeData: any = {
-              employee_id: (row as any).employee_id || `EMP${Date.now()}${i}`,
-              position: (row as any).position || 'Staff',
-              department: (row as any).department || 'General',
-              employment_status: 'active',
-              employment_type: 'full_time',
-              salary: (row as any).salary ? parseFloat((row as any).salary) : undefined,
+              employee_id: employeeId,
+              position: row.position ? String(row.position) : 'Staff',
+              department: row.department ? String(row.department) : 'General',
+              employment_status: row.status ? String(row.status) : 'active',
+              employment_type: row.type ? String(row.type) : 'full_time',
+              salary: row.salary !== undefined && row.salary !== null && row.salary !== '' ? Number(row.salary) : null,
+              bank_account: row.bank_account ? String(row.bank_account) : null,
+              tax_id: row.tax_id ? String(row.tax_id) : null,
+              emergency_contact_name: row.emergency_contact_name ? String(row.emergency_contact_name) : null,
+              emergency_contact_phone: row.emergency_contact_phone ? String(row.emergency_contact_phone) : null,
             };
 
+            const hireDate = toISO(row.hire_date);
+            const probEnd = toISO(row.probation_end_date);
+            const contractEnd = toISO(row.contract_end_date);
             if (hireDate) employeeData.hire_date = hireDate;
+            if (probEnd) employeeData.probation_end_date = probEnd;
+            if (contractEnd) employeeData.contract_end_date = contractEnd;
             if (userId) employeeData.user_id = userId;
 
-            const { error: empError } = await supabase
-              .from('employees')
-              .insert([employeeData]);
-            if (empError) throw empError;
+            const existingRowId = employeeIdToRowId.get(employeeId);
+            if (existingRowId) {
+              const { error: updErr } = await supabase
+                .from('employees')
+                .update(employeeData)
+                .eq('id', existingRowId);
+              if (updErr) throw updErr;
+            } else {
+              const { error: insErr } = await supabase
+                .from('employees')
+                .insert([employeeData]);
+              if (insErr) throw insErr;
+            }
 
             successful++;
           } catch (error: any) {
@@ -204,22 +296,44 @@ export const StaffDataImport = () => {
     // Sample data for the template
     const templateData = [
       {
-        employee_id: 'EMP001',
-        full_name: 'John Doe',
-        email: 'john@example.com',
-        position: 'Developer',
-        department: 'IT',
-        hire_date: '01-01-2024',
-        salary: 50000
+        "Employee ID": "EMP001",
+        "Full Name": "John Doe",
+        "Email": "john@example.com",
+        "Phone": "9876543210",
+        "Address": "123 Example Street, City",
+        "Password": "Temp1234!",
+        "Position": "Developer",
+        "Department": "IT",
+        "Status": "active",
+        "Type": "full_time",
+        "Salary (Annual)": 50000,
+        "Bank Account": "1234567890",
+        "Tax ID": "TAX12345",
+        "Hire Date": "01-01-2024",
+        "Probation End Date": "01-04-2024",
+        "Contract End Date": "01-01-2025",
+        "Emergency Contact Name": "Jane Doe",
+        "Emergency Contact Phone": "9876500000"
       },
       {
-        employee_id: 'EMP002',
-        full_name: 'Jane Smith',
-        email: 'jane@example.com',
-        position: 'Manager',
-        department: 'HR',
-        hire_date: '02-01-2024',
-        salary: 60000
+        "Employee ID": "EMP002",
+        "Full Name": "Jane Smith",
+        "Email": "jane@example.com",
+        "Phone": "9876543211",
+        "Address": "456 Sample Ave, City",
+        "Password": "Temp1234!",
+        "Position": "Manager",
+        "Department": "HR",
+        "Status": "active",
+        "Type": "part_time",
+        "Salary (Annual)": 60000,
+        "Bank Account": "9876543210",
+        "Tax ID": "TAX67890",
+        "Hire Date": "02-01-2024",
+        "Probation End Date": "02-04-2024",
+        "Contract End Date": "02-01-2025",
+        "Emergency Contact Name": "John Smith",
+        "Emergency Contact Phone": "9876511111"
       }
     ];
     
