@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EmployeeManagement } from './EmployeeManagement';
+
 import { AttendanceManagement } from './AttendanceManagement';
 import { PayrollManagement } from './PayrollManagement';
 import { PerformanceReviews } from './PerformanceReviews';
@@ -33,7 +33,7 @@ export const HRAdminTabs = () => {
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="trainers">Trainers</TabsTrigger>
             <TabsTrigger value="staff">Staff</TabsTrigger>
-            <TabsTrigger value="employees">Employees</TabsTrigger>
+            
             <TabsTrigger value="import">Import Data</TabsTrigger>
             <TabsTrigger value="attendance">Attendance</TabsTrigger>
             <TabsTrigger value="payroll">Payroll</TabsTrigger>
@@ -57,9 +57,6 @@ export const HRAdminTabs = () => {
           <StaffManagement />
         </TabsContent>
 
-        <TabsContent value="employees" className="space-y-6">
-          <EmployeeManagement />
-        </TabsContent>
 
         <TabsContent value="import" className="space-y-6">
           <StaffDataImport />
