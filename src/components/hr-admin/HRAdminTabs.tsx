@@ -11,8 +11,6 @@ import { AdvancedPerformanceReviews } from './AdvancedPerformanceReviews';
 import { AdvancedTaskManagement } from './AdvancedTaskManagement';
 import { AdvancedReportsAnalytics } from './AdvancedReportsAnalytics';
 import { StaffDataImport } from './StaffDataImport';
-import { StudentManagement } from '@/components/people/StudentManagement';
-import { TrainerManagement } from '@/components/people/TrainerManagement';
 import { StaffManagement } from '@/components/people/StaffManagement';
 
 export const HRAdminTabs = () => {
@@ -27,13 +25,10 @@ export const HRAdminTabs = () => {
         <p className="text-gray-600 mt-2">Comprehensive human resource and people management system</p>
       </div>
 
-      <Tabs defaultValue="students" className="w-full">
+      <Tabs defaultValue="staff" className="w-full">
         <div className="w-full overflow-x-auto pb-2">
           <TabsList className="inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground w-max">
-            <TabsTrigger value="students">Students</TabsTrigger>
-            <TabsTrigger value="trainers">Trainers</TabsTrigger>
             <TabsTrigger value="staff">Staff</TabsTrigger>
-            
             <TabsTrigger value="import">Import Data</TabsTrigger>
             <TabsTrigger value="attendance">Attendance</TabsTrigger>
             <TabsTrigger value="payroll">Payroll</TabsTrigger>
@@ -44,14 +39,6 @@ export const HRAdminTabs = () => {
             <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
           </TabsList>
         </div>
-
-        <TabsContent value="students" className="space-y-6">
-          <StudentManagement />
-        </TabsContent>
-
-        <TabsContent value="trainers" className="space-y-6">
-          <TrainerManagement />
-        </TabsContent>
 
         <TabsContent value="staff" className="space-y-6">
           <StaffManagement />

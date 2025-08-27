@@ -5,6 +5,8 @@ import { CourseManagement } from '@/components/education-department/CourseManage
 import { StudentAssignment } from '@/components/education-department/StudentAssignment';
 import { InstructorManagement } from '@/components/education-department/InstructorManagement';
 import { EducationAnalytics } from '@/components/education-department/EducationAnalytics';
+import { StudentManagement } from '@/components/people/StudentManagement';
+import { TrainerManagement } from '@/components/people/TrainerManagement';
 
 export const EducationDepartment = () => {
   return (
@@ -14,13 +16,25 @@ export const EducationDepartment = () => {
         <p className="text-gray-600 mt-2">Manage courses, instructors, and student assignments</p>
       </div>
 
-      <Tabs defaultValue="courses" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="courses">Course Management</TabsTrigger>
-          <TabsTrigger value="assignments">Student Assignment</TabsTrigger>
-          <TabsTrigger value="instructors">Instructors</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="students" className="space-y-4">
+        <div className="w-full overflow-x-auto pb-2">
+          <TabsList className="inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground w-max">
+            <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="trainers">Trainers</TabsTrigger>
+            <TabsTrigger value="courses">Course Management</TabsTrigger>
+            <TabsTrigger value="assignments">Student Assignment</TabsTrigger>
+            <TabsTrigger value="instructors">Instructors</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="students">
+          <StudentManagement />
+        </TabsContent>
+
+        <TabsContent value="trainers">
+          <TrainerManagement />
+        </TabsContent>
 
         <TabsContent value="courses">
           <CourseManagement />
