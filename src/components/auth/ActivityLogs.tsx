@@ -13,15 +13,16 @@ interface ActivityLog {
   id: string;
   user_id: string;
   action: string;
-  resource_type: string;
-  resource_id: string;
-  details: any;
-  ip_address: string;
-  user_agent: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  metadata: any;
+  ip_address: string | null;
+  user_agent: string | null;
   created_at: string;
   profiles?: {
-    full_name: string;
-    email: string;
+    full_name: string | null;
+    email: string | null;
+    user_id: string;
   } | null;
 }
 
@@ -42,7 +43,7 @@ export const ActivityLogs = () => {
 
       // Apply filters
       if (searchTerm) {
-        query = query.or(`action.ilike.%${searchTerm}%,resource_type.ilike.%${searchTerm}%`);
+        query = query.or(`action.ilike.%${searchTerm}%,entity_type.ilike.%${searchTerm}%`);
       }
 
       if (actionFilter !== 'all') {
@@ -253,10 +254,10 @@ export const ActivityLogs = () => {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <div className="font-medium">{log.resource_type}</div>
-                      {log.resource_id && (
+                      <div className="font-medium">{log.entity_type || '-'}</div>
+                      {log.entity_id && (
                         <div className="text-xs text-muted-foreground">
-                          ID: {log.resource_id.substring(0, 8)}...
+                          ID: {log.entity_id.substring(0, 8)}...
                         </div>
                       )}
                     </div>
@@ -268,7 +269,7 @@ export const ActivityLogs = () => {
                   </TableCell>
                   <TableCell>
                     <div className="text-xs text-muted-foreground max-w-48 truncate">
-                      {log.details ? JSON.stringify(log.details).substring(0, 50) + '...' : '-'}
+                      {log.metadata ? JSON.stringify(log.metadata).substring(0, 50) + '...' : '-'}
                     </div>
                   </TableCell>
                 </TableRow>

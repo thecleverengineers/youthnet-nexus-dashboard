@@ -11,14 +11,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface UserSession {
   id: string;
-  session_token: string;
-  device_info: any;
-  ip_address: string;
-  user_agent: string;
+  token: string | null;
+  user_id: string;
+  ip_address: string | null;
+  user_agent: string | null;
   is_active: boolean;
-  expires_at: string;
+  last_activity: string;
+  expires_at: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 export const SessionManager = () => {
@@ -30,7 +30,7 @@ export const SessionManager = () => {
     queryKey: ['user-sessions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('user_sessions')
+        .from('sessions')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -43,7 +43,7 @@ export const SessionManager = () => {
   const terminateSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
       const { error } = await supabase
-        .from('user_sessions')
+        .from('sessions')
         .update({ is_active: false })
         .eq('id', sessionId);
       
