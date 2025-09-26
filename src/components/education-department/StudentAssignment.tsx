@@ -74,9 +74,9 @@ export const StudentAssignment = () => {
         (data || []).map(async (enrollment) => {
           const { data: studentData } = await supabase
             .from('profiles')
-            .select('full_name, email, student_id')
+            .select('full_name, email')
             .eq('user_id', enrollment.student_id)
-            .single();
+            .maybeSingle();
           
           return {
             ...enrollment,
@@ -189,7 +189,7 @@ export const StudentAssignment = () => {
                 <SelectContent>
                   {students?.map((student) => (
                     <SelectItem key={student.user_id} value={student.user_id}>
-                      {student.full_name} {student.student_id && `(${student.student_id})`}
+                      {student.full_name || student.email}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -251,7 +251,7 @@ export const StudentAssignment = () => {
                       {enrollment.student?.full_name}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {enrollment.student?.student_id} • {enrollment.student?.email}
+                      {enrollment.student?.email}
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
                       Course: {enrollment.course?.course_name} ({enrollment.course?.course_code})
