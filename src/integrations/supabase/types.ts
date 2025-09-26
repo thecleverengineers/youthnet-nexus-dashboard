@@ -50,6 +50,102 @@ export type Database = {
         }
         Relationships: []
       }
+      course_enrollments: {
+        Row: {
+          assignment_reason: string | null
+          completed_at: string | null
+          course_id: string
+          created_at: string | null
+          enrollment_date: string | null
+          grade: string | null
+          id: string
+          status: string | null
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          assignment_reason?: string | null
+          completed_at?: string | null
+          course_id: string
+          created_at?: string | null
+          enrollment_date?: string | null
+          grade?: string | null
+          id?: string
+          status?: string | null
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          assignment_reason?: string | null
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string | null
+          enrollment_date?: string | null
+          grade?: string | null
+          id?: string
+          status?: string | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "education_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      education_courses: {
+        Row: {
+          course_code: string
+          course_name: string
+          created_at: string | null
+          credits: number | null
+          department: string | null
+          description: string | null
+          duration_weeks: number | null
+          id: string
+          max_students: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          course_code: string
+          course_name: string
+          created_at?: string | null
+          credits?: number | null
+          department?: string | null
+          description?: string | null
+          duration_weeks?: number | null
+          id?: string
+          max_students?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          course_code?: string
+          course_name?: string
+          created_at?: string | null
+          credits?: number | null
+          department?: string | null
+          description?: string | null
+          duration_weeks?: number | null
+          id?: string
+          max_students?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           created_at: string | null
@@ -360,7 +456,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { check_user_id: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
       employee_type: "full_time" | "part_time" | "contract" | "intern"
