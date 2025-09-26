@@ -218,8 +218,8 @@ const rawRows = XLSX.utils.sheet_to_json(worksheet);
                 email,
                 phone: row.phone ? String(row.phone) : null,
                 address: row.address ? String(row.address) : null,
-                role: 'staff',
-                status: row.status ? String(row.status) : 'active',
+                role: 'staff' as const,
+                status: (row.status ? String(row.status) : 'active') as 'active' | 'inactive' | 'suspended',
               });
               if (!profileErr) {
                 userId = newUserId;

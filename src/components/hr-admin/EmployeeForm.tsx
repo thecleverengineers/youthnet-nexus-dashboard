@@ -245,6 +245,8 @@ export const EmployeeForm = ({ employee, onSuccess, onCancel }: EmployeeFormProp
           .insert([{
             employee_id: employeeId,
             user_id: userId,
+            full_name: formData.full_name,
+            email: formData.email,
             position: formData.position,
             department: formData.department,
             employment_status: formData.employment_status,

@@ -1,107 +1,77 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Building2, MapPin, Phone, Mail, Plus } from 'lucide-react';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Building2, MapPin, Globe, AlertTriangle } from 'lucide-react';
 
 export function EmployerManagement() {
-  const { data: employers, isLoading } = useQuery({
-    queryKey: ['employers'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select('company, location')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Group by company and get unique employers
-      const uniqueEmployers = data?.reduce((acc: any[], curr) => {
-        const existing = acc.find(emp => emp.company === curr.company);
-        if (!existing) {
-          acc.push({
-            id: acc.length + 1,
-            company: curr.company,
-            location: curr.location,
-            activeJobs: data.filter(job => job.company === curr.company).length,
-            status: 'active'
-          });
-        }
-        return acc;
-      }, []) || [];
-
-      return uniqueEmployers;
-    }
-  });
-
+  // The job_postings table doesn't exist yet
+  // This component needs database tables to be created first
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Employer Management
+    <div className="space-y-6">
+      <Card className="border-amber-200 bg-amber-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            Database Setup Required
+          </CardTitle>
+          <CardDescription>
+            The employer management system requires additional database tables to function.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-amber-800">
+              The following tables need to be created:
+            </p>
+            <ul className="list-disc list-inside space-y-2 text-sm text-amber-700">
+              <li>job_postings - To store job listings</li>
+              <li>employers - To manage employer profiles</li>
+              <li>job_applications - To track applications</li>
+              <li>job_categories - To categorize positions</li>
+            </ul>
+            <p className="text-sm text-amber-800 mt-4">
+              Please contact your administrator to set up the Job Centre module.
+            </p>
           </div>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Employer
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Loading employers...
-            </div>
-          ) : employers?.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No employers found
-            </div>
-          ) : (
-            employers?.map((employer) => (
-              <div key={employer.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold">{employer.company}</h3>
-                    {employer.location && (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>{employer.location}</span>
-                      </div>
-                    )}
-                  </div>
-                  <Badge className="bg-green-100 text-green-800">
-                    {employer.status}
-                  </Badge>
-                </div>
+        </CardContent>
+      </Card>
 
-                <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
-                  <span>Active Jobs: {employer.activeJobs}</span>
-                  <span>Partnership Since: 2023</span>
-                </div>
+      {/* Placeholder cards showing what would be displayed */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="opacity-50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Employers</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">--</div>
+            <p className="text-xs text-muted-foreground">Pending setup</p>
+          </CardContent>
+        </Card>
 
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <Phone className="h-4 w-4 mr-2" />
-                    Contact
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Email
-                  </Button>
-                  <Button size="sm">
-                    View Details
-                  </Button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        <Card className="opacity-50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Locations</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">--</div>
+            <p className="text-xs text-muted-foreground">Pending setup</p>
+          </CardContent>
+        </Card>
+
+        <Card className="opacity-50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Industries</CardTitle>
+            <Globe className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">--</div>
+            <p className="text-xs text-muted-foreground">Pending setup</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
