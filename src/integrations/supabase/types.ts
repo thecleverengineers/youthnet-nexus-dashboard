@@ -237,12 +237,15 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           employee_id: string
+          employment_status: string | null
+          employment_type: string | null
           full_name: string
           hire_date: string | null
           id: string
           phone: string | null
           position: string | null
           probation_end_date: string | null
+          salary: number | null
           salary_annual: number | null
           status: Database["public"]["Enums"]["user_status"] | null
           tax_id: string | null
@@ -260,12 +263,15 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           employee_id: string
+          employment_status?: string | null
+          employment_type?: string | null
           full_name: string
           hire_date?: string | null
           id?: string
           phone?: string | null
           position?: string | null
           probation_end_date?: string | null
+          salary?: number | null
           salary_annual?: number | null
           status?: Database["public"]["Enums"]["user_status"] | null
           tax_id?: string | null
@@ -283,12 +289,15 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           employee_id?: string
+          employment_status?: string | null
+          employment_type?: string | null
           full_name?: string
           hire_date?: string | null
           id?: string
           phone?: string | null
           position?: string | null
           probation_end_date?: string | null
+          salary?: number | null
           salary_annual?: number | null
           status?: Database["public"]["Enums"]["user_status"] | null
           tax_id?: string | null
@@ -297,6 +306,44 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      export_logs: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          export_format: string
+          export_type: string
+          file_path: string | null
+          id: string
+          record_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          export_format: string
+          export_type: string
+          file_path?: string | null
+          id?: string
+          record_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          export_format?: string
+          export_type?: string
+          file_path?: string | null
+          id?: string
+          record_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_logs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       notifications: {
         Row: {
