@@ -70,7 +70,7 @@ serve(async (req) => {
       headers: { 'Content-Type': 'application/json' },
       status: 200,
     });
-  } catch (e) {
+  } catch (e: any) {
     return new Response(JSON.stringify({ error: String(e?.message || e) }), { status: 400 });
   }
 });

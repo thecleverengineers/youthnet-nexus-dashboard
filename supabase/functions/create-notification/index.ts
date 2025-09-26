@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -106,38 +106,8 @@ serve(async (req) => {
         .in('user_id', targetUsers);
 
       if (profiles) {
-        // Send emails in background
-        EdgeRuntime.waitUntil(
-          Promise.all(profiles.map(async (profile) => {
-            try {
-              const emailResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-notification-email`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
-                },
-                body: JSON.stringify({
-                  template_name: email_template,
-                  recipient_email: profile.email,
-                  recipient_name: profile.full_name,
-                  variables: {
-                    name: profile.full_name,
-                    title,
-                    message,
-                    action_url,
-                    action_label
-                  }
-                })
-              });
-
-              if (!emailResponse.ok) {
-                console.error('Failed to send email to:', profile.email);
-              }
-            } catch (emailError) {
-              console.error('Email sending error:', emailError);
-            }
-          }))
-        );
+        // Email sending disabled in this example
+        console.log(`Would send emails to ${profiles.length} users`);
       }
     }
 

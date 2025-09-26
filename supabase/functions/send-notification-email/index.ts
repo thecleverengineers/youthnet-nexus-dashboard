@@ -1,6 +1,5 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
-import { Resend } from "npm:resend@2.0.0";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,8 +12,6 @@ interface EmailRequest {
   recipient_name?: string;
   variables: Record<string, any>;
 }
-
-const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -76,32 +73,26 @@ serve(async (req) => {
       console.error('Failed to create email log:', logError);
     }
 
-    // Send email via Resend
-    const emailResponse = await resend.emails.send({
-      from: 'YouthNet <noreply@youthnet.in>',
-      to: [recipient_email],
-      subject,
-      html: htmlContent,
-      text: textContent,
-    });
+    // Note: Email sending via external service disabled
+    // To enable email sending, integrate with an email service like SendGrid, Resend, etc.
+    console.log('Email would be sent to:', recipient_email);
+    console.log('Subject:', subject);
+    console.log('Content prepared');
 
-    console.log('Email sent successfully:', emailResponse);
-
-    // Update email log with success
+    // Update email log with status
     if (emailLog) {
       await supabaseClient
         .from('email_logs')
         .update({
-          status: 'sent',
+          status: 'simulated',
           sent_at: new Date().toISOString(),
-          external_id: emailResponse.data?.id
         })
         .eq('id', emailLog.id);
     }
 
     return new Response(JSON.stringify({
       success: true,
-      email_id: emailResponse.data?.id,
+      message: 'Email template prepared (actual sending disabled)',
       log_id: emailLog?.id
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
