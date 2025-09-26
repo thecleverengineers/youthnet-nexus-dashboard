@@ -69,7 +69,7 @@ export const SessionManager = () => {
   const terminateAllSessionsMutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
-        .from('user_sessions')
+        .from('sessions')
         .update({ is_active: false })
         .neq('id', 'current'); // Keep current session active
       
@@ -191,10 +191,10 @@ export const SessionManager = () => {
                       {getDeviceIcon(session.user_agent)}
                       <div>
                         <div className="font-medium">
-                          {session.device_info?.browser || 'Unknown Browser'}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {session.device_info?.os || 'Unknown OS'}
+                      {session.user_agent ? session.user_agent.split(' ')[0] : 'Unknown Browser'}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {session.user_agent || 'Unknown OS'}
                         </div>
                       </div>
                     </div>
@@ -217,7 +217,7 @@ export const SessionManager = () => {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {formatDate(session.updated_at)}
+                      {formatDate(session.last_activity)}
                     </div>
                   </TableCell>
                   <TableCell>

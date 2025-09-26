@@ -124,8 +124,8 @@ export const ActivityLogs = () => {
         format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss'),
         log.profiles?.full_name || 'Unknown User',
         log.action,
-        log.resource_type,
-        log.ip_address
+        log.entity_type || '-',
+        log.ip_address || '-'
       ].join(','))
     ].join('\n');
 

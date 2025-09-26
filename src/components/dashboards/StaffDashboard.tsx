@@ -58,61 +58,16 @@ export const StaffDashboard = () => {
         setEmployee(empData);
 
         if (empData) {
-          // Fetch today's attendance
-          const today = format(new Date(), 'yyyy-MM-dd');
-          const { data: todayAttendance } = await supabase
-            .from('attendance_records')
-            .select('*')
-            .eq('employee_id', empData.id)
-            .eq('date', today)
-            .single();
+          // TODO: Tables for attendance_records and employee_tasks need to be created
+          // For now, using placeholder data
+          setAttendance(null);
+          setTasks([]);
 
-          setAttendance(todayAttendance);
-
-          // Fetch tasks
-          const { data: tasksData } = await supabase
-            .from('employee_tasks')
-            .select('*')
-            .eq('employee_id', empData.id)
-            .order('created_at', { ascending: false })
-            .limit(5);
-
-          setTasks(tasksData || []);
-
-          // Calculate stats
-          const completed = tasksData?.filter(t => t.status === 'completed').length || 0;
-          const total = tasksData?.length || 0;
-          
-          // Calculate attendance rate for the last 30 days
-          const { data: attendanceData } = await supabase
-            .from('attendance_records')
-            .select('*')
-            .eq('employee_id', empData.id)
-            .gte('date', format(subDays(new Date(), 30), 'yyyy-MM-dd'));
-          
-          const attendanceRate = attendanceData && attendanceData.length > 0
-            ? (attendanceData.filter(a => a.status === 'present').length / attendanceData.length * 100)
-            : 0;
-
-          // Calculate hours this week
-          const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-          const { data: weekAttendance } = await supabase
-            .from('attendance_records')
-            .select('*')
-            .eq('employee_id', empData.id)
-            .gte('date', format(weekStart, 'yyyy-MM-dd'));
-
+          // Calculate stats with placeholder values
+          const completed = 0;
+          const total = 0;
+          const attendanceRate = 0;
           let hoursThisWeek = 0;
-          if (weekAttendance) {
-            weekAttendance.forEach(record => {
-              if (record.check_in && record.check_out) {
-                const checkIn = new Date(`2000-01-01T${record.check_in}`);
-                const checkOut = new Date(`2000-01-01T${record.check_out}`);
-                const hours = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
-                hoursThisWeek += hours;
-              }
-            });
-          }
 
           setStats({
             tasksCompleted: completed,

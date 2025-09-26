@@ -3,15 +3,31 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { 
+      status: 405,
+      headers: corsHeaders
+    });
   }
 
   try {
     const { email, password, full_name } = await req.json();
     if (!email || !password) {
-      return new Response(JSON.stringify({ error: 'Missing email or password' }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'Missing email or password' }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -42,7 +58,10 @@ serve(async (req) => {
       }, { onConflict: 'user_id' });
       if (profileErr) console.error('Profile upsert error:', profileErr);
       
-      return new Response(JSON.stringify({ ok: true, message: 'User updated and confirmed', user_id: already.id }), { status: 200 });
+      return new Response(JSON.stringify({ ok: true, message: 'User updated and confirmed', user_id: already.id }), { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     // Create user with confirmed email and admin role metadata
@@ -67,10 +86,13 @@ serve(async (req) => {
     if (profileErr && !String(profileErr.message).includes('duplicate')) throw profileErr;
 
     return new Response(JSON.stringify({ ok: true, user_id: user.id }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: String(e?.message || e) }), { status: 400 });
+    return new Response(JSON.stringify({ error: String(e?.message || e) }), { 
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 });

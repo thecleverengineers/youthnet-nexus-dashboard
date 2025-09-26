@@ -15,27 +15,28 @@ import { format } from 'date-fns';
 
 interface UserPermission {
   id: string;
-  user_id: string;
-  permission_name: string;
-  resource_type: string;
-  granted_by: string;
-  granted_at: string;
-  expires_at: string;
-  is_active: boolean;
+  user_id: string | null;
+  permission: string;
+  resource: string | null;
+  granted_by: string | null;
+  created_at: string;
+  expires_at: string | null;
   profiles?: {
-    full_name: string;
-    email: string;
-    role: string;
+    user_id: string;
+    full_name: string | null;
+    email: string | null;
+    role: 'admin' | 'staff' | 'student' | 'trainer';
   } | null;
   granted_by_profile?: {
-    full_name: string;
+    user_id: string;
+    full_name: string | null;
   } | null;
 }
 
 interface PermissionFormData {
   user_id: string;
-  permission_name: string;
-  resource_type: string;
+  permission: string;
+  resource: string;
   expires_at: string;
 }
 
@@ -48,42 +49,43 @@ export const UserPermissions = () => {
 
   const [formData, setFormData] = useState<PermissionFormData>({
     user_id: '',
-    permission_name: '',
-    resource_type: '*',
+    permission: '',
+    resource: '*',
     expires_at: ''
   });
 
-  // Fetch permissions
+  // Fetch user permissions
   const { data: permissions = [], isLoading } = useQuery({
     queryKey: ['user-permissions', searchTerm],
     queryFn: async () => {
       let query = supabase
         .from('user_permissions')
         .select('*')
-        .order('granted_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (searchTerm) {
-        query = query.or(`permission_name.ilike.%${searchTerm}%,resource_type.ilike.%${searchTerm}%`);
+        query = query.or(`permission.ilike.%${searchTerm}%,resource.ilike.%${searchTerm}%`);
       }
 
       const { data: permissionsData, error } = await query;
+      
       if (error) throw error;
 
       // Fetch user profiles separately
       if (permissionsData && permissionsData.length > 0) {
-        const userIds = [...new Set(permissionsData.map(p => p.user_id))];
+        const userIds = [...new Set(permissionsData.map(p => p.user_id).filter(Boolean))];
         const grantedByIds = [...new Set(permissionsData.map(p => p.granted_by).filter(Boolean))];
         
-        const [{ data: profilesData }, { data: grantedByData }] = await Promise.all([
-          supabase.from('profiles').select('user_id, full_name, email, role').in('user_id', userIds),
-          supabase.from('profiles').select('user_id, full_name').in('user_id', grantedByIds)
-        ]);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, email, role')
+          .in('user_id', [...userIds, ...grantedByIds]);
 
         // Map profiles to permissions
         const permissionsWithProfiles = permissionsData.map(permission => ({
           ...permission,
           profiles: profilesData?.find(p => p.user_id === permission.user_id) || null,
-          granted_by_profile: grantedByData?.find(p => p.user_id === permission.granted_by) || null
+          granted_by_profile: profilesData?.find(p => p.user_id === permission.granted_by) || null
         }));
 
         return permissionsWithProfiles as UserPermission[];
@@ -95,131 +97,145 @@ export const UserPermissions = () => {
 
   // Fetch users for dropdown
   const { data: users = [] } = useQuery({
-    queryKey: ['users-for-permissions'],
+    queryKey: ['users'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('user_id, full_name, email, role')
+        .select('user_id, full_name, email')
         .order('full_name');
       
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
 
-  // Create/Update permission mutation
-  const savePermissionMutation = useMutation({
+  // Add permission mutation
+  const addPermissionMutation = useMutation({
     mutationFn: async (data: PermissionFormData) => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const permissionData = {
-        ...data,
-        granted_by: user?.id,
-        expires_at: data.expires_at || null
-      };
-
-      if (editingPermission) {
-        const { error } = await supabase
-          .from('user_permissions')
-          .update(permissionData)
-          .eq('id', editingPermission.id);
-        
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('user_permissions')
-          .insert([permissionData]);
-        
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
-      setShowForm(false);
-      setEditingPermission(null);
-      setFormData({ user_id: '', permission_name: '', resource_type: '*', expires_at: '' });
-      toast({
-        title: editingPermission ? "Permission Updated" : "Permission Granted",
-        description: `Permission has been successfully ${editingPermission ? 'updated' : 'granted'}.`,
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to save permission: " + error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Revoke permission mutation
-  const revokePermissionMutation = useMutation({
-    mutationFn: async (permissionId: string) => {
       const { error } = await supabase
         .from('user_permissions')
-        .update({ is_active: false })
-        .eq('id', permissionId);
+        .insert([{
+          user_id: data.user_id,
+          permission: data.permission,
+          resource: data.resource,
+          granted_by: user?.id,
+          expires_at: data.expires_at || null
+        }]);
       
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
       toast({
-        title: "Permission Revoked",
-        description: "The permission has been successfully revoked.",
+        title: "Permission Added",
+        description: "The permission has been successfully added.",
+      });
+      setShowForm(false);
+      resetForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to add permission: " + error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Update permission mutation
+  const updatePermissionMutation = useMutation({
+    mutationFn: async (data: { id: string; updates: Partial<PermissionFormData> }) => {
+      const { error } = await supabase
+        .from('user_permissions')
+        .update({
+          permission: data.updates.permission,
+          resource: data.updates.resource,
+          expires_at: data.updates.expires_at
+        })
+        .eq('id', data.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
+      toast({
+        title: "Permission Updated",
+        description: "The permission has been successfully updated.",
+      });
+      setEditingPermission(null);
+      resetForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update permission: " + error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete permission mutation
+  const deletePermissionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('user_permissions')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
+      toast({
+        title: "Permission Deleted",
+        description: "The permission has been successfully deleted.",
       });
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to revoke permission: " + error.message,
+        description: "Failed to delete permission: " + error.message,
         variant: "destructive",
       });
     }
   });
+
+  const resetForm = () => {
+    setFormData({
+      user_id: '',
+      permission: '',
+      resource: '*',
+      expires_at: ''
+    });
+  };
 
   const handleEdit = (permission: UserPermission) => {
     setEditingPermission(permission);
     setFormData({
-      user_id: permission.user_id,
-      permission_name: permission.permission_name,
-      resource_type: permission.resource_type,
-      expires_at: permission.expires_at ? format(new Date(permission.expires_at), 'yyyy-MM-dd') : ''
+      user_id: permission.user_id || '',
+      permission: permission.permission,
+      resource: permission.resource || '*',
+      expires_at: permission.expires_at ? permission.expires_at.split('T')[0] : ''
     });
-    setShowForm(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    savePermissionMutation.mutate(formData);
+  const handleSubmit = () => {
+    if (editingPermission) {
+      updatePermissionMutation.mutate({
+        id: editingPermission.id,
+        updates: formData
+      });
+    } else {
+      addPermissionMutation.mutate(formData);
+    }
   };
 
-  const resetForm = () => {
-    setFormData({ user_id: '', permission_name: '', resource_type: '*', expires_at: '' });
-    setEditingPermission(null);
-    setShowForm(false);
+  const isExpired = (expiresAt: string | null) => {
+    if (!expiresAt) return false;
+    return new Date(expiresAt) < new Date();
   };
-
-  const isExpired = (expiresAt: string) => {
-    return expiresAt && new Date(expiresAt) < new Date();
-  };
-
-  const getPermissionColor = (permission: UserPermission) => {
-    if (!permission.is_active) return 'bg-red-500/20 text-red-400 border-red-500/30';
-    if (isExpired(permission.expires_at)) return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-    return 'bg-green-500/20 text-green-400 border-green-500/30';
-  };
-
-  const getPermissionStatus = (permission: UserPermission) => {
-    if (!permission.is_active) return 'Revoked';
-    if (isExpired(permission.expires_at)) return 'Expired';
-    return 'Active';
-  };
-
-  const predefinedPermissions = [
-    'all', 'hr_management', 'education_management', 'student_access', 'inventory_management',
-    'reports_access', 'user_management', 'system_admin', 'read_only', 'write_access'
-  ];
 
   if (isLoading) {
     return (
@@ -234,7 +250,7 @@ export const UserPermissions = () => {
           <div className="animate-pulse space-y-4">
             <div className="h-4 bg-muted rounded w-1/4"></div>
             <div className="space-y-2">
-              {[1, 2, 3, 4, 5].map((i) => (
+              {[1, 2, 3].map((i) => (
                 <div key={i} className="h-12 bg-muted rounded"></div>
               ))}
             </div>
@@ -252,116 +268,108 @@ export const UserPermissions = () => {
             <Shield className="h-5 w-5" />
             User Permissions
           </CardTitle>
-          <Dialog open={showForm} onOpenChange={setShowForm}>
+          <Dialog open={showForm || !!editingPermission} onOpenChange={(open) => {
+            if (!open) {
+              setShowForm(false);
+              setEditingPermission(null);
+              resetForm();
+            } else {
+              setShowForm(true);
+            }
+          }}>
             <DialogTrigger asChild>
-              <Button onClick={() => resetForm()}>
+              <Button className="neo-button">
                 <Plus className="h-4 w-4 mr-2" />
-                Grant Permission
+                Add Permission
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <form onSubmit={handleSubmit}>
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingPermission ? 'Edit Permission' : 'Grant New Permission'}
-                  </DialogTitle>
-                  <DialogDescription>
-                    Assign specific permissions to users for resource access control.
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
+            <DialogContent className="futuristic-card">
+              <DialogHeader>
+                <DialogTitle>{editingPermission ? 'Edit' : 'Add'} Permission</DialogTitle>
+                <DialogDescription>
+                  {editingPermission ? 'Update the permission details below.' : 'Grant a new permission to a user.'}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                {!editingPermission && (
+                  <div>
                     <Label htmlFor="user">User</Label>
                     <select
                       id="user"
-                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md"
                       value={formData.user_id}
                       onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
-                      required
                     >
                       <option value="">Select a user</option>
-                      {users.map((user) => (
+                      {users.map(user => (
                         <option key={user.user_id} value={user.user_id}>
-                          {user.full_name} ({user.email}) - {user.role}
+                          {user.full_name || user.email}
                         </option>
                       ))}
                     </select>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="permission">Permission</Label>
-                    <select
-                      id="permission"
-                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
-                      value={formData.permission_name}
-                      onChange={(e) => setFormData({ ...formData, permission_name: e.target.value })}
-                      required
-                    >
-                      <option value="">Select permission</option>
-                      {predefinedPermissions.map((perm) => (
-                        <option key={perm} value={perm}>
-                          {perm.replace('_', ' ').toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="resource_type">Resource Type</Label>
-                    <Input
-                      id="resource_type"
-                      value={formData.resource_type}
-                      onChange={(e) => setFormData({ ...formData, resource_type: e.target.value })}
-                      placeholder="e.g., students, courses, * (for all)"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="expires_at">Expiry Date (Optional)</Label>
-                    <Input
-                      id="expires_at"
-                      type="date"
-                      value={formData.expires_at}
-                      onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
-                    />
-                  </div>
+                )}
+                <div>
+                  <Label htmlFor="permission">Permission</Label>
+                  <Input
+                    id="permission"
+                    placeholder="e.g., admin, editor, viewer"
+                    value={formData.permission}
+                    onChange={(e) => setFormData({ ...formData, permission: e.target.value })}
+                  />
                 </div>
-
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={resetForm}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={savePermissionMutation.isPending}>
-                    {savePermissionMutation.isPending ? 'Saving...' : (editingPermission ? 'Update' : 'Grant')}
-                  </Button>
-                </DialogFooter>
-              </form>
+                <div>
+                  <Label htmlFor="resource">Resource</Label>
+                  <Input
+                    id="resource"
+                    placeholder="e.g., *, /dashboard, /reports"
+                    value={formData.resource}
+                    onChange={(e) => setFormData({ ...formData, resource: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="expires">Expires At (Optional)</Label>
+                  <Input
+                    id="expires"
+                    type="date"
+                    value={formData.expires_at}
+                    onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!formData.user_id || !formData.permission}
+                  className="neo-button"
+                >
+                  {editingPermission ? 'Update' : 'Add'} Permission
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <Input
-              placeholder="Search permissions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
+          {/* Search */}
+          <Input
+            placeholder="Search permissions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
 
+          {/* Permissions Table */}
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
                 <TableHead>Permission</TableHead>
                 <TableHead>Resource</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Granted By</TableHead>
                 <TableHead>Expires</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -370,7 +378,7 @@ export const UserPermissions = () => {
                 <TableRow key={permission.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
+                      <User className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <div className="font-medium">
                           {permission.profiles?.full_name || 'Unknown User'}
@@ -382,19 +390,14 @@ export const UserPermissions = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      {permission.permission_name.replace('_', ' ').toUpperCase()}
+                    <Badge variant="secondary">
+                      {permission.permission}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                      {permission.resource_type}
+                    <code className="text-xs bg-muted px-2 py-1 rounded">
+                      {permission.resource}
                     </code>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getPermissionColor(permission)}>
-                      {getPermissionStatus(permission)}
-                    </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
@@ -402,50 +405,52 @@ export const UserPermissions = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm">
-                      {permission.expires_at ? (
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
+                    {permission.expires_at ? (
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        <span className="text-sm">
                           {format(new Date(permission.expires_at), 'MMM dd, yyyy')}
-                        </div>
-                      ) : (
-                        'Never'
-                      )}
-                    </div>
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Never</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isExpired(permission.expires_at) ? (
+                      <Badge variant="destructive">Expired</Badge>
+                    ) : (
+                      <Badge variant="default">Active</Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Button
-                        variant="ghost"
                         size="sm"
+                        variant="outline"
                         onClick={() => handleEdit(permission)}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={!permission.is_active}
-                          >
-                            <Trash2 className="h-4 w-4" />
+                          <Button size="sm" variant="destructive">
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Revoke Permission?</AlertDialogTitle>
+                            <AlertDialogTitle>Delete Permission</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This will permanently revoke this permission from the user. This action cannot be undone.
+                              Are you sure you want to delete this permission? This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => revokePermissionMutation.mutate(permission.id)}
-                              disabled={revokePermissionMutation.isPending}
+                              onClick={() => deletePermissionMutation.mutate(permission.id)}
                             >
-                              Revoke
+                              Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
